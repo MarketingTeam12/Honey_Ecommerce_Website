@@ -1,0 +1,163 @@
+@import './fonts.css';
+@import './tailwind.css';
+@import './theme.css';
+@import 'slick-carousel/slick/slick.css';
+@import 'slick-carousel/slick/slick-theme.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Remove visible scrollbars globally (legacy + nested containers) */
+html,
+body,
+#root,
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge legacy */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+#root::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Opera */
+}
+
+img,
+video,
+canvas,
+svg,
+iframe {
+  max-width: 100%;
+}
+
+#zsiq_float,
+#zsiq_floatmain,
+.zsiq_floatmain,
+.zsiq_custommain,
+.zsiq_theme1,
+.zsiq_theme2 {
+  bottom: 1rem !important;
+  right: 1rem !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 9998 !important;
+}
+
+#zsiq_float iframe,
+#zsiq_floatmain iframe,
+.zsiq_floatmain iframe,
+.zsiq_custommain iframe {
+  max-width: none !important;
+}
+
+.scroll-ambient {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(64px);
+  opacity: 0.45;
+  will-change: transform;
+}
+
+.scroll-ambient-one {
+  top: -8rem;
+  left: -6rem;
+  height: 20rem;
+  width: 20rem;
+  background: radial-gradient(circle, rgba(26, 31, 92, 0.18), rgba(26, 31, 92, 0));
+}
+
+.scroll-ambient-two {
+  top: 14rem;
+  right: -5rem;
+  height: 24rem;
+  width: 24rem;
+  background: radial-gradient(circle, rgba(45, 150, 216, 0.16), rgba(45, 150, 216, 0));
+}
+
+.scroll-ambient-three {
+  bottom: -10rem;
+  left: 35%;
+  height: 18rem;
+  width: 18rem;
+  background: radial-gradient(circle, rgba(103, 232, 249, 0.14), rgba(103, 232, 249, 0));
+}
+
+.scroll-grid {
+  inset: 0;
+  opacity: 0.08;
+  background-image:
+    linear-gradient(rgba(26, 31, 92, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(26, 31, 92, 0.07) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+}
+
+.scroll-reveal {
+  opacity: 0;
+  transform: translate3d(0, 24px, 0) scale(0.985);
+  transition:
+    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--scroll-reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.scroll-reveal.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .scroll-ambient,
+  .scroll-reveal,
+  .scroll-reveal.is-visible {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+
+input,
+textarea,
+select {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .container,
+  [class*='max-w-'] {
+    width: 100%;
+  }
+}
+
+/* Show hand cursor for interactive UI elements */
+a,
+button,
+[role='button'],
+label[for],
+[data-slot='select-trigger'],
+[data-slot='select-item'],
+[data-radix-collection-item] {
+  cursor: pointer;
+}
