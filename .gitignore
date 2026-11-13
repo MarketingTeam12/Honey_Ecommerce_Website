@@ -37,8 +37,6 @@ invoices/
 temp/
 tmp/
 *.pdf
-# Allow the specific audit report PDF if tracking documentation, or wait: user said:
-# "Never commit secrets or private data: .env / .env.* (except .env.example), node_modules, dist/build, *.sql backups, logs, uploads, customer documents."
 
 # OS / Editor files
 .DS_Store
@@ -47,3 +45,21 @@ Thumbs.db
 *.swo
 .vscode/
 .idea/
+
+# Working, session, and audit tracking files
+AUDIT_PROGRESS.md
+Honey_Universal_Audit_Tracking_Checklist.html
+*Tracking_Checklist*.pdf
+frontend/*_GUIDE*.md
+frontend/*_SUMMARY*.md
+frontend/*_FIX*.md
+frontend/*_STATUS*.md
+frontend/*_INSTRUCTIONS*.md
+frontend/*_COMPLETE*.md
+frontend/*_CHECKLIST*.md
+frontend/ERROR_*.md
+frontend/ERRORS_*.md
+frontend/QUICK_*.md
+frontend/guidelines/
+frontend/src/app/components/ZOHO_PAY_NOW_README.md
+frontend/src/app/components/ZohoPayNowButtonIntegrationGuide.md
