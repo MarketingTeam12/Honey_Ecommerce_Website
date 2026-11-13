@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   AlertCircle,
   ChevronRight,
@@ -116,12 +116,18 @@ const loadRazorpayCheckout = async (): Promise<RazorpayCheckoutConstructor | nul
 
     await new Promise<void>((resolve, reject) => {
       script.onload = () => resolve();
-      script.onerror = () => reject(new Error('Failed to load Razorpay checkout script.'));
+      script.onerror = () => {
+        script.remove();
+        reject(new Error('Failed to load Razorpay checkout script.'));
+      };
     });
   } else if (!isRazorpayCheckoutConstructor(window.Razorpay)) {
     await new Promise<void>((resolve, reject) => {
       existingScript.addEventListener('load', () => resolve(), { once: true });
-      existingScript.addEventListener('error', () => reject(new Error('Failed to load Razorpay checkout script.')), { once: true });
+      existingScript.addEventListener('error', () => {
+        existingScript.remove();
+        reject(new Error('Failed to load Razorpay checkout script.'));
+      }, { once: true });
     });
   }
 
@@ -208,30 +214,74 @@ export function NewPaymentPage() {
   const [paymentStep, setPaymentStep] = useState<'ready' | 'creating' | 'saving' | 'opening'>('ready');
   const [invoicePath, setInvoicePath] = useState<string | null>(null);
   const autoPayTriggeredRef = useRef(false);
-
-  // Generated ONCE for this checkout session (not per handlePayment() call).
-  // If the customer closes the Razorpay modal and retries, or double-clicks
-  // "Pay Now", handlePayment() runs again - reusing these same ids means the
-  // backend upserts the same order row instead of inserting a brand new
-  // "pending" duplicate for every attempt.
-  const checkoutIdsRef = useRef<{ orderId: string; orderNumber: string; trackingNumber: string } | null>(null);
-  if (!checkoutIdsRef.current) {
-    checkoutIdsRef.current = {
-      orderId: `ORD-${Date.now()}`,
-      orderNumber: `HT${Date.now().toString().slice(-8)}`,
-      trackingNumber: `TRK${Date.now().toString().slice(-10)}`,
-    };
-  }
+  const paymentInFlightRef = useRef(false);
 
   const subtotal = getCartTotal();
   const discount = getDiscountAmount();
   const tax = (subtotal - discount) * 0.18;
   const tipAmount = parseFloat(localStorage.getItem('orderTip') || '0');
   const total = subtotal - discount + tax + tipAmount;
-  const currencyCode = currency?.code || 'INR';
+  const currencyCode = 'INR';
+
+  const checkoutFingerprint = useMemo(
+    () =>
+      JSON.stringify({
+        userId: user?.id || 'guest',
+        total: total.toFixed(2),
+        items: cart.map((item) => `${item.id}:${item.pageCount}:${item.totalPrice}`),
+      }),
+    [user?.id, total, cart],
+  );
+
+  // Persist order/Razorpay IDs for this checkout fingerprint across modal retries and refreshes
+  // so double-clicking Pay or refreshing mid-checkout never creates duplicate orders/charges.
+  const checkoutIdsRef = useRef<{
+    fingerprint: string;
+    orderId: string;
+    orderNumber: string;
+    trackingNumber: string;
+    razorpayOrder?: RazorpayOrderResponse | null;
+  } | null>(null);
+
+  if (!checkoutIdsRef.current || checkoutIdsRef.current.fingerprint !== checkoutFingerprint) {
+    const storageKey = 'active_checkout_session_v1';
+    let restored: typeof checkoutIdsRef.current = null;
+    try {
+      const raw = sessionStorage.getItem(storageKey);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.fingerprint === checkoutFingerprint && parsed?.orderId && parsed?.orderNumber) {
+          restored = parsed;
+        }
+      }
+    } catch {
+      // Ignore corrupt session storage
+    }
+
+    if (restored) {
+      checkoutIdsRef.current = restored;
+    } else {
+      const uniqueToken =
+        typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID().replace(/-/g, '').toUpperCase()
+          : `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`.toUpperCase();
+      checkoutIdsRef.current = {
+        fingerprint: checkoutFingerprint,
+        orderId: `ORD-${uniqueToken.slice(0, 14)}`,
+        orderNumber: `HT${uniqueToken.slice(0, 10)}`,
+        trackingNumber: `TRK${uniqueToken.slice(10, 20)}`,
+        razorpayOrder: null,
+      };
+      try {
+        sessionStorage.setItem(storageKey, JSON.stringify(checkoutIdsRef.current));
+      } catch {
+        // Ignore storage quota errors
+      }
+    }
+  }
 
   useEffect(() => {
-    void loadRazorpayCheckout();
+    void loadRazorpayCheckout().catch(() => {});
   }, []);
 
   const generateTemplateInvoice = async (orderPayload: Record<string, any>) => {
@@ -373,6 +423,10 @@ export function NewPaymentPage() {
   };
 
   const handlePayment = async () => {
+    if (paymentInFlightRef.current || processing) {
+      return;
+    }
+
     if (!user) {
       setError('Please login to continue with payment');
       return;
@@ -383,15 +437,19 @@ export function NewPaymentPage() {
       return;
     }
 
-    const RazorpayCheckout = await loadRazorpayCheckout();
-    if (!RazorpayCheckout) {
-      setError('Razorpay checkout is not available right now. Please refresh and try again.');
-      return;
-    }
-
+    paymentInFlightRef.current = true;
     setProcessing(true);
     setError('');
     setPaymentStep('creating');
+
+    const RazorpayCheckout = await loadRazorpayCheckout().catch(() => null);
+    if (!RazorpayCheckout) {
+      paymentInFlightRef.current = false;
+      setProcessing(false);
+      setPaymentStep('ready');
+      setError('Razorpay checkout is not available right now. Please refresh and try again.');
+      return;
+    }
 
     try {
       const shippingAddress = localStorage.getItem('shipping_address');
@@ -593,7 +651,7 @@ export function NewPaymentPage() {
 
       setPaymentStep('opening');
 
-      let razorpayOrder = paymentCreateResponse?.razorpayOrder || null;
+      let razorpayOrder = checkoutIdsRef.current?.razorpayOrder || paymentCreateResponse?.razorpayOrder || null;
 
       if (!razorpayOrder) {
         if (paymentCreateResponse) {
@@ -605,10 +663,26 @@ export function NewPaymentPage() {
 
       razorpayOrder = validateRazorpayOrder(razorpayOrder);
 
+      // Cache created unpaid Razorpay order in sessionStorage for safe retries & refreshes
+      if (checkoutIdsRef.current) {
+        checkoutIdsRef.current.razorpayOrder = razorpayOrder;
+        try {
+          sessionStorage.setItem('active_checkout_session_v1', JSON.stringify(checkoutIdsRef.current));
+        } catch {
+          // Ignore storage quota errors
+        }
+      }
+
+      const expectedPaise = Math.round(total * 100);
+      const orderPaise = Number(razorpayOrder.amount);
+      if (orderPaise !== expectedPaise || String(razorpayOrder.currency || 'INR').toUpperCase() !== 'INR') {
+        throw new Error('Payment amount or currency mismatch detected. Please refresh and try again.');
+      }
+
       const options = {
         key: RAZORPAY_KEY_ID,
-        amount: razorpayOrder.amount,
-        currency: razorpayOrder.currency || currencyCode,
+        amount: orderPaise,
+        currency: 'INR',
         name: 'Honey Translation Services',
         description: `Order ${orderNumber}`,
         order_id: razorpayOrder.id,
@@ -626,9 +700,6 @@ export function NewPaymentPage() {
           razorpay_order_id?: string;
           razorpay_signature?: string;
         }) => {
-          console.log('Handler Running');
-          console.log(razorpayResponse);
-
           try {
             const verifyData = await verifyPayment({
               orderId,
@@ -660,7 +731,10 @@ export function NewPaymentPage() {
               },
             });
 
-            console.log('Payment Verified Successfully');
+            if (!verifyData?.success) {
+              throw new Error(verifyData?.message || 'Payment signature verification failed on server.');
+            }
+
             let resolvedInvoicePath: string | null = verifyData.invoicePath || null;
 
             try {
@@ -679,24 +753,43 @@ export function NewPaymentPage() {
               setInvoicePath(resolvedInvoicePath);
               localStorage.setItem(`invoicePath_${orderId}`, resolvedInvoicePath);
             }
+
+            try {
+              sessionStorage.removeItem('active_checkout_session_v1');
+            } catch {
+              // Ignore storage cleanup errors
+            }
+
+            clearCart();
+            paymentInFlightRef.current = false;
+            setProcessing(false);
+            navigate(
+              `/order-success?orderId=${orderId}&orderNumber=${orderNumber}&trackingNumber=${trackingNumber}&gateway=razorpay&payment_id=${razorpayResponse.razorpay_payment_id || ''}`,
+            );
           } catch (verifyError) {
             console.error('Payment verification request failed:', verifyError);
+            const message =
+              verifyError instanceof Error
+                ? verifyError.message
+                : 'Payment verification failed on the server.';
+            setError(
+              `${message} Your cart has been preserved — please retry or contact support with Payment ID ${razorpayResponse.razorpay_payment_id || 'N/A'}.`,
+            );
+            paymentInFlightRef.current = false;
+            setProcessing(false);
+            setPaymentStep('ready');
           }
-
-          clearCart();
-          setProcessing(false);
-          navigate(
-            `/order-success?orderId=${orderId}&orderNumber=${orderNumber}&trackingNumber=${trackingNumber}&gateway=razorpay&payment_id=${razorpayResponse.razorpay_payment_id || ''}`,
-          );
         },
         modal: {
           ondismiss: () => {
+            setError('Payment was cancelled before completion. Your cart items are saved — click below to retry.');
+            paymentInFlightRef.current = false;
             setProcessing(false);
             setPaymentStep('ready');
           },
         },
         theme: {
-          color: '#3399cc',
+          color: '#1a1f5c',
         },
       };
 
@@ -709,6 +802,7 @@ export function NewPaymentPage() {
       razorpay.on('payment.failed', (failureResponse) => {
         console.error('Razorpay payment failed:', failureResponse);
         setError(buildRazorpayFailureMessage(failureResponse));
+        paymentInFlightRef.current = false;
         setProcessing(false);
         setPaymentStep('ready');
       });
@@ -727,6 +821,7 @@ export function NewPaymentPage() {
       }
 
       setError(message);
+      paymentInFlightRef.current = false;
       setProcessing(false);
       setPaymentStep('ready');
     }
@@ -830,14 +925,20 @@ export function NewPaymentPage() {
                 <div className="h-px bg-gray-300" />
                 <div className="flex justify-between text-lg">
                   <span className="font-semibold">Amount to Pay</span>
-                  <span className="font-bold text-blue-600 text-2xl">{convertPrice(total)}</span>
+                  <span className="font-bold text-[#1a1f5c] text-2xl">{convertPrice(total)}</span>
                 </div>
+                {currency?.code && currency.code !== 'INR' && (
+                  <p className="text-xs text-gray-600 text-right">
+                    Charged via Razorpay in INR: <strong>₹{total.toFixed(2)}</strong>
+                  </p>
+                )}
               </div>
 
               <button
+                type="button"
                 onClick={handlePayment}
                 disabled={processing || !user}
-                className="w-full bg-blue-600 text-white py-4 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-lg mb-4"
+                className="w-full min-h-[44px] bg-[#1a1f5c] text-white py-4 rounded-lg font-medium hover:bg-[#252b70] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-lg mb-3"
               >
                 {processing ? (
                   <div className="flex items-center justify-center gap-3">
@@ -849,15 +950,26 @@ export function NewPaymentPage() {
                   </div>
                 ) : (
                   <div className="flex items-center justify-center gap-2">
-                    <Lock className="w-5 h-5" />
-                    Pay {convertPrice(total)} with Razorpay
+                    <Lock className="w-5 h-5" aria-hidden="true" />
+                    {error ? `Retry Payment (₹${total.toFixed(2)} INR)` : `Pay ₹${total.toFixed(2)} with Razorpay`}
                   </div>
                 )}
               </button>
 
+              <p className="text-xs text-gray-600 text-center mb-4">
+                By proceeding with payment, you agree to our{' '}
+                <Link
+                  to="/refund-cancellation-policy"
+                  className="text-[#1a1f5c] font-medium underline hover:text-[#252b70]"
+                >
+                  Refund &amp; Cancellation Policy
+                </Link>
+                .
+              </p>
+
               {error && (
-                <div className="bg-red-50 border border-red-500 text-red-600 px-4 py-3 rounded-lg mb-4 flex items-start gap-2">
-                  <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                <div role="alert" className="bg-red-50 border border-red-500 text-red-700 px-4 py-3 rounded-lg mb-4 flex items-start gap-2">
+                  <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" aria-hidden="true" />
                   <span className="text-sm">{error}</span>
                 </div>
               )}

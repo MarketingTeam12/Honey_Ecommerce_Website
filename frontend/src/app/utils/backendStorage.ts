@@ -44,6 +44,7 @@ export async function uploadImage(file: File | string): Promise<string> {
 
   const response = await fetch(`${API_URL}/api/s3/upload`, {
     method: 'POST',
+    credentials: 'include',
     body: formData,
   });
 
@@ -52,12 +53,13 @@ export async function uploadImage(file: File | string): Promise<string> {
     throw new Error(result.error || result.message || 'Upload failed');
   }
 
-  return result.url || result.imageUrl || result.objectUrl;
+  return result.key || result.signedUrlEndpoint;
 }
 
 export async function deleteProductImage(imageUrl: string): Promise<boolean> {
   const response = await fetch(`${API_URL}/api/s3/files`, {
     method: 'DELETE',
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ url: imageUrl }),
   });

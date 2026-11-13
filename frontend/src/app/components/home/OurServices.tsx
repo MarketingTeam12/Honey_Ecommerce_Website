@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { FileText, Award, MessageSquare } from 'lucide-react';
 import { motion } from 'motion/react';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
-import servicesImage from 'figma:asset/15aed9eb0e931fd6fc0dfd3f1878ffbf3d43bf49.png';
+import servicesImage from 'figma:asset/15aed9eb0e931fd6fc0dfd3f1878ffbf3d43bf49.webp';
 
 export function OurServices() {
   const services = [

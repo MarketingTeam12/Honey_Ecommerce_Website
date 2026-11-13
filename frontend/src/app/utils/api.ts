@@ -1,12 +1,35 @@
+const isLoopbackUrl = (url: string) =>
+  /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/i.test(url);
+
+const isLoopbackBrowser = () =>
+  typeof window !== "undefined" &&
+  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+
 export const API_BASE_URL = (() => {
-  const envUrl = import.meta.env.VITE_API_BASE_URL;
-  if (envUrl && !envUrl.includes("localhost") && !envUrl.includes("127.0.0.1")) {
-    return envUrl.replace(/\/$/, "");
+  const envUrl = (import.meta.env.VITE_API_BASE_URL || "").trim().replace(/\/$/, "");
+
+  if (envUrl) {
+    if (isLoopbackUrl(envUrl)) {
+      if (import.meta.env.DEV && typeof window !== "undefined") {
+        // In Vite dev server, use same-origin so vite.config.ts proxy handles cookies/CORS cleanly.
+        return window.location.origin;
+      }
+      if (isLoopbackBrowser()) {
+        // In local `vite preview`, there is no Vite proxy, so target the configured local API server.
+        return envUrl;
+      }
+      console.warn(
+        "[api] VITE_API_BASE_URL points to localhost in a non-localhost browser build; falling back to same origin.",
+      );
+    } else {
+      return envUrl;
+    }
   }
+
   if (typeof window !== "undefined") {
     return window.location.origin;
   }
-  return (envUrl || "http://localhost:3000").replace(/\/$/, "");
+  return "http://localhost:3000";
 })();
 
 export const API_PREFIX = "/make-server-a67f0635";

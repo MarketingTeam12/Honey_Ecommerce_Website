@@ -4,6 +4,7 @@ export async function initializeStorageBucket() {
   try {
     const response = await fetch(`${API_URL}/admin/initialize-storage`, {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
     });
 
@@ -17,13 +18,15 @@ export async function initializeStorageBucket() {
   }
 }
 
-export async function uploadFile(file: File, path: string) {
+export async function uploadFile(file: File, path: string, folder = 'documents') {
   try {
     const formData = new FormData();
+    formData.append('folder', folder);
     formData.append('file', file, path || file.name);
 
     const response = await fetch(`${API_URL}/api/s3/upload`, {
       method: 'POST',
+      credentials: 'include',
       body: formData,
     });
 
@@ -32,33 +35,50 @@ export async function uploadFile(file: File, path: string) {
       return { success: false, error: data.error || data.message || 'Upload failed' };
     }
 
-    return { success: true, data: { path: data.url || data.imageUrl || data.objectUrl } };
+    return {
+      success: true,
+      data: {
+        key: data.key,
+        path: data.key,
+        signedUrlEndpoint: data.signedUrlEndpoint,
+      },
+    };
   } catch (error: any) {
     return { success: false, error: error.message };
   }
 }
 
-export async function getSignedUrl(filePath: string) {
-  if (!filePath) {
-    return { success: false, error: 'File path is required' };
+export async function getSignedUrl(fileKeyOrPath: string) {
+  if (!fileKeyOrPath) {
+    return { success: false, error: 'File key is required' };
   }
 
-  if (/^https?:\/\//i.test(filePath)) {
-    return { success: true, url: filePath };
+  try {
+    const response = await fetch(
+      `${API_URL}/api/s3/signed-url?key=${encodeURIComponent(fileKeyOrPath)}`,
+      { credentials: 'include' },
+    );
+    const data = await response.json();
+    if (!response.ok || !data?.signedUrl) {
+      return { success: false, error: data?.message || 'Unable to generate signed URL' };
+    }
+    return {
+      success: true,
+      url: data.signedUrl as string,
+      expiresIn: data.expiresIn as number,
+    };
+  } catch (error: any) {
+    return { success: false, error: error.message };
   }
-
-  return {
-    success: true,
-    url: `${API_URL}/api/s3/proxy?key=${encodeURIComponent(filePath)}`,
-  };
 }
 
 export async function deleteFile(filePath: string) {
   try {
     const response = await fetch(`${API_URL}/api/s3/files`, {
       method: 'DELETE',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: filePath }),
+      body: JSON.stringify({ key: filePath }),
     });
 
     if (!response.ok) {

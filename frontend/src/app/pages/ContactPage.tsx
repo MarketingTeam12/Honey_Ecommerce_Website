@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { publicAnonKey } from '@/app/utils/backendInfo';
 import { API_URL } from '@/app/utils/api';
@@ -25,12 +26,19 @@ export function ContactPage() {
     email: '',
     message: '',
     verification: '',
+    website: '', // Honeypot
   });
 
+  const [privacyConsent, setPrivacyConsent] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const lastSubmittedAtRef = useRef<number>(0);
+
   const [errors, setErrors] = useState({
+    name: '',
     mobile: '',
     email: '',
     message: '',
+    consent: '',
   });
 
   const selectedCountry = countries.find(c => c.code === formData.country) || countries[0];
@@ -72,21 +80,38 @@ export function ContactPage() {
     setErrors({ ...errors, mobile: mobileError });
   };
 
+  const validateName = (name: string) => {
+    if (!name || !name.trim()) {
+      return 'Name is required';
+    }
+    return '';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    const nowMs = Date.now();
+    if (nowMs - lastSubmittedAtRef.current < 10_000) {
+      toast.error('Please wait a few seconds before sending another message.');
+      return;
+    }
+
     // Validate all fields
+    const nameError = validateName(formData.name);
     const mobileError = validateMobile(formData.mobile);
     const emailError = validateEmail(formData.email);
     const messageError = validateMessage(formData.message);
+    const consentError = privacyConsent ? '' : 'Please agree to the Privacy Policy before submitting';
     
     setErrors({
+      name: nameError,
       mobile: mobileError,
       email: emailError,
       message: messageError,
+      consent: consentError,
     });
     
-    if (mobileError || emailError || messageError) {
+    if (nameError || mobileError || emailError || messageError || consentError) {
       toast.error('Please fix the errors in the form');
       return;
     }
@@ -97,25 +122,30 @@ export function ContactPage() {
       return;
     }
     
+    setIsSubmitting(true);
     try {
-      
       const response = await fetch(`${API_URL}/customer-queries`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: formData.name,
+          name: formData.name.trim(),
+          country: selectedCountry.name,
           mobile: `${selectedCountry.dialCode} ${formData.mobile}`,
-          email: formData.email,
-          message: formData.message,
+          email: formData.email.trim(),
+          message: formData.message.trim(),
+          website: formData.website,
+          privacy_consent_accepted_at: new Date().toISOString(),
         })
       });
       
       if (!response.ok) {
-        throw new Error('Failed to submit query');
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err?.error || 'Failed to submit query');
       }
       
+      lastSubmittedAtRef.current = Date.now();
       toast.success('Message sent successfully! We will contact you soon.');
       
       // Reset form
@@ -126,11 +156,15 @@ export function ContactPage() {
         email: '',
         message: '',
         verification: '',
+        website: '',
       });
-      setErrors({ mobile: '', email: '', message: '' });
-    } catch (error) {
+      setPrivacyConsent(false);
+      setErrors({ name: '', mobile: '', email: '', message: '', consent: '' });
+    } catch (error: any) {
       console.error('Submit error:', error);
-      toast.error('Failed to send message. Please try again.');
+      toast.error(error?.message || 'Failed to send message. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -167,10 +201,14 @@ export function ContactPage() {
                   type="text"
                   required
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-600 outline-none transition-colors"
+                  onChange={(e) => {
+                    setFormData({ ...formData, name: e.target.value });
+                    setErrors({ ...errors, name: '' });
+                  }}
+                  className={`w-full px-4 py-3 border-2 ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:border-blue-600 outline-none transition-colors`}
                   placeholder="Your full name"
                 />
+                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
               </div>
 
               <div>
@@ -273,12 +311,50 @@ export function ContactPage() {
                 </div>
               </div>
 
+              <div className="hidden" aria-hidden="true">
+                <label htmlFor="contact-website">Website</label>
+                <input
+                  id="contact-website"
+                  name="website"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={formData.website}
+                  onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="flex items-start gap-2.5 text-sm text-gray-700 cursor-pointer">
+                  <input
+                    id="contact-privacy-consent"
+                    type="checkbox"
+                    checked={privacyConsent}
+                    onChange={(e) => {
+                      setPrivacyConsent(e.target.checked);
+                      setErrors({ ...errors, consent: '' });
+                    }}
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-[#1a1f5c] focus:ring-[#1a1f5c]"
+                    required
+                  />
+                  <span>
+                    I agree to the{' '}
+                    <Link to="/privacy-policy" className="text-[#1a1f5c] underline font-medium hover:text-[#252b70]">
+                      Privacy Policy
+                    </Link>
+                    .
+                  </span>
+                </label>
+                {errors.consent && <p className="text-red-500 text-sm mt-1">{errors.consent}</p>}
+              </div>
+
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                disabled={isSubmitting}
+                className="w-full bg-[#1a1f5c] text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#252b70] transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <Send className="w-5 h-5" />
-                Send Message
+                {isSubmitting ? 'Sending...' : 'Send Message'}
               </button>
             </form>
           </motion.div>

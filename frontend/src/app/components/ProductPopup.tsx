@@ -223,6 +223,10 @@ export function ProductPopup() {
             <img
               src={currentProduct.imageUrl}
               alt={currentProduct.name}
+              width={96}
+              height={96}
+              loading="lazy"
+              decoding="async"
               className="w-full h-full object-contain"
             />
           </div>

@@ -205,6 +205,37 @@ export const authClient = {
         error: null,
       };
     },
+
+    async requestPasswordReset(email: string) {
+      const response = await fetch(`${API_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      return parseResponse(response);
+    },
+
+    async resetPassword(token: string, password: string) {
+      const response = await fetch(`${API_URL}/auth/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, password }),
+      });
+      return parseResponse(response);
+    },
+
+    async changePassword(currentPassword: string, newPassword: string) {
+      const session = getStoredSession();
+      const response = await fetch(`${API_URL}/auth/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      return parseResponse(response);
+    },
   },
 
   storage: {

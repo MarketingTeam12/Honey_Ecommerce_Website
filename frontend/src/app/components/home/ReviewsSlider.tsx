@@ -1,7 +1,21 @@
+import { useEffect, useRef } from 'react';
 import Slider from 'react-slick';
 import { Star } from 'lucide-react';
+import { CarouselPauseButton, useAutoplayControl } from '@/app/components/home/CarouselPlaybackControls';
 
 export function ReviewsSlider() {
+  const sliderRef = useRef<Slider | null>(null);
+  const { isPlaying, isPaused, togglePlayback } = useAutoplayControl(true);
+
+  useEffect(() => {
+    if (!sliderRef.current) return;
+    if (isPlaying) {
+      sliderRef.current.slickPlay();
+    } else {
+      sliderRef.current.slickPause();
+    }
+  }, [isPlaying]);
+
   const reviews = Array.from({ length: 10 }, (_, i) => ({
     id: i + 1,
     name: `Customer ${i + 1}`,
@@ -15,8 +29,10 @@ export function ReviewsSlider() {
     speed: 500,
     slidesToShow: 3,
     slidesToScroll: 1,
-    autoplay: true,
+    autoplay: isPlaying,
     autoplaySpeed: 4000,
+    pauseOnHover: true,
+    pauseOnFocus: true,
     responsive: [
       {
         breakpoint: 1024,
@@ -34,12 +50,19 @@ export function ReviewsSlider() {
   };
 
   return (
-    <section className="py-20 bg-gradient-to-br from-yellow-50 to-orange-50">
+    <section className="py-20 bg-gradient-to-br from-yellow-50 to-orange-50" aria-roledescription="carousel" aria-label="Customer Reviews Slider">
       <div className="max-w-7xl mx-auto px-6">
-        <h2 className="text-4xl font-bold text-center text-gray-900 mb-12">
-          Reviews & Ratings
-        </h2>
-        <Slider {...settings}>
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-10">
+          <h2 className="text-4xl font-bold text-gray-900">
+            Reviews &amp; Ratings
+          </h2>
+          <CarouselPauseButton
+            isPaused={isPaused}
+            onToggle={togglePlayback}
+            carouselName="reviews slider"
+          />
+        </div>
+        <Slider ref={sliderRef} {...settings}>
           {reviews.map((review) => (
             <div key={review.id} className="px-4">
               <div className="bg-white rounded-lg p-6 shadow-lg">

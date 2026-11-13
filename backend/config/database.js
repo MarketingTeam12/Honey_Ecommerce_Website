@@ -105,10 +105,39 @@ async function initializeDatabase() {
       source VARCHAR(100) DEFAULT 'Direct',
       status VARCHAR(50) NOT NULL DEFAULT 'active',
       last_login_at DATETIME NULL,
+      terms_accepted_at DATETIME NULL,
       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       INDEX idx_users_role (role),
       INDEX idx_users_status (status)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS password_reset_tokens (
+      id VARCHAR(64) PRIMARY KEY,
+      user_id VARCHAR(64) NOT NULL,
+      token_hash VARCHAR(64) NOT NULL UNIQUE,
+      expires_at DATETIME NOT NULL,
+      used_at DATETIME NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_password_reset_user (user_id),
+      INDEX idx_password_reset_expires (expires_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS account_deletion_requests (
+      id VARCHAR(64) PRIMARY KEY,
+      user_id VARCHAR(64) NOT NULL,
+      email VARCHAR(255) NOT NULL,
+      name VARCHAR(255) NULL,
+      reason TEXT NULL,
+      status VARCHAR(32) NOT NULL DEFAULT 'pending',
+      requested_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      processed_at DATETIME NULL,
+      INDEX idx_deletion_user (user_id),
+      INDEX idx_deletion_status (status)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
 
@@ -496,6 +525,17 @@ async function initializeDatabase() {
       ALTER TABLE orders
         ADD COLUMN tracking_number VARCHAR(100) NULL AFTER shipping_address,
         ADD COLUMN shipping_carrier VARCHAR(100) NULL AFTER tracking_number
+    `);
+  }
+
+  const [consentCols] = await pool.query(
+    `SELECT COLUMN_NAME FROM information_schema.COLUMNS
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'terms_accepted_at'`
+  );
+  if (consentCols.length === 0) {
+    await pool.query(`
+      ALTER TABLE users
+        ADD COLUMN terms_accepted_at DATETIME NULL AFTER last_login_at
     `);
   }
 }

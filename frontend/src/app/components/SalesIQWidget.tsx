@@ -1,4 +1,6 @@
 import { useEffect } from 'react';
+import { scheduleAfterLoad } from '@/app/utils/deferredLoad';
+import { useCookieConsent } from '@/app/context/CookieConsentContext';
 
 const SALESIQ_SCRIPT_ID = 'zsiqscript';
 const SALESIQ_WIDGET_SRC =
@@ -22,37 +24,52 @@ function showSalesIQWidget() {
 }
 
 export function SalesIQWidget() {
+  const { hasConsented } = useCookieConsent();
+
   useEffect(() => {
-    window.$zoho = window.$zoho || {};
-    window.$zoho.salesiq = window.$zoho.salesiq || {};
-
-    const existingReady = window.$zoho.salesiq.ready;
-    window.$zoho.salesiq.ready = () => {
-      existingReady?.();
-      showSalesIQWidget();
-    };
-
-    const existingScript = document.getElementById(SALESIQ_SCRIPT_ID) as HTMLScriptElement | null;
-
-    if (!existingScript) {
-      const script = document.createElement('script');
-      script.id = SALESIQ_SCRIPT_ID;
-      script.src = SALESIQ_WIDGET_SRC;
-      script.defer = true;
-      script.onload = showSalesIQWidget;
-      document.body.appendChild(script);
-    } else if (!existingScript.src.includes('salesiq.zohopublic.in/widget')) {
-      existingScript.src = SALESIQ_WIDGET_SRC;
+    if (!hasConsented) {
+      window.$zoho?.salesiq?.floatbutton?.visible?.('hide');
+      return;
     }
 
-    const retry = window.setInterval(showSalesIQWidget, 1500);
-    const stopRetry = window.setTimeout(() => window.clearInterval(retry), 15000);
+    let retry: number | undefined;
+    let stopRetry: number | undefined;
+
+    const cancelSchedule = scheduleAfterLoad(() => {
+      window.$zoho = window.$zoho || {};
+      window.$zoho.salesiq = window.$zoho.salesiq || {};
+
+      const existingReady = window.$zoho.salesiq.ready;
+      window.$zoho.salesiq.ready = () => {
+        existingReady?.();
+        showSalesIQWidget();
+      };
+
+      const existingScript = document.getElementById(SALESIQ_SCRIPT_ID) as HTMLScriptElement | null;
+
+      if (!existingScript) {
+        const script = document.createElement('script');
+        script.id = SALESIQ_SCRIPT_ID;
+        script.src = SALESIQ_WIDGET_SRC;
+        script.defer = true;
+        script.onload = showSalesIQWidget;
+        document.body.appendChild(script);
+      } else if (!existingScript.src.includes('salesiq.zohopublic.in/widget')) {
+        existingScript.src = SALESIQ_WIDGET_SRC;
+      }
+
+      retry = window.setInterval(showSalesIQWidget, 1500);
+      stopRetry = window.setTimeout(() => {
+        if (retry !== undefined) window.clearInterval(retry);
+      }, 15000);
+    }, 1500);
 
     return () => {
-      window.clearInterval(retry);
-      window.clearTimeout(stopRetry);
+      cancelSchedule();
+      if (retry !== undefined) window.clearInterval(retry);
+      if (stopRetry !== undefined) window.clearTimeout(stopRetry);
     };
-  }, []);
+  }, [hasConsented]);
 
   return null;
 }

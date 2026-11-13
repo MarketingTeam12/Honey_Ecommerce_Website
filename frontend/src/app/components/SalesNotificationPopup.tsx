@@ -209,6 +209,10 @@ export function SalesNotificationPopup() {
               <img
                 src={currentNotification.thumbnail}
                 alt={currentNotification.productName}
+                width={64}
+                height={64}
+                loading="lazy"
+                decoding="async"
                 className="h-full w-full object-contain object-center"
               />
             </div>
@@ -220,6 +224,10 @@ export function SalesNotificationPopup() {
                 <img
                   src={checkMarkIcon}
                   alt="Recent purchase"
+                  width={20}
+                  height={20}
+                  loading="lazy"
+                  decoding="async"
                   className="block h-full w-full rotate-0 object-contain object-center align-middle"
                 />
               </span>

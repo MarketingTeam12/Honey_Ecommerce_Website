@@ -3,8 +3,10 @@ import ReactDOM from 'react-dom/client'
 import App from '@/app/App'
 import '@/styles/index.css'
 import { installApiFetchRewrite } from '@/app/utils/api'
+import { initErrorTracking } from '@/app/utils/errorTracking'
 
 installApiFetchRewrite()
+initErrorTracking()
 
 // NOTE: We intentionally do NOT call initializePersistentStorage() here anymore.
 // That utility patched window.localStorage/sessionStorage to proxy through a

@@ -2,9 +2,9 @@ import { Badge } from '@/app/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { useCurrency } from '@/app/context/CurrencyContext';
 import { useProducts } from '@/app/context/ProductContext';
-import spanishSwornImg from 'figma:asset/bae6e9023fb7c3265ca71db42883699dd1557abb.png';
-import italianSwornImg from 'figma:asset/aebd76dfa545dcd480a431d627b9afa2c177b490.png';
-import germanSwornImg from 'figma:asset/604e66db6f8e40cd18af4a70c2668969707585de.png';
+import spanishSwornImg from 'figma:asset/bae6e9023fb7c3265ca71db42883699dd1557abb.webp';
+import italianSwornImg from 'figma:asset/aebd76dfa545dcd480a431d627b9afa2c177b490.webp';
+import germanSwornImg from 'figma:asset/604e66db6f8e40cd18af4a70c2668969707585de.webp';
 import { getFirstValidImage } from '@/app/utils/imageUtils';
 
 const PROMO_TAGS = ['Top Rated', 'Best Offer', 'Popular Choice', 'Exclusive Deal', 'Best Seller', 'Limited Time Offer'];
@@ -93,6 +93,10 @@ export function ChooseSwornTranslation() {
                     <img
                       src={product.image}
                       alt={product.title}
+                      width={640}
+                      height={800}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (

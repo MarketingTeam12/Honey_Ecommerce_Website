@@ -1,1 +1,49 @@
+# Dependencies
 node_modules/
+*/node_modules/
+
+# Environment files
+.env
+.env.*
+!.env.example
+*.env
+*.env.local
+*.env.production
+
+# Build outputs
+dist/
+build/
+*/dist/
+*/build/
+
+# Database backups & dumps
+*.sql
+*.sqlite
+*.db
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Uploads & Customer Documents
+uploads/
+*/uploads/
+invoices/
+*/invoices/
+temp/
+tmp/
+*.pdf
+# Allow the specific audit report PDF if tracking documentation, or wait: user said:
+# "Never commit secrets or private data: .env / .env.* (except .env.example), node_modules, dist/build, *.sql backups, logs, uploads, customer documents."
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/

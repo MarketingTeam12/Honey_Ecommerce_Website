@@ -12,7 +12,7 @@ try {
 
 const GOOGLE_CALLBACK_URL =
   process.env.GOOGLE_CALLBACK_URL ||
-  "http://localhost:3000/make-server-a67f0635/auth/google/callback";
+  "http://localhost:3000/api/auth/google/callback";
 
 function configurePassport() {
   passport.use(

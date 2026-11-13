@@ -63,7 +63,7 @@ export function AuthGateProvider({ children }: { children: ReactNode }) {
               </button>
               <button
                 onClick={goToSignIn}
-                className="flex-1 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                className="flex-1 px-4 py-2 rounded-lg bg-[#1a1f5c] text-white hover:bg-[#252b70] transition-colors"
               >
                 Sign In
               </button>

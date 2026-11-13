@@ -1,0 +1,12 @@
+/*
+  ! Access-Control-Allow-Origin
+  Cache-Control: no-cache, no-store, must-revalidate
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'report-sample' https://checkout.razorpay.com https://api.razorpay.com https://cdn.razorpay.com https://salesiq.zohopublic.in https://salesiq.zohopublic.com https://static.zohocdn.com https://js.zohocdn.com https://cdn.trustindex.io https://static.cloudflareinsights.com https://accounts.google.com https://apis.google.com https://www.youtube.com https://www.youtube-nocookie.com; style-src 'self' 'unsafe-inline' https://static.zohocdn.com https://css.zohocdn.com https://cdn.trustindex.io; img-src 'self' data: blob: https://flagcdn.com https://images.unsplash.com https://cdn.trustindex.io https://i.ytimg.com https://lh3.googleusercontent.com https://static.zohocdn.com https://salesiq.zohopublic.in https://checkout.razorpay.com https://cdn.razorpay.com https://*.amazonaws.com https://honeyuniversal.com https://api.honeyuniversal.com; font-src 'self' data: https://static.zohocdn.com https://cdn.trustindex.io https://fonts.gstatic.com; connect-src 'self' https://api.honeyuniversal.com https://honeyuniversal.com https://*.supabase.co https://api.razorpay.com https://lumberjack.razorpay.com https://checkout.razorpay.com https://salesiq.zohopublic.in https://salesiq.zohopublic.com wss://*.zohopublic.in wss://*.zohopublic.com https://cdn.trustindex.io https://static.cloudflareinsights.com https://cloudflareinsights.com https://accounts.google.com https://www.googleapis.com https://*.amazonaws.com; frame-src 'self' https://checkout.razorpay.com https://api.razorpay.com https://www.youtube.com https://www.youtube-nocookie.com https://accounts.google.com https://payments.zoho.in https://salesiq.zohopublic.in https://salesiq.zohopublic.com; object-src 'none'; base-uri 'self'; form-action 'self' https://payments.zoho.in https://checkout.razorpay.com https://accounts.google.com; frame-ancestors 'self'
+
+/assets/*
+  ! Cache-Control
+  Cache-Control: public, max-age=31536000, immutable

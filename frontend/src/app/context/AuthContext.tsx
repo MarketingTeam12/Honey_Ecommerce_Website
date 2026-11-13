@@ -152,7 +152,7 @@ interface AuthContextType {
   isAdmin: boolean;
   accessToken: string | null;
   login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
-  signup: (email: string, password: string, name: string, phone?: string) => Promise<{ success: boolean; message?: string; requiresLogin?: boolean }>;
+  signup: (email: string, password: string, name: string, phone?: string, termsAcceptedAt?: string) => Promise<{ success: boolean; message?: string; requiresLogin?: boolean }>;
   loginWithGoogle: () => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
   loading: boolean;
@@ -305,10 +305,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       let userProfile;
+      const pendingConsentAt = sessionStorage.getItem('pendingTermsConsentAt');
       if (profileResponse.ok) {
         const profileData = await profileResponse.json();
         console.log('✅ [OAuth] Existing user profile found');
         userProfile = profileData.user;
+        if (pendingConsentAt && !userProfile?.terms_accepted_at) {
+          await fetch(`${functionsUrl}/auth/consent`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...buildHeaders(token),
+            },
+            body: JSON.stringify({ termsAcceptedAt: pendingConsentAt }),
+          }).catch(() => {});
+        }
       } else {
         // Create new profile for Google OAuth user
         console.log('📝 [OAuth] Creating new profile for Google user');
@@ -335,7 +346,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             name: name,
             phone: phone,
             source: 'Google OAuth',
-            avatar: BackendUser.user_metadata?.avatar_url
+            avatar: BackendUser.user_metadata?.avatar_url,
+            termsAcceptedAt: pendingConsentAt || undefined,
           })
         });
         
@@ -372,6 +384,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         lastLoginAt: new Date().toISOString(),
       });
       
+      if (pendingConsentAt) {
+        sessionStorage.removeItem('pendingTermsConsentAt');
+      }
       console.log('✅ [OAuth] Google sign-in complete');
     } catch (error) {
       console.error('❌ [OAuth] Error processing Google callback:', error);
@@ -752,7 +767,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { success: false, message: 'Invalid email or password' };
   };
 
-  const signup = async (email: string, password: string, name: string, phone?: string): Promise<{ success: boolean; message?: string; requiresLogin?: boolean }> => {
+  const signup = async (email: string, password: string, name: string, phone?: string, termsAcceptedAt?: string): Promise<{ success: boolean; message?: string; requiresLogin?: boolean }> => {
     console.log('📝 [AuthContext] Signup attempt started for:', email);
     console.log('📝 [AuthContext] Name:', name, 'Phone:', phone);
     
@@ -769,7 +784,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             password,
             name,
             phone: phone || 'N/A',
-            source: window.location.hostname || 'Direct'
+            source: window.location.hostname || 'Direct',
+            termsAccepted: Boolean(termsAcceptedAt),
+            termsAcceptedAt: termsAcceptedAt || undefined,
           }),
         }
       );

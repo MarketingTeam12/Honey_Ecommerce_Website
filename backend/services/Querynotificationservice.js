@@ -3,23 +3,38 @@ const resend = require("../utils/resend");
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "Honey Translations <onboarding@resend.dev>";
 const ADMIN_NOTIFICATION_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || "admin@honeytranslations.com";
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 /**
  * Sends the "new query" alert to the admin inbox.
  */
 async function notifyAdminOfNewQuery(query) {
   try {
+    const safeName = escapeHtml(query.name || "Anonymous");
+    const safeEmail = escapeHtml(query.email || "-");
+    const safePhone = escapeHtml(query.phone || "-");
+    const safeSubject = escapeHtml(query.subject || "-");
+    const safeMessage = escapeHtml(query.message || "").replace(/\n/g, "<br/>");
+
     const data = await resend.emails.send({
       from: FROM_EMAIL,
       to: ADMIN_NOTIFICATION_EMAIL,
       subject: `New Customer Query: ${query.subject || "General Inquiry"}`,
       html: `
         <h2>New Customer Query Received</h2>
-        <p><strong>Name:</strong> ${query.name || "Anonymous"}</p>
-        <p><strong>Email:</strong> ${query.email || "-"}</p>
-        <p><strong>Phone:</strong> ${query.phone || "-"}</p>
-        <p><strong>Subject:</strong> ${query.subject || "-"}</p>
+        <p><strong>Name:</strong> ${safeName}</p>
+        <p><strong>Email:</strong> ${safeEmail}</p>
+        <p><strong>Phone:</strong> ${safePhone}</p>
+        <p><strong>Subject:</strong> ${safeSubject}</p>
         <p><strong>Message:</strong></p>
-        <p>${(query.message || "").replace(/\n/g, "<br/>")}</p>
+        <p>${safeMessage}</p>
       `,
       text: [
         "New Customer Query Received",

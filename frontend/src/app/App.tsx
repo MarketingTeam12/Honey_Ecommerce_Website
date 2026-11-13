@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Suspense, lazy } from "react";
-import AdminUpload from "@/app/components/AdminUpload";
+import { MotionConfig } from "motion/react";
+const AdminUpload = lazy(() => import("@/app/components/AdminUpload"));
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import { initializeStorageBucket } from "@/app/utils/backendStorage";
@@ -20,49 +21,53 @@ import { CurrencyProvider } from "@/app/context/CurrencyContext";
 import { CartProvider } from "@/app/context/CartContext";
 import { WishlistProvider } from "@/app/context/WishlistContext";
 import { ProductProvider } from "@/app/context/ProductContext";
+import { CookieConsentProvider } from "@/app/context/CookieConsentContext";
+import { CookieConsentBanner } from "@/app/components/layout/CookieConsentBanner";
 
 // Import pages
-const HomePage = lazy(() => import("@/app/pages/HomePage"));
+import HomePage from "@/app/pages/HomePage";
 const ContactPage = lazy(() => import("@/app/pages/ContactPage"));
 const PrivacyPolicyPage = lazy(() => import("@/app/pages/PrivacyPolicyPage"));
 const FAQPage = lazy(() => import("@/app/pages/FAQPage"));
 const BlogPage = lazy(() => import("@/app/pages/BlogPage"));
 const SignInPage = lazy(() => import("@/app/pages/SignInPage"));
 const SignUpPage = lazy(() => import("@/app/pages/SignUpPage"));
+const ForgotPasswordPage = lazy(() => import("@/app/pages/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("@/app/pages/ResetPasswordPage"));
 const AuthCallbackPage = lazy(() => import("@/app/pages/AuthCallbackPage"));
 const WishlistPage = lazy(() => import("@/app/pages/WishlistPage"));
 const TestReviewPage = lazy(() => import("@/app/pages/TestReviewPage"));
 
-// Admin pages
-import AdminDashboard from "@/app/pages/admin/AdminDashboard";
-import ItemsPage from "@/app/pages/admin/ItemsPage";
-import AddEditItemPage from "@/app/pages/admin/AddEditItemPage";
-import ProductFieldsConfigPage from "@/app/pages/admin/ProductFieldsConfigPage";
-import CategoriesPage from "@/app/pages/admin/CategoriesPage";
-import CouponsPage from "@/app/pages/admin/CouponsPage";
-import OrdersPageAdmin from "@/app/pages/admin/OrdersPage";
-import OrderDetailPageAdmin from "@/app/pages/admin/OrderDetailPage";
-import CustomersPage from "@/app/pages/admin/CustomersPage";
-import RoleManagementPage from "@/app/pages/admin/RoleManagementPage";
-import CustomerEmailsPage from "@/app/pages/admin/CustomerEmailsPage";
-import { CustomerQueriesPage } from "@/app/pages/admin/CustomerQueriesPage";
-import SalesPage from "@/app/pages/admin/SalesPage";
-import NotificationsPage from "@/app/pages/admin/NotificationsPage";
-import ReportsPage from "@/app/pages/admin/ReportsPage";
-import OrderManagementDemoPage from "@/app/pages/admin/OrderManagementDemoPage";
-import WorkSamplesPage from "@/app/pages/admin/WorkSamplesPage";
-import InitializeWorkSamplesPage from "@/app/pages/admin/InitializeWorkSamplesPage";
-import DebugOrdersPage from "@/app/pages/admin/DebugOrdersPage";
-import { OrdersDiagnosticsPage } from "@/app/pages/admin/OrdersDiagnosticsPage";
-import { APIKeysPage } from "@/app/pages/admin/APIKeysPage";
-import { PaymentSettingsPage } from "@/app/pages/admin/PaymentSettingsPage";
-import { ItemReviewsPage } from "@/app/pages/admin/ItemReviewsPage";
-import { DataCleanupPage } from "@/app/pages/admin/DataCleanupPage";
-import OrdersSetupPage from "@/app/pages/admin/OrdersSetupPage";
-import { OrdersSetupChecklistPage } from "@/app/pages/admin/OrdersSetupChecklistPage";
-import QuickOrdersFixPage from "@/app/pages/admin/QuickOrdersFixPage";
-import { DiagnosticPage } from "@/app/pages/admin/DiagnosticPage";
-import { DeploymentGuidePage } from "@/app/pages/admin/DeploymentGuidePage";
+// Admin pages (lazy-loaded so they stay out of the main public bundle)
+const AdminDashboard = lazy(() => import("@/app/pages/admin/AdminDashboard"));
+const ItemsPage = lazy(() => import("@/app/pages/admin/ItemsPage"));
+const AddEditItemPage = lazy(() => import("@/app/pages/admin/AddEditItemPage"));
+const ProductFieldsConfigPage = lazy(() => import("@/app/pages/admin/ProductFieldsConfigPage"));
+const CategoriesPage = lazy(() => import("@/app/pages/admin/CategoriesPage"));
+const CouponsPage = lazy(() => import("@/app/pages/admin/CouponsPage"));
+const OrdersPageAdmin = lazy(() => import("@/app/pages/admin/OrdersPage"));
+const OrderDetailPageAdmin = lazy(() => import("@/app/pages/admin/OrderDetailPage"));
+const CustomersPage = lazy(() => import("@/app/pages/admin/CustomersPage"));
+const RoleManagementPage = lazy(() => import("@/app/pages/admin/RoleManagementPage"));
+const CustomerEmailsPage = lazy(() => import("@/app/pages/admin/CustomerEmailsPage"));
+const CustomerQueriesPage = lazy(() => import("@/app/pages/admin/CustomerQueriesPage").then((m) => ({ default: m.CustomerQueriesPage })));
+const SalesPage = lazy(() => import("@/app/pages/admin/SalesPage"));
+const NotificationsPage = lazy(() => import("@/app/pages/admin/NotificationsPage"));
+const ReportsPage = lazy(() => import("@/app/pages/admin/ReportsPage"));
+const OrderManagementDemoPage = lazy(() => import("@/app/pages/admin/OrderManagementDemoPage"));
+const WorkSamplesPage = lazy(() => import("@/app/pages/admin/WorkSamplesPage"));
+const InitializeWorkSamplesPage = lazy(() => import("@/app/pages/admin/InitializeWorkSamplesPage"));
+const DebugOrdersPage = lazy(() => import("@/app/pages/admin/DebugOrdersPage"));
+const OrdersDiagnosticsPage = lazy(() => import("@/app/pages/admin/OrdersDiagnosticsPage").then((m) => ({ default: m.OrdersDiagnosticsPage })));
+const APIKeysPage = lazy(() => import("@/app/pages/admin/APIKeysPage").then((m) => ({ default: m.APIKeysPage })));
+const PaymentSettingsPage = lazy(() => import("@/app/pages/admin/PaymentSettingsPage").then((m) => ({ default: m.PaymentSettingsPage })));
+const ItemReviewsPage = lazy(() => import("@/app/pages/admin/ItemReviewsPage").then((m) => ({ default: m.ItemReviewsPage })));
+const DataCleanupPage = lazy(() => import("@/app/pages/admin/DataCleanupPage").then((m) => ({ default: m.DataCleanupPage })));
+const OrdersSetupPage = lazy(() => import("@/app/pages/admin/OrdersSetupPage"));
+const OrdersSetupChecklistPage = lazy(() => import("@/app/pages/admin/OrdersSetupChecklistPage").then((m) => ({ default: m.OrdersSetupChecklistPage })));
+const QuickOrdersFixPage = lazy(() => import("@/app/pages/admin/QuickOrdersFixPage"));
+const DiagnosticPage = lazy(() => import("@/app/pages/admin/DiagnosticPage").then((m) => ({ default: m.DiagnosticPage })));
+const DeploymentGuidePage = lazy(() => import("@/app/pages/admin/DeploymentGuidePage").then((m) => ({ default: m.DeploymentGuidePage })));
 
 // Pages used in routes
 const CheckoutDemo = lazy(() => import("@/app/pages/CheckoutDemo"));
@@ -101,6 +106,7 @@ const PricingPlanPage = lazy(() => import("@/app/pages/PricingPlanPage"));
 const ZohoPaymentDemoPage = lazy(() => import("@/app/pages/ZohoPaymentDemoPage"));
 const QuickPaymentPage = lazy(() => import("@/app/pages/QuickPaymentPage"));
 const TestPayNowPage = lazy(() => import("@/app/pages/TestPayNowPage"));
+const NotFoundPage = lazy(() => import("@/app/pages/NotFoundPage"));
 
 // Import components
 import { SalesNotificationPopup } from "@/app/components/SalesNotificationPopup";
@@ -109,7 +115,8 @@ import DemoUserInitializer from "@/app/components/DemoUserInitializer";
 import ErrorBoundary from "@/app/components/ErrorBoundary";
 import ScrollToTop from "@/app/components/ScrollToTop";
 import PublicLayout from "@/app/components/layout/PublicLayout";
-import { PublicPageSkeleton } from "@/app/components/layout/PageSkeleton";
+import { PublicPageSkeleton, InitialRouteSkeleton } from "@/app/components/layout/PageSkeleton";
+import { SeoManager } from "@/app/components/SeoManager";
 
 function App() {
   const [appReady, setAppReady] = useState(false);
@@ -158,16 +165,7 @@ function App() {
   }, []);
 
   if (!appReady) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-          <p className="text-gray-600">
-            Loading Honey Translation Services...
-          </p>
-        </div>
-      </div>
-    );
+    return <InitialRouteSkeleton />;
   }
 
   if (initError) {
@@ -192,6 +190,7 @@ function App() {
 
   return (
     <ErrorBoundary>
+      <MotionConfig reducedMotion="user">
       <BrowserRouter
         future={{
           v7_startTransition: true,
@@ -200,13 +199,16 @@ function App() {
       >
         <ScrollToTop />
         <DemoUserInitializer />
+        <CookieConsentProvider>
         <AuthProvider>
           <AuthGateProvider>
           <CurrencyProvider>
             <CartProvider>
               <WishlistProvider>
                 <ProductProvider>
+                  <SeoManager />
                   <SalesIQWidget />
+                  <CookieConsentBanner />
                   <SalesNotificationPopup />
                   <Toaster position="top-right" richColors closeButton />
                   <Suspense
@@ -228,6 +230,14 @@ function App() {
                     <Route
                       path="/signup"
                       element={<SignUpPage />}
+                    />
+                    <Route
+                      path="/forgot-password"
+                      element={<ForgotPasswordPage />}
+                    />
+                    <Route
+                      path="/reset-password"
+                      element={<ResetPasswordPage />}
                     />
                     <Route
                       path="/auth/callback"
@@ -422,14 +432,6 @@ function App() {
                       element={
                         <PublicLayout>
                           <AllApostilleProductsPage />
-                        </PublicLayout>
-                      }
-                    />
-                    <Route
-                      path="/apostille/:id"
-                      element={
-                        <PublicLayout>
-                          <ApostillePage />
                         </PublicLayout>
                       }
                     />
@@ -706,6 +708,14 @@ function App() {
                       }
                     />
                     <Route
+                      path="/blog/:slug"
+                      element={
+                        <PublicLayout>
+                          <BlogPage />
+                        </PublicLayout>
+                      }
+                    />
+                    <Route
                       path="/services"
                       element={
                         <PublicLayout>
@@ -953,6 +963,14 @@ function App() {
                         </PublicLayout>
                       }
                     />
+                    <Route
+                      path="*"
+                      element={
+                        <PublicLayout>
+                          <NotFoundPage />
+                        </PublicLayout>
+                      }
+                    />
                     </Routes>
                   </Suspense>
                 </ProductProvider>
@@ -961,7 +979,9 @@ function App() {
           </CurrencyProvider>
           </AuthGateProvider>
         </AuthProvider>
+        </CookieConsentProvider>
       </BrowserRouter>
+      </MotionConfig>
     </ErrorBoundary>
   );
 }

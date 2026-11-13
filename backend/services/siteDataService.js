@@ -144,13 +144,18 @@ function normalizeSubscriber(row) {
 
 function normalizeWorkSample(row) {
   if (!row) return null;
+  const metadata = parseJson(row.metadata);
+  const metaObj = metadata && typeof metadata === "object" ? metadata : {};
   return {
     ...row,
     imageUrl: row.image_url,
     fileUrl: row.file_url,
+    fileName: metaObj.fileName || metaObj.file_name || row.file_name || "",
+    status: metaObj.status || row.status || "active",
+    order: Number(metaObj.order ?? row.order ?? 0),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
-    metadata: parseJson(row.metadata),
+    metadata,
   };
 }
 

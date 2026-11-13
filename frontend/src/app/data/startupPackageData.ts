@@ -1,10 +1,10 @@
-import image_4f29f9a535a1e020ddf88422c4a5ef071dde1ab8 from 'figma:asset/4f29f9a535a1e020ddf88422c4a5ef071dde1ab8.png';
-import image_6bb2a8c7c05cf8ee36080d1453fdaa96fd923340 from 'figma:asset/6bb2a8c7c05cf8ee36080d1453fdaa96fd923340.png';
-import image_ee810d526fb09362f3adbdbf9eba4864e17e0e11 from 'figma:asset/ee810d526fb09362f3adbdbf9eba4864e17e0e11.png';
-import image_f42c47a61d483c5a5aa5fd1f9743e66d9f5aedc9 from 'figma:asset/f42c47a61d483c5a5aa5fd1f9743e66d9f5aedc9.png';
-import image_d8c18857369797e62f24a21531a9cf10b9c0dc81 from 'figma:asset/d8c18857369797e62f24a21531a9cf10b9c0dc81.png';
-import image_d4b1f2e915e9cd79f93d6af750c3e12dca7eb069 from 'figma:asset/d4b1f2e915e9cd79f93d6af750c3e12dca7eb069.png';
-import image_f5707a0d9c0c12ebdf5442f8b476f3511cfd86bf from 'figma:asset/f5707a0d9c0c12ebdf5442f8b476f3511cfd86bf.png';
+import image_4f29f9a535a1e020ddf88422c4a5ef071dde1ab8 from 'figma:asset/4f29f9a535a1e020ddf88422c4a5ef071dde1ab8.webp';
+import image_6bb2a8c7c05cf8ee36080d1453fdaa96fd923340 from 'figma:asset/6bb2a8c7c05cf8ee36080d1453fdaa96fd923340.webp';
+import image_ee810d526fb09362f3adbdbf9eba4864e17e0e11 from 'figma:asset/ee810d526fb09362f3adbdbf9eba4864e17e0e11.webp';
+import image_f42c47a61d483c5a5aa5fd1f9743e66d9f5aedc9 from 'figma:asset/f42c47a61d483c5a5aa5fd1f9743e66d9f5aedc9.webp';
+import image_d8c18857369797e62f24a21531a9cf10b9c0dc81 from 'figma:asset/d8c18857369797e62f24a21531a9cf10b9c0dc81.webp';
+import image_d4b1f2e915e9cd79f93d6af750c3e12dca7eb069 from 'figma:asset/d4b1f2e915e9cd79f93d6af750c3e12dca7eb069.webp';
+import image_f5707a0d9c0c12ebdf5442f8b476f3511cfd86bf from 'figma:asset/f5707a0d9c0c12ebdf5442f8b476f3511cfd86bf.webp';
 import { ProductData } from "../components/product/ProductTemplate";
 
 // Startup Packages Data - Updated Version

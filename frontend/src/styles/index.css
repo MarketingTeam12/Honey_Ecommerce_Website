@@ -53,10 +53,20 @@ iframe {
 .zsiq_theme2 {
   bottom: 1rem !important;
   right: 1rem !important;
+  max-width: calc(100vw - 2rem) !important;
+  max-height: 4rem !important;
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
-  z-index: 9998 !important;
+  z-index: 40 !important;
+}
+
+/* Keep SalesIQ teaser/greeting bubbles contained near bottom-right without overlapping stacked controls */
+#zsiq_maintitle,
+.zsiq_flt_rel,
+.siq_bR {
+  max-height: 4rem !important;
+  max-width: min(260px, calc(100vw - 2rem)) !important;
 }
 
 #zsiq_float iframe,

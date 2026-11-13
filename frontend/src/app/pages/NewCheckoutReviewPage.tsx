@@ -647,13 +647,23 @@ export function NewCheckoutReviewPage() {
 
                 <button
                   onClick={handleMakePayment}
-                  className="w-full bg-blue-600 text-white py-4 rounded-lg font-medium hover:bg-blue-700 transition-colors mb-4 text-lg flex items-center justify-center gap-2"
+                  className="w-full min-h-[44px] bg-[#1a1f5c] text-white py-4 rounded-lg font-medium hover:bg-[#252b70] transition-colors mb-3 text-lg flex items-center justify-center gap-2"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                   Make Payment
                 </button>
+                <p className="text-xs text-gray-600 text-center mb-4">
+                  By placing this order, you agree to our{' '}
+                  <Link
+                    to="/refund-cancellation-policy"
+                    className="text-[#1a1f5c] font-medium underline hover:text-[#252b70]"
+                  >
+                    Refund &amp; Cancellation Policy
+                  </Link>
+                  .
+                </p>
 
                 {/* Security Info */}
                 <div className="space-y-2 pt-4 border-t border-gray-300">

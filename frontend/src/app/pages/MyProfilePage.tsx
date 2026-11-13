@@ -1,13 +1,27 @@
 import { useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/app/context/AuthContext';
-import { User, Eye, EyeOff } from 'lucide-react';
+import { User, Eye, EyeOff, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { getAuthClient } from '@/app/utils/authClient';
 import { API_URL } from '@/app/utils/api';
 import { buildHeaders } from '@/app/utils/buildHeaders';
+import { validatePasswordPolicy } from '@/app/utils/passwordValidation';
+import { PasswordRulesChecklist } from '@/app/components/auth/PasswordRulesChecklist';
+
+function normalizeIndianPhone(input: string): { valid: boolean; value: string } {
+  const raw = input.trim();
+  if (!raw) return { valid: true, value: 'N/A' };
+  const digits = raw.replace(/\D/g, '');
+  const tenDigits = digits.startsWith('91') && digits.length === 12 ? digits.slice(2) : digits;
+  if (!/^[6-9]\d{9}$/.test(tenDigits)) {
+    return { valid: false, value: raw };
+  }
+  return { valid: true, value: `+91${tenDigits}` };
+}
 
 export function MyProfilePage() {
-  const { user, accessToken } = useAuth();
+  const { user, accessToken, loading: authLoading } = useAuth();
   const [isEditMode, setIsEditMode] = useState(false);
   const [formData, setFormData] = useState({
     firstName: user?.name?.split(' ')[0] || '',
@@ -36,6 +50,10 @@ export function MyProfilePage() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [deletionReason, setDeletionReason] = useState('');
+  const [deletionConfirmed, setDeletionConfirmed] = useState(false);
+  const [isRequestingDeletion, setIsRequestingDeletion] = useState(false);
+  const [deletionRequestRecord, setDeletionRequestRecord] = useState<{ id: string; requested_at: string } | null>(null);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -102,8 +120,19 @@ export function MyProfilePage() {
       return;
     }
 
+    const name = `${formData.firstName} ${formData.lastName}`.trim();
+    if (!name) {
+      toast.error('Please enter your name');
+      return;
+    }
+
+    const phoneCheck = normalizeIndianPhone(formData.phoneNumber);
+    if (!phoneCheck.valid) {
+      toast.error('Please enter a valid 10-digit Indian mobile number (with +91)');
+      return;
+    }
+
     try {
-      const name = `${formData.firstName} ${formData.lastName}`.trim();
       const response = await fetch(
         `${API_URL}/auth/profile`,
         {
@@ -111,7 +140,7 @@ export function MyProfilePage() {
           headers: buildHeaders(accessToken),
           body: JSON.stringify({
             name,
-            phone: formData.phoneNumber || 'N/A',
+            phone: phoneCheck.value,
             dateOfBirth: formData.dateOfBirth,
             gender: formData.gender,
             companyName: formData.companyName,
@@ -128,6 +157,10 @@ export function MyProfilePage() {
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
         throw new Error(errData?.error || 'Failed to update profile');
+      }
+
+      if (phoneCheck.value !== 'N/A') {
+        setFormData(prev => ({ ...prev, phoneNumber: phoneCheck.value }));
       }
 
       toast.success('Profile updated successfully');
@@ -147,8 +180,9 @@ export function MyProfilePage() {
       return;
     }
     
-    if (passwordData.newPassword.length < 6) {
-      toast.error('New password must be at least 6 characters long');
+    const policy = validatePasswordPolicy(passwordData.newPassword);
+    if (!policy.valid) {
+      toast.error('New password must be at least 8 characters with at least one letter and one number');
       return;
     }
     
@@ -166,27 +200,14 @@ export function MyProfilePage() {
     
     try {
       const authClient = getAuthClient();
-      
-      // First verify the old password by signing in
-      const { error: signInError } = await authClient.auth.signInWithPassword({
-        email: user?.email || '',
-        password: passwordData.oldPassword,
-      });
-      
-      if (signInError) {
-        toast.error('Current password is incorrect');
-        setIsUpdatingPassword(false);
-        return;
-      }
-      
-      // Update the password
-      const { error: updateError } = await authClient.auth.updateUser({
-        password: passwordData.newPassword
-      });
+      const { error: updateError } = await authClient.auth.changePassword(
+        passwordData.oldPassword,
+        passwordData.newPassword
+      );
       
       if (updateError) {
         console.error('Password update error:', updateError);
-        toast.error('Failed to update password: ' + updateError.message);
+        toast.error(updateError.message || 'Failed to update password');
         setIsUpdatingPassword(false);
         return;
       }
@@ -206,9 +227,50 @@ export function MyProfilePage() {
     }
   };
 
+  const handleRequestDeletion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!accessToken) {
+      toast.error('You must be logged in to request account deletion');
+      return;
+    }
+    if (!deletionConfirmed) {
+      toast.error('Please confirm that you want to request account deletion');
+      return;
+    }
+
+    setIsRequestingDeletion(true);
+    try {
+      const response = await fetch(`${API_URL}/auth/request-deletion`, {
+        method: 'POST',
+        headers: buildHeaders(accessToken),
+        body: JSON.stringify({ reason: deletionReason.trim() }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data?.message || data?.error || 'Failed to submit deletion request');
+      }
+      setDeletionRequestRecord({
+        id: data?.request?.id || 'submitted',
+        requested_at: data?.request?.requested_at || new Date().toISOString(),
+      });
+      setDeletionReason('');
+      setDeletionConfirmed(false);
+      toast.success('Account deletion request submitted for review.');
+    } catch (error: any) {
+      console.error('Account deletion request error:', error);
+      toast.error(error?.message || 'Failed to submit deletion request');
+    } finally {
+      setIsRequestingDeletion(false);
+    }
+  };
+
   const handleCancel = () => {
     setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
   };
+
+  if (!authLoading && !user) {
+    return <Navigate to="/signin" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -494,9 +556,13 @@ export function MyProfilePage() {
                       type="button"
                       className="absolute right-3 top-1/2 transform -translate-y-1/2"
                       onClick={() => setShowNewPassword(!showNewPassword)}
+                      aria-label={showNewPassword ? 'Hide new password' : 'Show new password'}
                     >
                       {showNewPassword ? <Eye className="w-5 h-5 text-gray-500" /> : <EyeOff className="w-5 h-5 text-gray-500" />}
                     </button>
+                  </div>
+                  <div className="mt-2">
+                    <PasswordRulesChecklist password={passwordData.newPassword} />
                   </div>
                 </div>
 
@@ -543,6 +609,56 @@ export function MyProfilePage() {
                   </button>
                 </div>
               </form>
+            </div>
+
+            {/* Request Account Deletion */}
+            <div className="bg-white rounded-lg shadow-md p-6 border border-red-200 mt-6">
+              <div className="flex items-center gap-2 mb-2">
+                <Trash2 className="w-5 h-5 text-red-600" />
+                <h2 className="text-xl font-bold text-gray-900">Request Account Deletion</h2>
+              </div>
+              <p className="text-xs text-gray-600 mb-4">
+                Submit a deletion request to our support team. Your account and order records are not deleted automatically; our team reviews and processes requests manually.
+              </p>
+
+              {deletionRequestRecord ? (
+                <div className="rounded-md bg-amber-50 border border-amber-200 p-3 text-xs text-amber-900">
+                  <p className="font-semibold">Deletion request submitted</p>
+                  <p className="mt-1">Reference ID: <span className="font-mono">{deletionRequestRecord.id}</span></p>
+                </div>
+              ) : (
+                <form onSubmit={handleRequestDeletion} className="space-y-3">
+                  <div>
+                    <label htmlFor="deletion-reason" className="block text-xs font-medium text-gray-700 mb-1">
+                      Reason (optional)
+                    </label>
+                    <textarea
+                      id="deletion-reason"
+                      rows={2}
+                      value={deletionReason}
+                      onChange={(e) => setDeletionReason(e.target.value)}
+                      placeholder="Optional note for our team"
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    />
+                  </div>
+                  <label className="flex items-start gap-2 text-xs text-gray-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={deletionConfirmed}
+                      onChange={(e) => setDeletionConfirmed(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
+                    />
+                    <span>I confirm I want to request deletion of my Honey Translations account.</span>
+                  </label>
+                  <button
+                    type="submit"
+                    disabled={isRequestingDeletion || !deletionConfirmed}
+                    className="w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isRequestingDeletion ? 'Submitting...' : 'Request Account Deletion'}
+                  </button>
+                </form>
+              )}
             </div>
           </div>
         </div>

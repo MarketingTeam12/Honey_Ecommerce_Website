@@ -13,12 +13,13 @@ export function WhatsAppButton() {
 
   return (
     <button
+      type="button"
       onClick={handleClick}
-      className="fixed bottom-[5.1rem] right-3 h-11 sm:h-12 px-3 sm:px-4 bg-green-500 text-white rounded-lg shadow-lg hover:bg-green-600 transition-colors flex items-center gap-1.5 z-50"
+      className="fixed bottom-[5.75rem] right-4 min-h-[44px] min-w-[44px] h-11 px-3.5 bg-green-700 text-white rounded-lg shadow-lg hover:bg-green-800 transition-colors flex items-center gap-1.5 z-50"
       aria-label="Contact on WhatsApp"
     >
       <MessageCircle className="w-4 h-4" />
-      <span className="text-[11px] sm:text-xs font-semibold leading-none">WhatsApp</span>
+      <span className="text-xs font-semibold leading-none">WhatsApp</span>
     </button>
   );
 }

@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import { Globe, FileCheck } from 'lucide-react';
-import apostilleImage from 'figma:asset/a87130555bc7eab59ec95ad82c3a105db88bf0c1.png';
+import apostilleImage from 'figma:asset/a87130555bc7eab59ec95ad82c3a105db88bf0c1.webp';
 
 export function PickYourApostille() {
   return (
@@ -29,6 +29,10 @@ export function PickYourApostille() {
               <img
                 src={apostilleImage}
                 alt="Apostille Services"
+                width={760}
+                height={1074}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-auto object-contain transition-transform duration-500 ease-out group-hover:scale-110"
               />
             </div>

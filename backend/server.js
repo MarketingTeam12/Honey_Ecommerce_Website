@@ -17,16 +17,30 @@ const razorpayService = require("./services/razorpayService");
 const s3Routes = require("./routes/s3Routes");
 
 const app = express();
+// Trust first reverse proxy (Cloudflare / Nginx) so req.ip & rate-limiting use real visitor IP
+app.set("trust proxy", 1);
 
 // ======================================================
 // CORS CONFIGURATION
 // ======================================================
 
-const allowedOrigins = [
+const configuredOrigins = [
   process.env.FRONTEND_URL,
-  "http://localhost:5173",
-  "http://localhost:3000",
-].filter(Boolean);
+  process.env.FRONTEND_URLS,
+]
+  .filter(Boolean)
+  .flatMap((value) => String(value).split(","))
+  .map((value) => value.trim().replace(/\/$/, ""))
+  .filter(Boolean);
+
+const allowedOrigins = Array.from(
+  new Set([
+    ...configuredOrigins,
+    "http://localhost:5173",
+    "http://localhost:4173",
+    "http://localhost:3000",
+  ])
+);
 
 app.use(
   cors({
@@ -36,7 +50,7 @@ app.use(
         return callback(null, true);
       }
 
-      // Allow localhost and FRONTEND_URL
+      // Allow localhost and configured FRONTEND_URL(s)
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
@@ -49,9 +63,9 @@ app.use(
         return callback(null, true);
       }
 
-      return callback(
-        new Error(`CORS blocked for origin: ${origin}`)
-      );
+      const corsError = new Error(`CORS blocked for origin: ${origin}`);
+      corsError.status = 403;
+      return callback(corsError);
     },
 
     credentials: true,
@@ -62,8 +76,15 @@ app.use(
 // BODY PARSER
 // ======================================================
 
-app.use(express.json({ limit: "25mb" }));
-app.use(express.urlencoded({ extended: true, limit: "25mb" }));
+app.use(
+  express.json({
+    limit: "55mb",
+    verify: (req, res, buf) => {
+      req.rawBody = buf;
+    },
+  })
+);
+app.use(express.urlencoded({ extended: true, limit: "55mb" }));
 
 // ======================================================
 // HELMET SECURITY
@@ -96,10 +117,35 @@ app.use(
   [
     "/api/auth/login",
     "/api/auth/signup",
+    "/api/auth/forgot-password",
+    "/api/auth/reset-password",
     "/make-server-a67f0635/auth/login",
     "/make-server-a67f0635/auth/signup",
+    "/make-server-a67f0635/auth/forgot-password",
+    "/make-server-a67f0635/auth/reset-password",
   ],
   authLimiter
+);
+
+const publicFormLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 15,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many submissions. Please wait a few minutes before trying again.",
+  },
+});
+
+app.use(
+  [
+    "/api/customer-queries",
+    "/api/subscribe-email",
+    "/make-server-a67f0635/customer-queries",
+    "/make-server-a67f0635/subscribe-email",
+  ],
+  publicFormLimiter
 );
 
 // ======================================================
@@ -162,18 +208,41 @@ app.post("/create-order", async (req, res) => {
 });
 
 // ======================================================
-// GLOBAL ERROR HANDLER
+// API 404 & GLOBAL ERROR HANDLER (always return JSON)
 // ======================================================
+
+app.use(["/make-server-a67f0635", "/api"], (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "API endpoint not found",
+    error: `Not found: ${req.method} ${req.originalUrl}`,
+  });
+});
 
 app.use((error, req, res, next) => {
   console.error("Backend error:", error);
 
-  res.status(error.status || 500).json({
+  if (error?.code === "LIMIT_FILE_SIZE") {
+    return res.status(413).json({
+      success: false,
+      message: "File exceeds the 50 MB maximum upload limit.",
+      error: "File exceeds the 50 MB maximum upload limit.",
+    });
+  }
+
+  if (error?.name === "MulterError") {
+    return res.status(400).json({
+      success: false,
+      message: error.message || "Invalid file upload.",
+      error: error.message || "Invalid file upload.",
+    });
+  }
+
+  const statusCode = Number(error?.status || error?.statusCode) || 500;
+  res.status(statusCode).json({
     success: false,
-    message:
-      error.message || "Internal server error",
-    error:
-      error.message || "Internal server error",
+    message: error?.message || "Internal server error",
+    error: error?.message || "Internal server error",
   });
 });
 

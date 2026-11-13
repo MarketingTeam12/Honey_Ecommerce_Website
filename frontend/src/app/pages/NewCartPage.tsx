@@ -101,7 +101,7 @@ export function NewCartPage() {
           <div className="text-center mt-3">
             <Link
               to="/"
-              className="text-orange-500 hover:text-orange-600 font-medium border-b-2 border-orange-500 pb-1"
+              className="text-[#1a1f5c] hover:text-[#252b70] font-medium border-b-2 border-[#1a1f5c] pb-1"
             >
               Continue adding more services
             </Link>
@@ -114,15 +114,15 @@ export function NewCartPage() {
           // Empty Cart State
           <div className="text-center py-16">
             <div className="inline-flex items-center justify-center w-24 h-24 bg-gray-100 rounded-full mb-6">
-              <ShoppingBag className="w-12 h-12 text-gray-400" />
+              <ShoppingBag className="w-12 h-12 text-gray-500" aria-hidden="true" />
             </div>
-            <h2 className="text-2xl mb-3">Your cart is empty</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">Your cart is empty</h2>
             <p className="text-gray-600 mb-8">
               Add translation services to your cart to get started
             </p>
             <Link
               to="/"
-              className="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center justify-center min-h-[44px] bg-[#1a1f5c] text-white px-8 py-3 rounded-lg font-medium hover:bg-[#252b70] transition-colors"
             >
               Browse Services
             </Link>
@@ -212,14 +212,14 @@ export function NewCartPage() {
                             <div className="flex gap-3 mt-4">
                               <button
                                 onClick={() => navigate(item.url, { state: { editCartItem: item } })}
-                                className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded hover:bg-orange-600 transition-colors"
+                                className="min-h-[44px] flex items-center gap-2 px-4 py-2 bg-[#c2410c] text-white text-sm font-medium rounded hover:bg-[#9a3412] transition-colors"
                               >
-                                <Edit className="w-4 h-4" />
+                                <Edit className="w-4 h-4" aria-hidden="true" />
                                 EDIT OPTIONS
                               </button>
                               <button
                                 onClick={() => removeFromCart(item.id)}
-                                className="px-4 py-2 text-gray-600 text-sm font-medium hover:text-red-600 transition-colors"
+                                className="min-h-[44px] px-4 py-2 text-gray-700 text-sm font-medium hover:text-red-700 transition-colors"
                               >
                                 Remove
                               </button>
@@ -230,8 +230,9 @@ export function NewCartPage() {
 
                       {/* PRICE COLUMN */}
                       <div className="md:col-span-2 text-center">
-                        <p className="text-sm text-gray-500 md:hidden font-semibold mb-1">PRICE</p>
+                        <p className="text-sm text-gray-500 md:hidden font-semibold mb-1">UNIT PRICE</p>
                         <p className="font-bold text-gray-900">{convertPrice(item.basePrice)}</p>
+                        <p className="text-xs text-gray-600 mt-0.5">Qty: {item.quantity || 1}</p>
                       </div>
 
                       {/* TOTAL NO. OF PAGES COLUMN */}
@@ -240,25 +241,31 @@ export function NewCartPage() {
                           <p className="text-sm text-gray-500 md:hidden font-semibold mb-2">TOTAL NO. OF PAGES</p>
                           <div className="flex items-center border border-gray-300 rounded">
                             <button
+                              type="button"
                               onClick={() => updatePageCount(item.id, Math.max(1, item.pageCount - 1))}
-                              className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 transition-colors"
-                              aria-label="Decrease quantity"
+                              disabled={item.pageCount <= 1}
+                              className="min-h-[44px] min-w-[44px] md:w-9 md:h-9 md:min-h-0 md:min-w-0 flex items-center justify-center hover:bg-gray-100 disabled:opacity-40 transition-colors"
+                              aria-label="Decrease pages"
                             >
-                              <Minus className="w-4 h-4 text-gray-600" />
+                              <Minus className="w-4 h-4 text-gray-700" aria-hidden="true" />
                             </button>
                             <input
                               type="number"
+                              aria-label={`Page count for ${item.name}`}
                               value={item.pageCount}
-                              onChange={(e) => updatePageCount(item.id, Math.max(1, parseInt(e.target.value) || 1))}
-                              className="w-12 text-center font-medium text-gray-900 border-x border-gray-300"
+                              onChange={(e) => updatePageCount(item.id, Math.min(500, Math.max(1, parseInt(e.target.value, 10) || 1)))}
+                              className="w-12 text-center font-medium text-gray-900 border-x border-gray-300 py-1"
                               min="1"
+                              max="500"
                             />
                             <button
-                              onClick={() => updatePageCount(item.id, item.pageCount + 1)}
-                              className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 transition-colors"
-                              aria-label="Increase quantity"
+                              type="button"
+                              onClick={() => updatePageCount(item.id, Math.min(500, item.pageCount + 1))}
+                              disabled={item.pageCount >= 500}
+                              className="min-h-[44px] min-w-[44px] md:w-9 md:h-9 md:min-h-0 md:min-w-0 flex items-center justify-center hover:bg-gray-100 disabled:opacity-40 transition-colors"
+                              aria-label="Increase pages"
                             >
-                              <Plus className="w-4 h-4 text-gray-600" />
+                              <Plus className="w-4 h-4 text-gray-700" aria-hidden="true" />
                             </button>
                           </div>
                         </div>
@@ -304,7 +311,7 @@ export function NewCartPage() {
                               <span className="text-xs text-green-600 font-semibold">
                                 {coupon.discountType === 'percentage' 
                                   ? `${coupon.discountValue}% OFF` 
-                                  : `?${coupon.discountValue} OFF`}
+                                  : `₹${coupon.discountValue} OFF`}
                               </span>
                             </div>
                             {coupon.minOrderValue > 0 && (
@@ -405,15 +412,25 @@ export function NewCartPage() {
                 {/* Checkout Button */}
                 <button
                   onClick={handleCheckout}
-                  className="w-full mt-6 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                  className="w-full min-h-[44px] mt-6 bg-[#1a1f5c] text-white py-3 rounded-lg font-semibold hover:bg-[#252b70] transition-colors"
                 >
                   Proceed to Checkout
                 </button>
+                <p className="text-xs text-gray-600 text-center mt-2.5">
+                  Review our{' '}
+                  <Link
+                    to="/refund-cancellation-policy"
+                    className="text-[#1a1f5c] underline font-medium hover:text-[#252b70]"
+                  >
+                    Refund &amp; Cancellation Policy
+                  </Link>
+                  .
+                </p>
 
                 {/* Continue Shopping Link */}
                 <Link
                   to="/"
-                  className="block text-center mt-4 text-orange-500 hover:text-orange-600 font-medium"
+                  className="block text-center mt-4 text-[#1a1f5c] hover:text-[#252b70] font-medium"
                 >
                   Continue Shopping
                 </Link>

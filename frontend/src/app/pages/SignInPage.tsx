@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
 import { useAuth } from '@/app/context/AuthContext';
+import { Button } from '@/app/components/ui/button';
 import logoImage from 'figma:asset/c63663e51387c858f000fbba9c714974dbc99e3e.png';
 import { toast } from 'sonner';
 
@@ -138,9 +139,19 @@ export function SignInPage() {
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  Password
+                </label>
+                {!isAdminLogin && (
+                  <Link
+                    to="/forgot-password"
+                    className="text-sm font-medium text-[#1a1f5c] hover:underline"
+                  >
+                    Forgot password?
+                  </Link>
+                )}
+              </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-gray-400" />
@@ -152,11 +163,13 @@ export function SignInPage() {
                   autoComplete="current-password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a1f5c] focus:border-[#1a1f5c] transition-colors"
                   placeholder="Enter password"
                 />
                 <button
                   type="button"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword}
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
@@ -177,10 +190,10 @@ export function SignInPage() {
             )}
 
             {/* Submit Button */}
-            <button
+            <Button
               type="submit"
               disabled={loading || googleLoading}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full h-auto py-3 px-4 rounded-lg bg-[#1a1f5c] hover:bg-[#252b70] text-white text-base font-medium focus-visible:ring-[#1a1f5c]"
             >
               {loading ? (
                 <>
@@ -193,7 +206,7 @@ export function SignInPage() {
                   Sign In
                 </>
               )}
-            </button>
+            </Button>
 
           </form>
 

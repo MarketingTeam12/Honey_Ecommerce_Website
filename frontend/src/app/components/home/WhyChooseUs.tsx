@@ -1,6 +1,6 @@
-import fastTranslationImg from 'figma:asset/6eeb26f37300eb81d0806d49f85f830a369b55ca.png';
-import certifiedQualityImg from 'figma:asset/9a5f80b4ced84c897e104ede7131fbdd4bcb1211.png';
-import expertTranslatorsImg from 'figma:asset/3ef55548c809358d6f3bf8544cc506437eb809d2.png';
+import fastTranslationImg from 'figma:asset/6eeb26f37300eb81d0806d49f85f830a369b55ca.webp';
+import certifiedQualityImg from 'figma:asset/9a5f80b4ced84c897e104ede7131fbdd4bcb1211.webp';
+import expertTranslatorsImg from 'figma:asset/3ef55548c809358d6f3bf8544cc506437eb809d2.webp';
 
 export function WhyChooseUs() {
   const reasons = [
@@ -25,6 +25,10 @@ export function WhyChooseUs() {
                 <img 
                   src={reason.image} 
                   alt={reason.title}
+                  width={160}
+                  height={160}
+                  loading="lazy"
+                  decoding="async"
                   className="w-40 h-40 object-contain"
                 />
               </div>

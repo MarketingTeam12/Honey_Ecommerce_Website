@@ -4,9 +4,10 @@ import { useCurrency } from '@/app/context/CurrencyContext';
 import { useWishlist } from '@/app/context/WishlistContext';
 import { useCart } from '@/app/context/CartContext';
 import { useProducts } from '@/app/context/ProductContext';
+import { ListingScreenSkeleton } from '@/app/components/layout/PageSkeleton';
 import { getFirstValidImage } from '@/app/utils/imageUtils';
 import { toast } from 'sonner';
-import legacyFallbackImage from '@/assets/hero-banner-documents.png';
+import legacyFallbackImage from '@/assets/hero-banner-documents.webp';
 
 interface Product {
   id: string;
@@ -277,7 +278,7 @@ export function AllApostilleProductsPage() {
   const { convertPrice } = useCurrency();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { addToCart } = useCart();
-  const { products: adminProducts } = useProducts();
+  const { products: adminProducts, isLoading } = useProducts();
 
   // Debug logging - Log ALL products first
   console.log('=== AllApostilleProductsPage Debug ===');
@@ -364,6 +365,10 @@ export function AllApostilleProductsPage() {
     });
   };
 
+  if (isLoading) {
+    return <ListingScreenSkeleton />;
+  }
+
   return (
     <div className="min-h-screen bg-white py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -391,6 +396,10 @@ export function AllApostilleProductsPage() {
                   <img
                     src={product.image}
                     alt={product.name}
+                    width={400}
+                    height={400}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-64 lg:h-full object-contain bg-white p-3 group-hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
