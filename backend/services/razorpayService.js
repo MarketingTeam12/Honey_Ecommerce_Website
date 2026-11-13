@@ -18,6 +18,21 @@ function getRazorpay() {
   return razorpayInstance;
 }
 
+function timingSafeHexCompare(expectedHex, actualHex) {
+  if (!expectedHex || !actualHex || typeof expectedHex !== "string" || typeof actualHex !== "string") {
+    return false;
+  }
+  const a = Buffer.from(expectedHex, "utf8");
+  const b = Buffer.from(actualHex, "utf8");
+  if (a.length !== b.length) {
+    return false;
+  }
+  return crypto.timingSafeEqual(a, b);
+}
+
+/**
+ * Creates a Razorpay order strictly in INR paise.
+ */
 async function createOrder({ amount, currency = "INR", receipt }) {
   const numericAmount = Number(amount);
   const resolvedReceipt = typeof receipt === "string" && receipt.trim()
@@ -30,15 +45,31 @@ async function createOrder({ amount, currency = "INR", receipt }) {
     throw error;
   }
 
+  // Catalog prices, taxes, and discounts are stored in INR; always charge in INR paise.
+  const normalizedCurrency = String(currency || "INR").trim().toUpperCase();
+  if (normalizedCurrency !== "INR") {
+    const error = new Error("Razorpay checkout currency must be INR");
+    error.status = 400;
+    throw error;
+  }
+
+  const amountPaise = Math.round(numericAmount * 100);
+  if (amountPaise <= 0) {
+    const error = new Error("Order amount in paise must be greater than zero");
+    error.status = 400;
+    throw error;
+  }
+
   return getRazorpay().orders.create({
-    amount: Math.round(numericAmount * 100),
-    currency,
+    amount: amountPaise,
+    currency: "INR",
     receipt: resolvedReceipt,
   });
 }
 
-// Verifies the HMAC-SHA256 signature Razorpay returns after checkout, using
-// razorpay_order_id + razorpay_payment_id + key secret, per Razorpay docs.
+/**
+ * Verifies the HMAC-SHA256 signature Razorpay returns after checkout.
+ */
 function verifyPaymentSignature({ razorpay_order_id, razorpay_payment_id, razorpay_signature }) {
   if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) return false;
   if (!process.env.RAZORPAY_KEY_SECRET) return false;
@@ -48,10 +79,33 @@ function verifyPaymentSignature({ razorpay_order_id, razorpay_payment_id, razorp
     .update(`${razorpay_order_id}|${razorpay_payment_id}`)
     .digest("hex");
 
-  return expectedSignature === razorpay_signature;
+  return timingSafeHexCompare(expectedSignature, String(razorpay_signature).trim());
+}
+
+/**
+ * Verifies the HMAC-SHA256 webhook signature from X-Razorpay-Signature against the raw request body.
+ */
+function verifyWebhookSignature(rawBody, signatureHeader) {
+  const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    const error = new Error("RAZORPAY_WEBHOOK_SECRET is not configured on the server");
+    error.status = 503;
+    throw error;
+  }
+  if (!signatureHeader || !rawBody) {
+    return false;
+  }
+  const payloadBuffer = Buffer.isBuffer(rawBody) ? rawBody : Buffer.from(String(rawBody), "utf8");
+  const expectedSignature = crypto
+    .createHmac("sha256", webhookSecret)
+    .update(payloadBuffer)
+    .digest("hex");
+
+  return timingSafeHexCompare(expectedSignature, String(signatureHeader).trim());
 }
 
 module.exports = {
   createOrder,
   verifyPaymentSignature,
+  verifyWebhookSignature,
 };

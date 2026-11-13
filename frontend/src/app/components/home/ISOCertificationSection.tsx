@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { Award, CheckCircle } from 'lucide-react';
 import { useState } from 'react';
-import isoCertificate from 'figma:asset/a216a26c38b8e6c28e205fed28b8b38049b797db.png';
+import isoCertificate from 'figma:asset/a216a26c38b8e6c28e205fed28b8b38049b797db.webp';
 
 export function ISOCertificationSection() {
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
@@ -36,6 +36,10 @@ export function ISOCertificationSection() {
                 <img
                   src={isoCertificate}
                   alt="ISO 17100:2015 Certificate of Registration"
+                  width={960}
+                  height={1358}
+                  loading="lazy"
+                  decoding="async"
                   className={`w-full h-auto transition-transform duration-300 ${isHovering ? 'scale-150' : 'scale-100'}`}
                   style={isHovering ? {
                     transformOrigin: `${imagePosition.x}% ${imagePosition.y}%`

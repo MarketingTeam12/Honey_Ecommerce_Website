@@ -4,6 +4,7 @@ import { useCurrency } from '@/app/context/CurrencyContext';
 import { useWishlist } from '@/app/context/WishlistContext';
 import { useCart } from '@/app/context/CartContext';
 import { useProducts } from '@/app/context/ProductContext';
+import { ListingScreenSkeleton } from '@/app/components/layout/PageSkeleton';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 import { startupProducts, StartupProduct } from '@/app/data/startupProductsList';
 import { getFirstValidImage } from '@/app/utils/imageUtils';
@@ -19,7 +20,7 @@ export function AllStartupProductsPage() {
   const { convertPrice } = useCurrency();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { addToCart } = useCart();
-  const { products } = useProducts();
+  const { products, isLoading } = useProducts();
 
   // Get Startup products from admin database
   const adminStartupProducts = products
@@ -93,6 +94,10 @@ export function AllStartupProductsPage() {
     });
   };
 
+  if (isLoading) {
+    return <ListingScreenSkeleton />;
+  }
+
   return (
     <div className="min-h-screen bg-white py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -119,6 +124,10 @@ export function AllStartupProductsPage() {
                 <ImageWithFallback
                   src={product.image}
                   alt={product.name}
+                  width={400}
+                  height={400}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-64 lg:h-full object-contain bg-white p-3 group-hover:scale-105 transition-transform duration-300"
                 />
                 

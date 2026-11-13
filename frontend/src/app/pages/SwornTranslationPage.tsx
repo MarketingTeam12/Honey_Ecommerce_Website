@@ -1,16 +1,22 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Check, Upload, MessageCircle, Minus, Plus, Heart, Share2, ShoppingCart as ShoppingCartIcon } from 'lucide-react';
+import { NotFoundPage } from '@/app/pages/NotFoundPage';
+import { Check, Upload, MessageCircle, Heart, Share2, ShoppingCart as ShoppingCartIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/app/components/ui/select';
 import { Label } from '@/app/components/ui/label';
 import { Badge } from '@/app/components/ui/badge';
 import { Button } from '@/app/components/ui/button';
+import { PageCountStepper, MAX_PAGE_COUNT } from '@/app/components/product/PageCountStepper';
+import { DocumentUploadField } from '@/app/components/product/DocumentUploadField';
 import { useCurrency } from '@/app/context/CurrencyContext';
 import { useCart } from '@/app/context/CartContext';
 import { useWishlist } from '@/app/context/WishlistContext';
 import { useAuth } from '@/app/context/AuthContext';
+import { useAuthGate } from '@/app/context/AuthGateContext';
 import { toast } from 'sonner';
+import { calculateRatingPercentages } from '@/app/utils/ratingPercentages';
+import { MAX_UPLOAD_SIZE_MB, validateUploadFiles } from '@/app/utils/documentUpload';
 import googlePayIcon from 'figma:asset/02347af70453dbcedcb242f3af1712a1a954b2f1.png';
 import mastercardIcon from 'figma:asset/23e6e86ee8f55bfcbc0611bfe54a4aa7beca2f55.png';
 import paypalIcon from 'figma:asset/44e11688213a30c41ad3fe8aae7def63b605380d.png';
@@ -49,22 +55,55 @@ const getPromoTag = (seed: string) => {
 };
 
 export function SwornTranslationPage() {
-  const { language } = useParams<{ language: string }>();
+  const { language, id } = useParams<{ language?: string; id?: string }>();
+  const resolvedLanguage = language || id || '';
   const navigate = useNavigate();
   const { convertPrice, currency } = useCurrency();
   const { addToCart } = useCart();
   const { addToWishlist, isInWishlist } = useWishlist();
   const { user } = useAuth();
+  const { requireAuth } = useAuthGate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [quantity, setQuantity] = useState(1);
   const [documentType, setDocumentType] = useState('');
   const [numberOfPages, setNumberOfPages] = useState(1);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [restoredDraftNotice, setRestoredDraftNotice] = useState<string | null>(null);
 
-  const data = SWORN_TRANSLATION_DATA[language || 'english-to-spanish'];
+  const draftStorageKey = `sworn_draft:${resolvedLanguage || 'default'}`;
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(draftStorageKey);
+      if (!raw) return;
+      const draft = JSON.parse(raw) as {
+        documentType?: string;
+        numberOfPages?: number;
+        hadAttachedFiles?: boolean;
+      };
+      if (typeof draft.documentType === 'string' && draft.documentType) {
+        setDocumentType(draft.documentType);
+      }
+      if (typeof draft.numberOfPages === 'number' && Number.isFinite(draft.numberOfPages)) {
+        setNumberOfPages(Math.min(MAX_PAGE_COUNT, Math.max(1, Math.round(draft.numberOfPages))));
+      }
+      if (user) {
+        sessionStorage.removeItem(draftStorageKey);
+      }
+      const message = draft.hadAttachedFiles
+        ? 'Your order details were restored. Please re-attach your document files before adding to cart.'
+        : 'Your saved order configuration was restored.';
+      setRestoredDraftNotice(message);
+      toast.info(message);
+    } catch {
+      // Ignore malformed draft payloads
+    }
+  }, [draftStorageKey, user]);
+
+  const data = resolvedLanguage ? SWORN_TRANSLATION_DATA[resolvedLanguage] : undefined;
   const staticReviewStats = useMemo(() => {
-    const seed = language || 'english-to-spanish';
+    const seed = resolvedLanguage || 'english-to-spanish';
     const hash = seed.split('').reduce((acc, char, index) => {
       return (acc + char.charCodeAt(0) * (index + 1)) % 2147483647;
     }, 0);
@@ -97,18 +136,13 @@ export function SwornTranslationPage() {
         distribution[1]) /
       totalReviews;
 
-    return { totalReviews, distribution, average };
-  }, [language]);
+    const percentages = calculateRatingPercentages(distribution);
+
+    return { totalReviews, distribution, average, percentages };
+  }, [resolvedLanguage]);
 
   if (!data) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Service Not Found</h1>
-          <Link to="/" className="text-blue-600 hover:underline">Return to Home</Link>
-        </div>
-      </div>
-    );
+    return <NotFoundPage />;
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,7 +157,19 @@ export function SwornTranslationPage() {
 
   const handleAddToCart = () => {
     if (!user) {
-      toast.error('Please log in to add items to your cart.');
+      try {
+        sessionStorage.setItem(
+          draftStorageKey,
+          JSON.stringify({
+            documentType,
+            numberOfPages,
+            hadAttachedFiles: uploadedFiles.length > 0,
+          }),
+        );
+      } catch {
+        // Ignore storage quota errors
+      }
+      requireAuth('Please sign in to add items to your cart.');
       return;
     }
     if (!documentType) {
@@ -134,6 +180,12 @@ export function SwornTranslationPage() {
       toast.error('Please upload at least one document.');
       return;
     }
+    try {
+      sessionStorage.removeItem(draftStorageKey);
+    } catch {
+      // Ignore storage errors
+    }
+    setRestoredDraftNotice(null);
     addToCart({
       id: `sworn-translation-${language}`,
       name: data.label,
@@ -208,6 +260,9 @@ export function SwornTranslationPage() {
               <img
                 src="https://images.unsplash.com/photo-1577345848762-8b7cab61de4d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600"
                 alt={data.label}
+                width={600}
+                height={600}
+                loading="eager"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -347,77 +402,27 @@ export function SwornTranslationPage() {
             </div>
 
             {/* File Upload */}
-            <div>
-              <Label className="font-semibold mb-3 block">
-                Upload Documents <span className="text-red-600">*</span>
-              </Label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors cursor-pointer"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-600 mb-1">Click to upload or drag and drop</p>
-                <p className="text-sm text-gray-500">Recommended file size: maximum {MAX_UPLOAD_SIZE_MB} MB</p>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  className="hidden"
-                  onChange={handleFileChange}
-                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                />
-              </div>
-              {uploadedFiles.length > 0 && (
-                <div className="mt-3">
-                  <p className="text-sm font-medium text-gray-700 mb-2">Uploaded Files:</p>
-                  <ul className="space-y-1">
-                    {uploadedFiles.map((file, index) => (
-                      <li key={index} className="text-sm text-gray-600 flex items-center justify-between gap-2 bg-gray-50 px-3 py-2 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <Check className="w-4 h-4 text-green-600" />
-                          <span>{file.name}</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setUploadedFiles(uploadedFiles.filter((_, i) => i !== index))}
-                          className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
-                          title="Remove file"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
+            <DocumentUploadField
+              files={uploadedFiles}
+              onFilesChange={setUploadedFiles}
+              label="Upload Documents"
+            />
 
             {/* Total Number of Pages */}
-            <div>
-              <Label htmlFor="pages" className="font-semibold mb-3 block">
-                Total no. of pages: {numberOfPages}
-              </Label>
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => setNumberOfPages(Math.max(1, numberOfPages - 1))}
-                  className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors"
-                >
-                  <Minus className="w-5 h-5" />
-                </button>
-                <input
-                  type="number"
-                  value={numberOfPages}
-                  onChange={(e) => setNumberOfPages(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-20 text-center border-2 border-gray-300 rounded-lg py-2 text-lg font-semibold"
-                  min="1"
-                />
-                <button
-                  onClick={() => setNumberOfPages(numberOfPages + 1)}
-                  className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors"
-                >
-                  <Plus className="w-5 h-5" />
-                </button>
+            <PageCountStepper
+              inputId="pages"
+              value={numberOfPages}
+              onChange={setNumberOfPages}
+            />
+
+            {restoredDraftNotice && (
+              <div
+                role="status"
+                className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+              >
+                {restoredDraftNotice}
               </div>
-            </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex gap-4">
@@ -438,15 +443,15 @@ export function SwornTranslationPage() {
               <div className="flex flex-wrap items-center gap-3">
                 <span className="bg-gradient-to-r from-red-600 to-orange-600 text-white px-3 py-1.5 rounded text-xs font-bold">Razorpay</span>
                 
-                <img src={googlePayIcon} alt="Google Pay" className="h-10" />
+                <img src={googlePayIcon} alt="Google Pay" width={40} height={40} loading="lazy" decoding="async" className="h-10 w-auto" />
                 
-                <img src={mastercardIcon} alt="Mastercard" className="h-10" />
+                <img src={mastercardIcon} alt="Mastercard" width={40} height={40} loading="lazy" decoding="async" className="h-10 w-auto" />
                 
-                <img src={paypalIcon} alt="PayPal" className="h-10" />
+                <img src={paypalIcon} alt="PayPal" width={40} height={40} loading="lazy" decoding="async" className="h-10 w-auto" />
                 
-                <img src={rupayIcon} alt="RuPay" className="h-10" />
+                <img src={rupayIcon} alt="RuPay" width={40} height={40} loading="lazy" decoding="async" className="h-10 w-auto" />
                 
-                <img src={visaIcon} alt="Visa" className="h-10" />
+                <img src={visaIcon} alt="Visa" width={40} height={40} loading="lazy" decoding="async" className="h-10 w-auto" />
               </div>
             </div>
           </div>
@@ -571,7 +576,7 @@ export function SwornTranslationPage() {
             </div>
             <p className="text-gray-600 mb-4">Based on {staticReviewStats.totalReviews} reviews</p>
             <p className="text-gray-500">
-              {`5 stars: ${Math.round((staticReviewStats.distribution[5] / staticReviewStats.totalReviews) * 100)}% | 4 stars: ${Math.round((staticReviewStats.distribution[4] / staticReviewStats.totalReviews) * 100)}% | 3 stars: ${Math.round((staticReviewStats.distribution[3] / staticReviewStats.totalReviews) * 100)}% | 2 stars: ${Math.round((staticReviewStats.distribution[2] / staticReviewStats.totalReviews) * 100)}% | 1 star: ${Math.round((staticReviewStats.distribution[1] / staticReviewStats.totalReviews) * 100)}%`}
+              {`5 stars: ${staticReviewStats.percentages[5]}% | 4 stars: ${staticReviewStats.percentages[4]}% | 3 stars: ${staticReviewStats.percentages[3]}% | 2 stars: ${staticReviewStats.percentages[2]}% | 1 star: ${staticReviewStats.percentages[1]}%`}
             </p>
             <p className="text-sm text-gray-500 mt-2">Only Verified Buyers can review.</p>
           </div>

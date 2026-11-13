@@ -3,6 +3,7 @@ import { Star, AlertCircle, CheckCircle, ThumbsUp, ThumbsDown, Edit2, Check, X, 
 import { useAuth } from '@/app/context/AuthContext';
 import { API_URL } from '@/app/utils/api';
 import { buildHeaders } from '@/app/utils/buildHeaders';
+import { calculateRatingPercentages } from '@/app/utils/ratingPercentages';
 
 interface Review {
   id: string;
@@ -422,12 +423,12 @@ export function ProductReviews({ productId, productName }: ProductReviewsProps) 
     );
   };
 
-  const getRatingPercentage = (stars: number) => {
-    const sourceStats = stats.totalReviews === 0 ? getStaticStatsForProduct(productId) : stats;
-    return Math.round((sourceStats.ratingDistribution[stars as keyof typeof sourceStats.ratingDistribution] / sourceStats.totalReviews) * 100);
-  };
-
   const displayStats = stats.totalReviews === 0 ? getStaticStatsForProduct(productId) : stats;
+  const ratingPercentages = calculateRatingPercentages(displayStats.ratingDistribution);
+
+  const getRatingPercentage = (stars: number) => {
+    return ratingPercentages[stars as keyof typeof ratingPercentages] ?? 0;
+  };
 
   const handleVote = async (reviewId: string, voteType: 'helpful' | 'notHelpful') => {
     console.log('👍 Vote Debug Info:', {

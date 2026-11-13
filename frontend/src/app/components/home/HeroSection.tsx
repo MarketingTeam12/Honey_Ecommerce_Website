@@ -1,11 +1,13 @@
 import { motion } from 'motion/react';
-import centerCertificate from '@/assets/center-certificate-v2.png';
+import { CarouselPauseButton, useAutoplayControl } from '@/app/components/home/CarouselPlaybackControls';
+import centerCertificate from '@/assets/center-certificate-v2.webp';
 import honeyFavicon from '@/assets/honey-favicon-transparent.png';
-import bannerBefore from '@/assets/banner-before.png';
-import bannerAfter from '@/assets/banner-after.png';
+import bannerBefore from '@/assets/banner-before.webp';
+import bannerAfter from '@/assets/banner-after.webp';
 import checkMarkIcon from '@/assets/check-mark.png';
 
 export function HeroSection() {
+  const { isPaused, togglePlayback } = useAutoplayControl(true);
   const flags = [
     { code: 'fr', label: 'France' },
     { code: 'de', label: 'Germany' },
@@ -127,12 +129,20 @@ export function HeroSection() {
                   <img
                     src={bannerBefore}
                     alt="Certificate sample left"
+                    width={720}
+                    height={1021}
+                    loading="eager"
+                    decoding="async"
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute top-[0.8%] left-[0.8%] w-[20%] h-[9.5%] bg-white rounded-md z-10" />
                   <img
                     src={honeyFavicon}
                     alt="Certificate icon left"
+                    width={32}
+                    height={32}
+                    loading="eager"
+                    decoding="async"
                     className="absolute top-[1.4%] left-[1.5%] w-[7.2%] h-auto object-contain z-20"
                   />
                 </div>
@@ -141,12 +151,20 @@ export function HeroSection() {
                 <img
                   src={centerCertificate}
                   alt="Certificate sample center"
+                  width={760}
+                  height={950}
+                  loading="eager"
+                  {...({ fetchpriority: 'high' } as Record<string, string>)}
                   className="w-full h-full object-contain object-top bg-white"
                 />
                 <div className="absolute top-[1%] left-[0.8%] w-[9.8%] h-[8.8%] bg-white rounded-md z-10" />
                 <img
                   src={honeyFavicon}
                   alt="Certificate icon center"
+                  width={32}
+                  height={32}
+                  loading="eager"
+                  decoding="async"
                   className="absolute top-[1.8%] left-[1.75%] w-[6.2%] h-auto object-contain z-20"
                 />
               </div>
@@ -155,12 +173,20 @@ export function HeroSection() {
                   <img
                     src={bannerAfter}
                     alt="Certificate sample right"
+                    width={720}
+                    height={966}
+                    loading="eager"
+                    decoding="async"
                     className="w-full h-full object-contain object-top bg-white"
                   />
                   <div className="absolute top-[0.8%] left-[0.6%] w-[19%] h-[10.5%] bg-white rounded-md z-10" />
                   <img
                     src={honeyFavicon}
                     alt="Certificate icon right"
+                    width={32}
+                    height={32}
+                    loading="eager"
+                    decoding="async"
                     className="absolute top-[1.6%] left-[1.6%] w-[7.8%] h-auto object-contain z-20"
                   />
                 </div>
@@ -168,25 +194,39 @@ export function HeroSection() {
                   <img
                     src={checkMarkIcon}
                     alt="Verified check mark"
+                    width={80}
+                    height={80}
+                    loading="eager"
+                    decoding="async"
                     className="h-20 w-20 object-contain rotate-0"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="mt-4 sm:mt-5 w-full border-t border-[#2d96d8]/40 pt-3 overflow-hidden">
-              <div className="flags-track flex w-max gap-6 sm:gap-8 pr-6 sm:pr-8">
-                {scrollingFlags.map((flag, index) => (
-                  <img
-                    key={`${flag.code}-${index}`}
-                    src={`https://flagcdn.com/w40/${flag.code}.png`}
-                    alt={flag.label}
-                    className="h-6 sm:h-7 w-auto select-none shrink-0"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                ))}
+            <div className="mt-4 sm:mt-5 w-full border-t border-[#2d96d8]/40 pt-3 flex items-center gap-3">
+              <div className="flex-1 overflow-hidden">
+                <div className={`flags-track flex w-max gap-6 sm:gap-8 pr-6 sm:pr-8 ${isPaused ? 'carousel-paused' : ''}`}>
+                  {scrollingFlags.map((flag, index) => (
+                    <img
+                      key={`${flag.code}-${index}`}
+                      src={`https://flagcdn.com/w40/${flag.code}.png`}
+                      alt={flag.label}
+                      width={40}
+                      height={27}
+                      className="h-6 sm:h-7 w-auto select-none shrink-0"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ))}
+                </div>
               </div>
+              <CarouselPauseButton
+                isPaused={isPaused}
+                onToggle={togglePlayback}
+                carouselName="country flags ticker"
+                compact
+              />
             </div>
 
           </motion.div>
@@ -205,11 +245,15 @@ export function HeroSection() {
           }
         }
 
-        .flags-track {
-          animation: scroll-flags 40s linear infinite;
+        @media (prefers-reduced-motion: no-preference) {
+          .flags-track {
+            animation: scroll-flags 40s linear infinite;
+          }
         }
 
-        .flags-track:hover {
+        .flags-track:hover,
+        .flags-track:focus-within,
+        .flags-track.carousel-paused {
           animation-play-state: paused;
         }
 

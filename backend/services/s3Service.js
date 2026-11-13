@@ -44,12 +44,7 @@ function buildObjectKey(originalName, folder = "uploads") {
 }
 
 function buildFileUrl(req, key) {
-  const host = req?.get?.("host");
-  const protocol = req?.protocol || "https";
-  if (!host) {
-    return `/api/s3/files/${encodeURIComponent(key)}`;
-  }
-  return `${protocol}://${host}/api/s3/files/${encodeURIComponent(key)}`;
+  return `/api/s3/signed-url?key=${encodeURIComponent(key)}`;
 }
 
 function extractKeyFromUrl(value) {
@@ -85,7 +80,8 @@ async function uploadBuffer({ buffer, originalName, mimeType, folder = "uploads"
     Key: key,
     Body: buffer,
     ContentType: mimeType || "application/octet-stream",
-    CacheControl: "no-cache, no-store, must-revalidate",
+    CacheControl: "private, no-cache, no-store, must-revalidate",
+    ServerSideEncryption: "AES256",
   });
 
   await s3Client.send(command);
@@ -117,7 +113,7 @@ async function deleteObjectByKey(key) {
   return true;
 }
 
-async function getRedirectUrl(key, expiresInSeconds = 900) {
+async function getRedirectUrl(key, expiresInSeconds = 300) {
   if (!isS3Configured() || !key) {
     throw new Error("AWS S3 is not configured");
   }

@@ -1,7 +1,7 @@
 const express = require("express");
-const multer = require("multer");
 const crypto = require("crypto");
 const kv = require("../services/kvStore");
+const resend = require("../utils/resend");
 const userService = require("../services/userService");
 const razorpayService = require("../services/razorpayService");
 const whatsappService = require("../services/whatsappService");
@@ -15,9 +15,9 @@ const {
   getRedirectUrl,
   uploadFileFromRequest,
 } = require("../services/s3Service");
+const upload = require("../middleware/upload");
 
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() });
 const STORAGE_COOKIE_NAME = "honey_client_id";
 const STORAGE_KEY_PREFIX = "browser_storage";
 
@@ -548,12 +548,93 @@ router.get("/admin/product-configs", async (req, res, next) => {
   }
 });
 
+function makeUnsubscribeToken(email) {
+  const secret = process.env.JWT_SECRET || process.env.SESSION_SECRET || "honey-newsletter-unsub";
+  return crypto.createHmac("sha256", secret).update(String(email).trim().toLowerCase()).digest("hex");
+}
+
 router.post("/subscribe-email", async (req, res, next) => {
   try {
-    const email = req.body?.email;
-    if (!email) return res.status(400).json({ success: false, error: "Email is required" });
-    const subscriber = await siteData.saveSubscriber(email, { subscribedAt: now() });
-    res.status(201).json({ success: true, subscriber });
+    // Honeypot check: bots filling hidden fields get a silent 200
+    if (req.body?.website || req.body?.company_url) {
+      return res.status(200).json({ success: true });
+    }
+
+    const email = String(req.body?.email || "").trim().toLowerCase();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ success: false, message: "Please enter a valid email address." });
+    }
+
+    const existingList = await siteData.listSubscribers();
+    const existing = Array.isArray(existingList)
+      ? existingList.find((item) => String(item.email || "").trim().toLowerCase() === email && item.status !== "unsubscribed")
+      : null;
+
+    if (existing) {
+      return res.status(200).json({
+        success: true,
+        alreadySubscribed: true,
+        message: "You are already subscribed to our newsletter.",
+        subscriber: existing,
+      });
+    }
+
+    const subscriber = await siteData.saveSubscriber(email, { subscribedAt: now(), status: "active" });
+
+    if (process.env.RESEND_API_KEY) {
+      const apiBase = (process.env.BACKEND_PUBLIC_URL || process.env.FRONTEND_URL || "https://honeyuniversal.com")
+        .split(",")[0]
+        .trim()
+        .replace(/\/$/, "");
+      const unsubToken = makeUnsubscribeToken(email);
+      const unsubscribeUrl = `${apiBase}/api/unsubscribe-email?email=${encodeURIComponent(email)}&token=${unsubToken}`;
+      resend.emails
+        .send({
+          from: process.env.RESEND_FROM_EMAIL || "Honey Translations <onboarding@resend.dev>",
+          to: [email],
+          subject: "Subscription Confirmed – Honey Translations",
+          html: `
+            <h2>Thank you for subscribing!</h2>
+            <p>You are now subscribed to updates from Honey Translations.</p>
+            <p style="font-size:12px;color:#666;">
+              No longer want these emails? <a href="${unsubscribeUrl}">Unsubscribe here</a>.
+            </p>
+          `,
+        })
+        .catch((err) => console.warn("Newsletter confirmation email failed:", err.message));
+    }
+
+    res.status(201).json({
+      success: true,
+      alreadySubscribed: false,
+      message: "Successfully subscribed to our newsletter!",
+      subscriber,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/unsubscribe-email", async (req, res, next) => {
+  try {
+    const email = String(req.query?.email || "").trim().toLowerCase();
+    const token = String(req.query?.token || "").trim();
+    if (!email || !token) {
+      return res.status(400).send("Invalid unsubscribe link.");
+    }
+
+    const expected = makeUnsubscribeToken(email);
+    const matches =
+      token.length === expected.length &&
+      crypto.timingSafeEqual(Buffer.from(token), Buffer.from(expected));
+    if (!matches) {
+      return res.status(403).send("Invalid or expired unsubscribe token.");
+    }
+
+    await siteData.saveSubscriber(email, { subscribedAt: now(), status: "unsubscribed" });
+    return res
+      .status(200)
+      .send("<html><body style='font-family:sans-serif;padding:24px;'><h2>Unsubscribed</h2><p>You have been unsubscribed from Honey Translations newsletter emails.</p></body></html>");
   } catch (error) {
     next(error);
   }
@@ -579,7 +660,21 @@ router.delete("/admin/subscriber-emails/:id", requireAuth, requireAdmin, async (
 
 router.post("/customer-queries", async (req, res, next) => {
   try {
-    const query = await siteData.saveQuery({ ...req.body, status: "new" });
+    if (req.body?.website || req.body?.company_url) {
+      return res.status(200).json({ success: true });
+    }
+
+    const name = String(req.body?.name || "").trim();
+    const email = String(req.body?.email || "").trim();
+    const message = String(req.body?.message || "").trim();
+    if (!name || !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || message.length < 10) {
+      return res.status(400).json({
+        success: false,
+        error: "Please provide a valid name, email address, and message (at least 10 characters).",
+      });
+    }
+
+    const query = await siteData.saveQuery({ ...req.body, name, email, message, status: "new" });
 
     // Fire-and-forget: don't block the response on email delivery, and never
     // let a notification failure affect the already-saved query.
@@ -1035,7 +1130,7 @@ router.post("/orders/track", async (req, res, next) => {
   }
 });
 
-router.patch("/orders/:id/completed-file", requireAuth, upload.single("file"), async (req, res, next) => {
+router.patch("/orders/:id/completed-file", requireAuth, requireAdmin, upload.single("file"), async (req, res, next) => {
   try {
     const existingOrder = await siteData.getOrder(req.params.id);
     const fileUrl = req.file
@@ -1059,18 +1154,46 @@ router.patch("/orders/:id/completed-file", requireAuth, upload.single("file"), a
   }
 });
 
-router.get("/orders/:id/download-completed-file", optionalAuth, async (req, res, next) => {
+router.get("/orders/:id/download-completed-file", requireAuth, async (req, res, next) => {
   try {
     const order = await siteData.getOrder(req.params.id);
-    if (!order?.completed_file_url) return res.status(404).json({ error: "Completed file not found" });
-
-    const key = extractKeyFromUrl(order.completed_file_url);
-    if (key) {
-      const redirectUrl = await getRedirectUrl(key);
-      return res.redirect(redirectUrl);
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
     }
 
-    res.redirect(order.completed_file_url);
+    const reqEmail = String(req.user?.email || "").trim().toLowerCase();
+    const orderEmail = String(order.customer_email || order.customerEmail || "").trim().toLowerCase();
+    const isOwner =
+      (order.user_id && order.user_id === req.user.id) ||
+      (order.userId && order.userId === req.user.id) ||
+      (orderEmail && reqEmail && orderEmail === reqEmail) ||
+      req.user.role === "admin";
+
+    if (!isOwner) {
+      return res.status(403).json({
+        error: "Access denied. You do not have permission to download this file.",
+      });
+    }
+
+    if (!order.completed_file_url) {
+      return res.status(404).json({ error: "Completed file not found" });
+    }
+
+    let downloadUrl = order.completed_file_url;
+    const key = extractKeyFromUrl(order.completed_file_url);
+    if (key) {
+      downloadUrl = await getRedirectUrl(key, 300);
+    }
+
+    if (req.query.redirect === "1") {
+      return res.redirect(downloadUrl);
+    }
+
+    return res.json({
+      success: true,
+      downloadUrl,
+      expiresInSeconds: 300,
+    });
   } catch (error) {
     next(error);
   }
@@ -1182,7 +1305,6 @@ router.post("/payment/create-order", async (req, res, next) => {
       userEmail,
       userName,
       amount,
-      currency,
       paymentMethod,
       items,
       subtotal,
@@ -1197,17 +1319,39 @@ router.post("/payment/create-order", async (req, res, next) => {
       gstNumber,
     } = req.body || {};
 
-    // Digital (email/WhatsApp) deliveries never get a courier shipment, so
-    // they must never carry a tracking number or a courier name - only a
-    // physical/courier delivery does.
-    const isPhysicalDelivery = shippingMethod === 'physical';
+    const numericAmount = Number(amount);
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+      return res.status(400).json({ success: false, message: "Valid payment amount is required" });
+    }
 
-    // Persist the order right away (status: pending) so it shows up in the
-    // admin panel and tracking page immediately, even before the Razorpay
-    // payment is completed/verified.
+    const existingOrder = orderId ? await siteData.getOrder(orderId) : null;
+    if (existingOrder?.payment_status === "paid") {
+      return res.status(409).json({
+        success: false,
+        message: "This order has already been paid.",
+      });
+    }
+
+    const isPhysicalDelivery = shippingMethod === "physical";
+    const resolvedAmountPaise = Math.round(numericAmount * 100);
+    const existingRazorpayOrder = existingOrder?.metadata?.razorpayOrder;
+    const canReuseRazorpayOrder =
+      existingRazorpayOrder?.id &&
+      Number(existingRazorpayOrder.amount) === resolvedAmountPaise &&
+      String(existingRazorpayOrder.currency || "INR").toUpperCase() === "INR";
+
+    const razorpayOrder = canReuseRazorpayOrder
+      ? existingRazorpayOrder
+      : await razorpayService.createOrder({
+          amount: numericAmount,
+          currency: "INR",
+          receipt: existingOrder?.order_number || orderNumber,
+        });
+
+    // Persist/update the order (status: pending) with its Razorpay order ID for idempotent retries
     const savedOrder = await siteData.saveOrder(
       {
-        order_number: orderNumber,
+        order_number: existingOrder?.order_number || orderNumber,
         user_id: userId,
         customer_name: userName,
         customer_email: userEmail,
@@ -1215,18 +1359,16 @@ router.post("/payment/create-order", async (req, res, next) => {
         subtotal,
         discount,
         tax,
-        total_amount: amount,
+        total_amount: numericAmount,
+        currency: "INR",
         payment_method: paymentMethod || "razorpay",
         payment_status: "pending",
         tracking_number: isPhysicalDelivery ? trackingNumber : null,
         shipping_carrier: isPhysicalDelivery ? "BlueDart" : null,
         status: "pending",
         shipping_address: shippingAddress,
-        // shipping_details / shipping_method aren't dedicated columns, but
-        // normalizeOrder() surfaces them back out of metadata so the admin
-        // UI can read order.shipping_details / order.shipping_method
-        // directly instead of relying on a localStorage merge.
         metadata: {
+          ...(existingOrder?.metadata || {}),
           trackingNumber: isPhysicalDelivery ? trackingNumber : null,
           shippingDetails,
           notes,
@@ -1234,26 +1376,19 @@ router.post("/payment/create-order", async (req, res, next) => {
           shippingMethod,
           customerType,
           gstNumber,
+          razorpayOrder,
         },
       },
       orderId,
     );
 
-    // Initialize a tracking record so the admin tracking page has something
-    // to show from the moment the order is placed.
     await siteData.saveTracking(savedOrder.id, { stage: "order_received" });
-
-    const razorpayOrder = await razorpayService.createOrder({
-      amount,
-      currency,
-      receipt: orderNumber,
-    });
 
     res.json({
       success: true,
       orderId: savedOrder.id,
-      amount,
-      currency,
+      amount: numericAmount,
+      currency: "INR",
       razorpayOrder,
       order: savedOrder,
     });
@@ -1284,6 +1419,28 @@ router.post("/payment/verify", async (req, res, next) => {
     }
 
     const existingOrder = orderId ? await siteData.getOrder(orderId) : null;
+    if (existingOrder?.payment_status === "paid" && existingOrder?.transaction_id === razorpay_payment_id) {
+      return res.json({ success: true, alreadyVerified: true, order: existingOrder });
+    }
+
+    await siteData.savePayment({
+      orderId: razorpay_order_id,
+      paymentId: razorpay_payment_id,
+      gateway: "razorpay",
+      status: "verified",
+      amount: Number(customer?.amount || existingOrder?.total_amount || 0),
+      currency: "INR",
+      method: "razorpay",
+      gatewayResponse: {
+        razorpay_order_id,
+        razorpay_payment_id,
+        razorpay_signature,
+      },
+      metadata: {
+        internalOrderId: orderId || existingOrder?.id || null,
+        ...(customer || {}),
+      },
+    });
 
     const order = await siteData.saveOrder(
       {
@@ -1295,8 +1452,30 @@ router.post("/payment/verify", async (req, res, next) => {
       orderId,
     );
 
-    // Fire-and-forget WhatsApp notifications; failures here must never
-    // block the payment confirmation response.
+    await siteData
+      .saveTracking(order.id, { stage: "payment_confirmed" })
+      .catch((err) => console.error("Tracking stage update failed:", err));
+
+    const recipientEmail = String(order.customer_email || customer?.email || "").trim();
+    if (process.env.RESEND_API_KEY && recipientEmail) {
+      resend.emails
+        .send({
+          from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
+          to: recipientEmail,
+          subject: `Order Confirmed – ${order.order_number || order.id}`,
+          html: `
+            <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#1f2937">
+              <h2 style="color:#1a1f5c">Thank you for your order</h2>
+              <p>Your payment has been verified.</p>
+              <p><strong>Order Number:</strong> ${order.order_number || order.id}</p>
+              <p><strong>Payment ID:</strong> ${razorpay_payment_id}</p>
+              <p><strong>Amount Paid:</strong> INR ${Number(order.total_amount || customer?.amount || 0).toFixed(2)}</p>
+            </div>
+          `,
+        })
+        .catch((err) => console.error("Order confirmation email failed:", err));
+    }
+
     whatsappService
       .notifyCustomerOrderConfirmed({
         orderId: order.order_number || order.id,
@@ -1326,8 +1505,68 @@ router.post("/payment/verify", async (req, res, next) => {
   }
 });
 
-router.post("/payment/webhook", (req, res) => {
-  res.json({ success: true, message: "Payment event accepted", payload: parseMaybeJson(req.body) });
+router.post("/payment/webhook", async (req, res, next) => {
+  try {
+    const signature = req.get("X-Razorpay-Signature");
+    const rawPayload = req.rawBody || JSON.stringify(req.body || {});
+    const isValid = razorpayService.verifyWebhookSignature(rawPayload, signature);
+    if (!isValid) {
+      return res.status(400).json({ success: false, message: "Invalid Razorpay webhook signature" });
+    }
+
+    const eventPayload = parseMaybeJson(req.body) || {};
+    const eventName = String(eventPayload.event || "");
+    const paymentEntity = eventPayload?.payload?.payment?.entity || {};
+    const internalOrderId = paymentEntity?.notes?.orderId || null;
+
+    if (eventName === "payment.captured" || eventName === "order.paid") {
+      if (paymentEntity.id) {
+        await siteData.savePayment({
+          orderId: paymentEntity.order_id || internalOrderId,
+          paymentId: paymentEntity.id,
+          gateway: "razorpay",
+          status: "verified",
+          amount: Number(paymentEntity.amount || 0) / 100,
+          currency: String(paymentEntity.currency || "INR").toUpperCase(),
+          method: paymentEntity.method || "razorpay",
+          gatewayResponse: eventPayload,
+        });
+      }
+
+      if (internalOrderId) {
+        const existingOrder = await siteData.getOrder(internalOrderId);
+        if (existingOrder && existingOrder.payment_status !== "paid") {
+          await siteData.saveOrder(
+            {
+              ...existingOrder,
+              payment_status: "paid",
+              status: "confirmed",
+              transaction_id: paymentEntity.id || existingOrder.transaction_id,
+            },
+            internalOrderId,
+          );
+          await siteData
+            .saveTracking(internalOrderId, { stage: "payment_confirmed" })
+            .catch(() => {});
+        }
+      }
+    } else if (eventName === "payment.failed" && paymentEntity.id) {
+      await siteData.savePayment({
+        orderId: paymentEntity.order_id || internalOrderId,
+        paymentId: paymentEntity.id,
+        gateway: "razorpay",
+        status: "failed",
+        amount: Number(paymentEntity.amount || 0) / 100,
+        currency: String(paymentEntity.currency || "INR").toUpperCase(),
+        method: paymentEntity.method || "razorpay",
+        gatewayResponse: eventPayload,
+      });
+    }
+
+    return res.json({ success: true, event: eventName });
+  } catch (error) {
+    return next(error);
+  }
 });
 
 router.get("/payment/:paymentId", async (req, res, next) => {

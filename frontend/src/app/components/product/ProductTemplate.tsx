@@ -20,6 +20,9 @@ import { Check, Heart, ChevronLeft, ChevronRight, Upload, Minus, Plus, MessageCi
 import { publicAnonKey } from '@/app/utils/backendInfo';
 import { API_URL } from '@/app/utils/api';
 import { toast } from 'sonner';
+import { PageCountStepper, MAX_PAGE_COUNT } from '@/app/components/product/PageCountStepper';
+import { DocumentUploadField } from '@/app/components/product/DocumentUploadField';
+import { validateDriveLink } from '@/app/utils/documentUpload';
 import googlePayIcon from 'figma:asset/02347af70453dbcedcb242f3af1712a1a954b2f1.png';
 import mastercardIcon from 'figma:asset/23e6e86ee8f55bfcbc0611bfe54a4aa7beca2f55.png';
 import paypalIcon from 'figma:asset/44e11688213a30c41ad3fe8aae7def63b605380d.png';
@@ -27,6 +30,13 @@ import rupayIcon from 'figma:asset/81733917598b7aad94b96ac30b5e2f8a5f8dab91.png'
 import visaIcon from 'figma:asset/6f49b2a01cfe14370d80bfa5aa6e2cb4c045e327.png';
 import { Trash2 } from 'lucide-react';
 import { getFirstValidImage, normalizeProductImages } from '@/app/utils/imageUtils';
+import {
+  applyDocumentSeo,
+  DEFAULT_OG_IMAGE,
+  fitMetaDescription,
+  normalizeCanonicalUrl,
+  SITE_NAME,
+} from '@/app/utils/seo';
 
 const PROMO_TAGS = ['Top Rated', 'Best Offer', 'Popular Choice', 'Exclusive Deal', 'Best Seller', 'Limited Time Offer'];
 const POPULAR_CHOICE_APOSTILLE_KEYS = ['poland-apostille', 'dutch-apostille', 'serbia-apostille', 'netherlands-apostille'];
@@ -70,13 +80,6 @@ const PERSONAL_DOCUMENT_OPTIONS: DocumentTypeOption[] = [
 const PRODUCT_DRAFT_STORAGE_PREFIX = 'honey_product_draft:';
 const MAX_DRAFT_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
-interface SerializedUploadedFile {
-  name: string;
-  type: string;
-  lastModified: number;
-  dataUrl: string;
-}
-
 interface ProductFormDraft {
   version: 1;
   productId: string;
@@ -91,7 +94,7 @@ interface ProductFormDraft {
   translateFromLanguage: string;
   translateToLanguage: string;
   selectedDocTypes: string[];
-  uploadedFiles: SerializedUploadedFile[];
+  hadAttachedFiles?: boolean;
   driveLink: string;
   pageCount: number;
   packageDuration: 'full-package' | '1-year' | '2-year';
@@ -99,47 +102,6 @@ interface ProductFormDraft {
 }
 
 const getProductDraftStorageKey = (productId: string) => `${PRODUCT_DRAFT_STORAGE_PREFIX}${productId}`;
-
-const readFileAsDataUrl = (file: File) =>
-  new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result || ''));
-    reader.onerror = () => reject(reader.error || new Error('Failed to read file'));
-    reader.readAsDataURL(file);
-  });
-
-const serializeUploadedFiles = async (files: File[]): Promise<SerializedUploadedFile[]> => {
-  const serializableFiles = files.filter((file) => file.size <= MAX_DRAFT_FILE_SIZE_BYTES);
-
-  return Promise.all(
-    serializableFiles.map(async (file) => ({
-      name: file.name,
-      type: file.type,
-      lastModified: file.lastModified,
-      dataUrl: await readFileAsDataUrl(file),
-    }))
-  );
-};
-
-const deserializeUploadedFiles = async (files: SerializedUploadedFile[]): Promise<File[]> => {
-  const restoredFiles = await Promise.all(
-    files.map(async (file) => {
-      try {
-        const response = await fetch(file.dataUrl);
-        const blob = await response.blob();
-        return new File([blob], file.name, {
-          type: file.type || blob.type,
-          lastModified: file.lastModified,
-        });
-      } catch (error) {
-        console.warn('Failed to restore uploaded file from draft:', file.name, error);
-        return null;
-      }
-    })
-  );
-
-  return restoredFiles.filter((file): file is File => file !== null);
-};
 const EDUCATION_DOCUMENT_OPTIONS: DocumentTypeOption[] = [
   { id: 'college-leaving-certificate', label: 'College Leaving Certificate' },
   { id: 'diploma-certificate', label: 'Diploma Certificate' },
@@ -553,6 +515,27 @@ export function ProductTemplate({ data, productKey }: ProductTemplateProps) {
   
   // Use productKey if provided, otherwise generate from title (for backward compatibility)
   const productId = productKey || data.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+
+  useEffect(() => {
+    if (!data?.title) return;
+    const rawDetail =
+      (typeof data.description === 'string' && data.description.trim()) ||
+      (typeof data.productDetails?.[0] === 'string' ? data.productDetails[0] : '') ||
+      (typeof data.highlights?.[0]?.text === 'string' ? data.highlights[0].text : '');
+    const baseText = rawDetail
+      ? `${rawDetail.replace(/\.$/, '')}. Provided online across India by ${SITE_NAME} with soft copy and courier delivery.`
+      : `${data.title} provided online across India by ${SITE_NAME}, with email soft copies and courier delivery across India.`;
+    applyDocumentSeo({
+      title: `${data.title} | ${SITE_NAME}`,
+      description: fitMetaDescription(
+        baseText,
+        'Pan-India online document service with email soft copies and courier delivery.',
+      ),
+      canonicalUrl: normalizeCanonicalUrl(location.pathname),
+      ogType: 'website',
+      ogImage: DEFAULT_OG_IMAGE,
+    });
+  }, [data.title, data.description, data.productDetails, data.highlights, location.pathname]);
   
   console.log('🔑 ProductTemplate - productKey:', productKey, 'productId:', productId);
   
@@ -576,7 +559,9 @@ export function ProductTemplate({ data, productKey }: ProductTemplateProps) {
   const [selectedDocTypes, setSelectedDocTypes] = useState<string[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [driveLink, setDriveLink] = useState('');
+  const [driveLinkError, setDriveLinkError] = useState('');
   const [pageCount, setPageCount] = useState(1);
+  const [restoredDraftNotice, setRestoredDraftNotice] = useState(false);
   const [packageDuration, setPackageDuration] = useState<'full-package' | '1-year' | '2-year'>('full-package');
   const startupVideosByPath: Record<string, { title: string; videoId: string }> = {
     '/basic-startup-package': { title: 'Basic Startup Package', videoId: 'nVrSsvjJ1lg' },
@@ -718,7 +703,7 @@ export function ProductTemplate({ data, productKey }: ProductTemplateProps) {
 
     let cancelled = false;
 
-    const restoreDraft = async () => {
+    const restoreDraft = () => {
       try {
         const storageKey = getProductDraftStorageKey(productId);
         const rawDraft = sessionStorage.getItem(storageKey);
@@ -739,16 +724,13 @@ export function ProductTemplate({ data, productKey }: ProductTemplateProps) {
         setTranslateToLanguage(draft.translateToLanguage || '');
         setSelectedDocTypes(Array.isArray(draft.selectedDocTypes) ? draft.selectedDocTypes : []);
         setDriveLink(draft.driveLink || '');
-        setPageCount(draft.pageCount || 1);
+        setPageCount(Math.min(MAX_PAGE_COUNT, Math.max(1, draft.pageCount || 1)));
         setPackageDuration(draft.packageDuration || 'full-package');
 
-        if (Array.isArray(draft.uploadedFiles) && draft.uploadedFiles.length > 0) {
-          const restoredFiles = await deserializeUploadedFiles(draft.uploadedFiles);
-          if (!cancelled) {
-            setUploadedFiles(restoredFiles);
-            if (restoredFiles.length !== draft.uploadedFiles.length) {
-              toast.info('Some uploaded files could not be restored automatically. Please verify them before checkout.');
-            }
+        if (!cancelled) {
+          setRestoredDraftNotice(true);
+          if (draft.hadAttachedFiles) {
+            toast.info('Your order details were restored. Please re-attach your files before adding to cart.');
           }
         }
       } catch (error) {
@@ -756,7 +738,7 @@ export function ProductTemplate({ data, productKey }: ProductTemplateProps) {
       }
     };
 
-    void restoreDraft();
+    restoreDraft();
 
     return () => {
       cancelled = true;
@@ -982,13 +964,9 @@ export function ProductTemplate({ data, productKey }: ProductTemplateProps) {
   const sourceLanguageDisplay = sourceLanguages.length > 0 ? sourceLanguages.join(', ') : '';
   const targetLanguageDisplay = targetLanguages.length > 0 ? targetLanguages.join(', ') : '';
 
-  const incrementPages = () => setPageCount(prev => prev + 1);
-  const decrementPages = () => setPageCount(prev => Math.max(1, prev - 1));
-
-  const saveProductDraft = async () => {
+  const saveProductDraft = () => {
     try {
       const storageKey = getProductDraftStorageKey(productId);
-      const uploadedFilesDraft = await serializeUploadedFiles(uploadedFiles);
       const draft: ProductFormDraft = {
         version: 1,
         productId,
@@ -1003,9 +981,9 @@ export function ProductTemplate({ data, productKey }: ProductTemplateProps) {
         translateFromLanguage,
         translateToLanguage,
         selectedDocTypes,
-        uploadedFiles: uploadedFilesDraft,
+        hadAttachedFiles: uploadedFiles.length > 0,
         driveLink,
-        pageCount,
+        pageCount: Math.min(MAX_PAGE_COUNT, Math.max(1, pageCount)),
         packageDuration,
         savedAt: new Date().toISOString(),
       };
@@ -1013,32 +991,6 @@ export function ProductTemplate({ data, productKey }: ProductTemplateProps) {
       sessionStorage.setItem(storageKey, JSON.stringify(draft));
     } catch (error) {
       console.warn('Failed to save product draft:', error);
-
-      try {
-        const fallbackDraft: ProductFormDraft = {
-          version: 1,
-          productId,
-          sourceLanguages,
-          targetLanguages,
-          sourceLanguageSearch,
-          targetLanguageSearch,
-          destinationSearch,
-          destination,
-          apostilleDocumentType,
-          needTranslation,
-          translateFromLanguage,
-          translateToLanguage,
-          selectedDocTypes,
-          uploadedFiles: [],
-          driveLink,
-          pageCount,
-          packageDuration,
-          savedAt: new Date().toISOString(),
-        };
-        sessionStorage.setItem(getProductDraftStorageKey(productId), JSON.stringify(fallbackDraft));
-      } catch (fallbackError) {
-        console.warn('Fallback draft save also failed:', fallbackError);
-      }
     }
   };
 
@@ -1052,7 +1004,7 @@ export function ProductTemplate({ data, productKey }: ProductTemplateProps) {
 
   const handleAddToCart = async () => {
     if (!user) {
-      await saveProductDraft();
+      saveProductDraft();
       requireAuth('Please sign in to add items to your cart.');
       return;
     }
@@ -1082,7 +1034,18 @@ export function ProductTemplate({ data, productKey }: ProductTemplateProps) {
     }
 
     if (data.type !== 'startup' && uploadedFiles.length === 0 && !driveLink.trim()) {
-      errors.push('Please upload at least one document or provide a Drive link');
+      errors.push('Please upload at least one document or provide a restricted Drive link');
+    }
+
+    if (driveLink.trim()) {
+      const driveValidation = validateDriveLink(driveLink);
+      if (!driveValidation.valid) {
+        const msg = driveValidation.error || 'Please provide a valid https:// cloud link';
+        setDriveLinkError(msg);
+        errors.push(msg);
+      } else {
+        setDriveLinkError('');
+      }
     }
 
     if (errors.length > 0) {
@@ -1111,6 +1074,7 @@ export function ProductTemplate({ data, productKey }: ProductTemplateProps) {
       totalPrice: currentPrice * pageCount,
     });
     clearProductDraft();
+    setRestoredDraftNotice(false);
     toast.success('Item added to cart!');
     navigate('/cart');
   };
@@ -1249,51 +1213,62 @@ export function ProductTemplate({ data, productKey }: ProductTemplateProps) {
             </div>
 
             {/* Thumbnail Images */}
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 gap-2 md:gap-3">
-              {validImages.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImage(index)}
-                    className={`aspect-square rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
-                    selectedImage === index
-                      ? 'border-blue-600 ring-2 ring-blue-200'
-                      : 'border-gray-200 hover:border-gray-400'
-                  }`}
-                >
-                  
-                  <img
-                    src={image.url}
-                    alt={image.alt}
-                    className="w-full h-full object-contain object-center bg-white p-1.5 cursor-pointer"
-                    width="120"
-                    height="120"
-                    loading="lazy"
-                    style={{ aspectRatio: '1/1' }}
-                  />
-                </button>
-              ))}
-            </div>
+            {validImages.length > 0 && (
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 gap-2 md:gap-3">
+                {validImages.map((image, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    aria-label={image.alt || `View image ${index + 1}`}
+                    onClick={() => setSelectedImage(index)}
+                      className={`aspect-square rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
+                      selectedImage === index
+                        ? 'border-blue-600 ring-2 ring-blue-200'
+                        : 'border-gray-200 hover:border-gray-400'
+                    }`}
+                  >
+                    
+                    <img
+                      src={image.url}
+                      alt={image.alt}
+                      className="w-full h-full object-contain object-center bg-white p-1.5 cursor-pointer"
+                      width="120"
+                      height="120"
+                      loading="lazy"
+                      decoding="async"
+                      style={{ aspectRatio: '1/1' }}
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Mobile Image Slider */}
-            <div className="lg:hidden flex items-center gap-2">
-              <button
-                onClick={() => setSelectedImage(prev => Math.max(0, prev - 1))}
-                disabled={selectedImage === 0}
-                className="p-2 rounded-full bg-gray-200 disabled:opacity-50"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <div className="flex-1 text-center text-sm text-gray-600">
-                {selectedImage + 1} / {validImages.length}
+            {validImages.length > 0 && (
+              <div className="lg:hidden flex items-center gap-2">
+                <button
+                  type="button"
+                  aria-label="Previous product image"
+                  onClick={() => setSelectedImage(prev => Math.max(0, prev - 1))}
+                  disabled={selectedImage === 0}
+                  className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-full bg-gray-200 disabled:opacity-50"
+                >
+                  <ChevronLeft className="w-5 h-5" aria-hidden="true" />
+                </button>
+                <div className="flex-1 text-center text-sm text-gray-600">
+                  {selectedImage + 1} / {validImages.length}
+                </div>
+                <button
+                  type="button"
+                  aria-label="Next product image"
+                  onClick={() => setSelectedImage(prev => Math.min(validImages.length - 1, prev + 1))}
+                  disabled={selectedImage === validImages.length - 1}
+                  className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-full bg-gray-200 disabled:opacity-50"
+                >
+                  <ChevronRight className="w-5 h-5" aria-hidden="true" />
+                </button>
               </div>
-              <button
-                onClick={() => setSelectedImage(prev => Math.min(validImages.length - 1, prev + 1))}
-                disabled={selectedImage === validImages.length - 1}
-                className="p-2 rounded-full bg-gray-200 disabled:opacity-50"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
+            )}
 
             {data.type === 'startup' && currentStartupVideo && (
               <div className="space-y-2 pt-2">
@@ -1456,40 +1431,20 @@ export function ProductTemplate({ data, productKey }: ProductTemplateProps) {
               </a>
             </div>
 
-                        {/* Total No. of Pages - Above Configure Your Order */}
+            {/* Total No. of Pages - Above Configure Your Order */}
             {data.type !== 'startup' && (
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <Label htmlFor="page-count-top" className="mb-2 block">
-                  Total No. of Pages
-                </Label>
-                <div className="flex items-center gap-3">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={decrementPages}
-                    disabled={pageCount <= 1}
-                  >
-                    <Minus className="w-4 h-4" />
-                  </Button>
-                  <input
-                    id="page-count-top"
-                    type="number"
-                    min="1"
-                    value={pageCount}
-                    onChange={(e) => setPageCount(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-20 text-center px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={incrementPages}
-                  >
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                  <span className="text-sm text-gray-600">pages</span>
-                </div>
+              <PageCountStepper
+                inputId="page-count-top"
+                value={pageCount}
+                onChange={setPageCount}
+              />
+            )}
+            {restoredDraftNotice && data.type !== 'startup' && (
+              <div
+                className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900"
+                role="status"
+              >
+                Your saved order configuration was restored. Please re-attach your document files below before adding to cart.
               </div>
             )}
             {isApostilleService && (
@@ -1813,75 +1768,19 @@ export function ProductTemplate({ data, productKey }: ProductTemplateProps) {
 
               {/* Upload Document - Hide for startup packages */}
               {data.type !== 'startup' && (
-                <div>
-                <Label htmlFor="file-upload" className="mb-2 block text-base md:text-lg font-semibold">
-                    Upload Document (Max {MAX_UPLOAD_SIZE_MB} MB, Multiple Files Allowed) <span className="text-red-600">*</span>
-                  </Label>
-                  <div 
-                    className="relative"
-                    onDragOver={handleDragOver}
-                    onDrop={handleDrop}
-                  >
-                    <input
-                      id="file-upload"
-                      type="file"
-                      multiple
-                      onChange={handleFileUpload}
-                      className="hidden"
-                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                    />
-                    <label
-                      htmlFor="file-upload"
-                      className="flex flex-col items-center justify-center w-full h-32 px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-lg appearance-none cursor-pointer hover:border-blue-400 focus:outline-none"
-                    >
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <Upload className="w-10 h-10 mb-3 text-gray-400" />
-                        <p className="mb-2 text-base md:text-lg text-gray-500"> or drag and drop <span className="font-semibold">Click to upload</span></p>
-                        <p className="text-sm md:text-base text-gray-500">PDF, DOC, DOCX, JPG, PNG (MAX. {MAX_UPLOAD_SIZE_MB}MB)</p>
-                      </div>
-                    </label>
-                  </div>
-                  {uploadedFiles.length > 0 && (
-                    <div className="mt-2 space-y-1">
-                      {uploadedFiles.map((file, idx) => (
-                        <div key={idx} className="text-sm text-gray-600 flex items-center justify-between gap-2 bg-gray-50 px-3 py-2 rounded-lg">
-                          <div className="flex items-center gap-2">
-                            <Check className="w-4 h-4 text-green-600" />
-                            <span>{file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)</span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const newFiles = uploadedFiles.filter((_, i) => i !== idx);
-                              setUploadedFiles(newFiles);
-                              updatePageCountFromFiles(newFiles);
-                            }}
-                            className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
-                            title="Remove file"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  <div className="mt-3">
-                    <Label htmlFor="drive-link" className="mb-2 block text-sm md:text-base font-medium text-gray-700">
-                      Drive Link (for files larger than {MAX_UPLOAD_SIZE_MB} MB)
-                    </Label>
-                    <input
-                      id="drive-link"
-                      type="url"
-                      value={driveLink}
-                      onChange={(e) => setDriveLink(e.target.value)}
-                      placeholder="Paste Google Drive / OneDrive / Dropbox link"
-                      className="w-full h-11 rounded-lg border border-gray-300 px-3 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <p className="mt-1 text-xs text-gray-500">
-                      If file size is too large, share a public download link here.
-                    </p>
-                  </div>
-                </div>
+                <DocumentUploadField
+                  files={uploadedFiles}
+                  onFilesChange={(nextFiles) => {
+                    setUploadedFiles(nextFiles);
+                    updatePageCountFromFiles(nextFiles);
+                  }}
+                  driveLink={driveLink}
+                  onDriveLinkChange={setDriveLink}
+                  driveLinkError={driveLinkError}
+                  onDriveLinkErrorChange={setDriveLinkError}
+                  showDriveLink
+                  label={`Upload Document (Max ${MAX_UPLOAD_SIZE_MB} MB, Multiple Files Allowed)`}
+                />
               )}
             {/* Add to Cart Button */}
               <Button
@@ -1915,15 +1814,15 @@ export function ProductTemplate({ data, productKey }: ProductTemplateProps) {
                 <div className="flex flex-wrap items-center gap-3">
                   <span className="bg-gradient-to-r from-red-600 to-orange-600 text-white px-3 py-1.5 rounded text-xs font-bold">Razorpay</span>
                   
-                  <img src={googlePayIcon} alt="Google Pay" className="h-10" />
+                  <img src={googlePayIcon} alt="Google Pay" width={40} height={40} loading="lazy" decoding="async" className="h-10 w-auto" />
                   
-                  <img src={mastercardIcon} alt="Mastercard" className="h-10" />
+                  <img src={mastercardIcon} alt="Mastercard" width={40} height={40} loading="lazy" decoding="async" className="h-10 w-auto" />
                   
-                  <img src={paypalIcon} alt="PayPal" className="h-10" />
+                  <img src={paypalIcon} alt="PayPal" width={40} height={40} loading="lazy" decoding="async" className="h-10 w-auto" />
                   
-                  <img src={rupayIcon} alt="RuPay" className="h-10" />
+                  <img src={rupayIcon} alt="RuPay" width={40} height={40} loading="lazy" decoding="async" className="h-10 w-auto" />
                   
-                  <img src={visaIcon} alt="Visa" className="h-10" />
+                  <img src={visaIcon} alt="Visa" width={40} height={40} loading="lazy" decoding="async" className="h-10 w-auto" />
                 </div>
               </div>
             </div>

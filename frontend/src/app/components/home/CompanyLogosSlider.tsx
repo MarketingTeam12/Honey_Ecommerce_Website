@@ -1,18 +1,20 @@
 import type { CSSProperties } from 'react';
-import aachiLogo from '@/assets/aachi-logo.png';
+import { CarouselPauseButton, useAutoplayControl } from '@/app/components/home/CarouselPlaybackControls';
+import aachiLogo from '@/assets/aachi-logo.webp';
 import arcLogo from '@/assets/arc-logo.avif';
 import brightLightSocietyLogo from '@/assets/bright-light-society-logo.png';
 import dbsLogo from '@/assets/dbs-logo-fixed.png';
-import fratelliLogo from '@/assets/fratelli-logo.jpg';
-import hpLogo from '@/assets/hp-logo.jpeg';
+import fratelliLogo from '@/assets/fratelli-logo.webp';
+import hpLogo from '@/assets/hp-logo.webp';
 import identityLogo from '@/assets/identity-logo.png';
-import lrkLogo from '@/assets/lrk-logo.jpg';
+import lrkLogo from '@/assets/lrk-logo.webp';
 import muthootFinanceLogo from '@/assets/muthoot-finance-logo.webp';
-import newIndiaLogo from '@/assets/new-india-logo.jpg';
-import saintGobainLogo from '@/assets/saint-gobain-source.jpg';
+import newIndiaLogo from '@/assets/new-india-logo.webp';
+import saintGobainLogo from '@/assets/saint-gobain-source.webp';
 import tvsLogo from '@/assets/tvs-logo-clean.png';
 
 export function CompanyLogosSlider() {
+  const { isPaused, togglePlayback } = useAutoplayControl(true);
   type LogoItem = {
     id: number;
     name: string;
@@ -122,15 +124,22 @@ export function CompanyLogosSlider() {
   const duplicatedLogos = [...logos, ...logos];
 
   return (
-    <section className="py-8 md:py-10 bg-gray-50 overflow-hidden">
+    <section className="py-8 md:py-10 bg-gray-50 overflow-hidden" aria-roledescription="carousel" aria-label="Trusted by Leading Companies">
       <div className="max-w-full mx-auto px-6">
-        <h3 className="text-center text-2xl font-semibold text-gray-700 mb-6">
-          Trusted by Leading Companies
-        </h3>
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-center sm:justify-between gap-4 mb-6">
+          <h3 className="text-center text-2xl font-semibold text-gray-800">
+            Trusted by Leading Companies
+          </h3>
+          <CarouselPauseButton
+            isPaused={isPaused}
+            onToggle={togglePlayback}
+            carouselName="company logos slider"
+          />
+        </div>
         
         {/* Continuous scrolling container */}
         <div className="relative w-full overflow-hidden">
-          <div className="flex animate-scroll-logos w-max">
+          <div className={`flex animate-scroll-logos w-max ${isPaused ? 'carousel-paused' : ''}`}>
             {duplicatedLogos.map((logo, index) => (
               <div 
                 key={`${logo.id}-${index}`} 
@@ -146,7 +155,11 @@ export function CompanyLogosSlider() {
                     <img
                       src={logo.image ?? ''}
                       alt={logo.name}
-                      className="w-auto max-w-[230px] max-h-[96px] object-contain"
+                      width={230}
+                      height={96}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-auto h-auto max-w-[230px] max-h-[96px] object-contain"
                       style={logo.imageStyle}
                     />
                   )}
@@ -167,11 +180,15 @@ export function CompanyLogosSlider() {
           }
         }
 
-        .animate-scroll-logos {
-          animation: scroll-logos 45s linear infinite;
+        @media (prefers-reduced-motion: no-preference) {
+          .animate-scroll-logos {
+            animation: scroll-logos 45s linear infinite;
+          }
         }
 
-        .animate-scroll-logos:hover {
+        .animate-scroll-logos:hover,
+        .animate-scroll-logos:focus-within,
+        .animate-scroll-logos.carousel-paused {
           animation-play-state: paused;
         }
 

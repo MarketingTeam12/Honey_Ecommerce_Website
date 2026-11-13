@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Download, FileText } from 'lucide-react';
+import { WorkSampleListSkeleton } from '@/app/components/layout/PageSkeleton';
 import { publicAnonKey } from '@/app/utils/backendInfo';
 import { API_URL } from '@/app/utils/api';
 import { buildHeaders } from '@/app/utils/buildHeaders';
-import exampleImage from 'figma:asset/2b5d92b752452ee96adba1a106a3de42ffc5f274.png';
+import exampleImage from 'figma:asset/2b5d92b752452ee96adba1a106a3de42ffc5f274.webp';
 
 interface WorkSample {
   id: string;
@@ -16,6 +17,9 @@ interface WorkSample {
   status: string;
 }
 
+const FRIENDLY_ERROR_MESSAGE =
+  'Work samples are temporarily unavailable. Please contact us on WhatsApp.';
+
 export function WorkSamplePage() {
   const [samples, setSamples] = useState<WorkSample[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,6 +29,7 @@ export function WorkSamplePage() {
     const fetchSamples = async () => {
       try {
         setLoading(true);
+        setError(null);
         console.log('📋 Fetching work samples...');
         
         const response = await fetch(
@@ -34,22 +39,17 @@ export function WorkSamplePage() {
           }
         );
 
-        if (!response.ok) {
+        const contentType = response.headers.get('content-type') || '';
+        if (!response.ok || !contentType.toLowerCase().includes('application/json')) {
           const errorText = await response.text();
-          
-          // Check if it's a backend deployment issue
-          const isBackendIssue = errorText.includes('Invalid JWT') || 
-                                 errorText.includes('"code":401') ||
-                                 response.status === 401;
-          
-          if (isBackendIssue) {
-            console.warn('⚠️ [WorkSample] Backend not available - showing empty state');
-            setSamples([]);
-            setError(null); // Don't show error for backend issues
-            return;
-          }
-          
-          throw new Error('Failed to fetch work samples');
+          console.error('❌ [WorkSample] Unexpected API response:', {
+            status: response.status,
+            contentType,
+            bodyPreview: errorText.slice(0, 200),
+          });
+          setSamples([]);
+          setError(FRIENDLY_ERROR_MESSAGE);
+          return;
         }
 
         const data = await response.json();
@@ -57,15 +57,8 @@ export function WorkSamplePage() {
         setSamples(data.samples || []);
       } catch (err) {
         console.error('❌ Error fetching work samples:', err);
-        
-        // Only set error for non-backend issues
-        if (err instanceof TypeError && err.message.includes('fetch')) {
-          console.warn('⚠️ [WorkSample] Network error - backend may not be available');
-          setSamples([]);
-          setError(null);
-        } else {
-          setError(err instanceof Error ? err.message : 'Failed to load work samples');
-        }
+        setSamples([]);
+        setError(FRIENDLY_ERROR_MESSAGE);
       } finally {
         setLoading(false);
       }
@@ -74,12 +67,17 @@ export function WorkSamplePage() {
     fetchSamples();
   }, []);
 
-  // Group samples by category
-  const samplesByCategory = samples.reduce((acc, sample) => {
-    if (!acc[sample.category]) {
-      acc[sample.category] = [];
+  // Filter active downloadable samples and group by category
+  const activeSamples = samples
+    .filter((sample) => (sample.status ?? 'active') === 'active' && Boolean(sample.fileUrl))
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+  const samplesByCategory = activeSamples.reduce((acc, sample) => {
+    const category = sample.category || 'General';
+    if (!acc[category]) {
+      acc[category] = [];
     }
-    acc[sample.category].push(sample);
+    acc[category].push(sample);
     return acc;
   }, {} as Record<string, WorkSample[]>);
 
@@ -114,17 +112,30 @@ export function WorkSamplePage() {
       </div>
 
       {/* Loading State */}
-      {loading && (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading work samples...</p>
-        </div>
-      )}
+      {loading && <WorkSampleListSkeleton />}
 
       {/* Error State */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
-          <p className="text-red-800">Error: {error}</p>
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-10 text-center mb-8">
+          <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" aria-hidden="true" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Work Samples Unavailable</h2>
+          <p className="text-gray-700 mb-6">{error}</p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href="https://wa.me/917299005577?text=Hi, I would like to request work samples"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-colors"
+            >
+              Contact us on WhatsApp
+            </a>
+            <a
+              href="mailto:salesteam@honeytranslations.com?subject=Request for Work Samples"
+              className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition-colors"
+            >
+              Request Samples via Email
+            </a>
+          </div>
         </div>
       )}
 
@@ -200,11 +211,11 @@ export function WorkSamplePage() {
 
       {/* Reference Image - Hidden but available */}
       <div className="hidden">
-        <img src={exampleImage} alt="Reference design" />
+        <img src={exampleImage} alt="Reference design" width={800} height={450} loading="lazy" decoding="async" />
       </div>
 
       {/* Additional Information */}
-      {!loading && !error && samples.length > 0 && (
+      {!loading && !error && activeSamples.length > 0 && (
         <section className="mt-12">
           <div className="bg-gray-50 p-6 rounded-lg">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Confidentiality Guaranteed</h3>
@@ -216,7 +227,7 @@ export function WorkSamplePage() {
       )}
 
       {/* Contact Section */}
-      {!loading && !error && samples.length > 0 && (
+      {!loading && !error && activeSamples.length > 0 && (
         <section className="mt-12">
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-8 rounded-lg">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Need More Samples?</h2>

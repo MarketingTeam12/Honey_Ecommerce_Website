@@ -1,14 +1,15 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Slider from 'react-slick';
 import { motion } from 'motion/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Badge } from '@/app/components/ui/badge';
+import { CarouselPauseButton, useAutoplayControl } from '@/app/components/home/CarouselPlaybackControls';
 import { useCurrency } from '@/app/context/CurrencyContext';
 import { useProducts } from '@/app/context/ProductContext';
-import englishToForeignImg from 'figma:asset/ed7cdf787729d6d1793cb1a6b477c320f0fcadeb.png';
-import englishToIndianImg from 'figma:asset/5d3738f42d25760a7464ddc4a8fe45a029b7fbfb.png';
-import indianToEnglishImg from 'figma:asset/cef973a78471dbf5787d64535927f3ed4d791b1e.png';
+import englishToForeignImg from 'figma:asset/ed7cdf787729d6d1793cb1a6b477c320f0fcadeb.webp';
+import englishToIndianImg from 'figma:asset/5d3738f42d25760a7464ddc4a8fe45a029b7fbfb.webp';
+import indianToEnglishImg from 'figma:asset/cef973a78471dbf5787d64535927f3ed4d791b1e.webp';
 import { getFirstValidImage } from '@/app/utils/imageUtils';
 
 const PROMO_TAGS = ['Top Rated', 'Best Offer', 'Popular Choice', 'Exclusive Deal', 'Best Seller', 'Limited Time Offer'];
@@ -41,7 +42,17 @@ export function PickYourLanguage() {
   const { convertPrice } = useCurrency();
   const { products: adminProducts } = useProducts();
   const sliderRef = useRef<Slider | null>(null);
+  const { isPlaying, isPaused, togglePlayback } = useAutoplayControl(true);
   const blockedHomeProductName = 'any language to any language';
+
+  useEffect(() => {
+    if (!sliderRef.current) return;
+    if (isPlaying) {
+      sliderRef.current.slickPlay();
+    } else {
+      sliderRef.current.slickPause();
+    }
+  }, [isPlaying]);
 
   // Get Translation category products from admin (exclude sworn translations)
   const translationProducts = adminProducts.filter(
@@ -122,9 +133,10 @@ export function PickYourLanguage() {
     speed: 650,
     slidesToShow: desktopSlidesToShow,
     slidesToScroll: 1,
-    autoplay: true,
+    autoplay: isPlaying,
     autoplaySpeed: 2200,
     pauseOnHover: true,
+    pauseOnFocus: true,
     initialSlide: 0,
     cssEase: 'ease-in-out',
     responsive: [
@@ -144,34 +156,41 @@ export function PickYourLanguage() {
   };
 
   return (
-    <section className="py-12 bg-white">
+    <section className="py-12 bg-white" aria-roledescription="carousel" aria-label="Pick Your Language">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
-        <motion.h2
-          className="text-4xl lg:text-5xl font-bold text-center text-gray-900 mb-8"
-          initial={{ opacity: 0, y: -20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          Pick Your Language
-        </motion.h2>
+        <div className="flex flex-wrap items-center justify-center sm:justify-between gap-4 mb-8">
+          <motion.h2
+            className="text-4xl lg:text-5xl font-bold text-center text-gray-900"
+            initial={{ opacity: 0, y: -20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            Pick Your Language
+          </motion.h2>
+          <CarouselPauseButton
+            isPaused={isPaused}
+            onToggle={togglePlayback}
+            carouselName="language cards carousel"
+          />
+        </div>
 
         <div className="relative">
           <button
             type="button"
             onClick={() => sliderRef.current?.slickPrev()}
             aria-label="Previous language cards"
-            className="hidden md:flex absolute -left-6 lg:-left-10 top-1/2 -translate-y-1/2 z-10 h-12 w-12 items-center justify-center rounded-full bg-white border border-gray-300 shadow-md hover:bg-gray-50"
+            className="hidden md:flex absolute -left-6 lg:-left-10 top-1/2 -translate-y-1/2 z-10 min-h-[44px] min-w-[44px] h-12 w-12 items-center justify-center rounded-full bg-white border border-gray-300 shadow-md hover:bg-gray-50"
           >
-            <ChevronLeft className="h-6 w-6 text-gray-700" />
+            <ChevronLeft className="h-6 w-6 text-gray-700" aria-hidden="true" />
           </button>
 
           <button
             type="button"
             onClick={() => sliderRef.current?.slickNext()}
             aria-label="Next language cards"
-            className="hidden md:flex absolute -right-6 lg:-right-10 top-1/2 -translate-y-1/2 z-10 h-12 w-12 items-center justify-center rounded-full bg-white border border-gray-300 shadow-md hover:bg-gray-50"
+            className="hidden md:flex absolute -right-6 lg:-right-10 top-1/2 -translate-y-1/2 z-10 min-h-[44px] min-w-[44px] h-12 w-12 items-center justify-center rounded-full bg-white border border-gray-300 shadow-md hover:bg-gray-50"
           >
-            <ChevronRight className="h-6 w-6 text-gray-700" />
+            <ChevronRight className="h-6 w-6 text-gray-700" aria-hidden="true" />
           </button>
 
           <Slider ref={sliderRef} {...sliderSettings} className="max-w-6xl mx-auto">
@@ -190,6 +209,10 @@ export function PickYourLanguage() {
                           <img
                             src={product.image}
                             alt={product.title}
+                            width={640}
+                            height={800}
+                            loading="lazy"
+                            decoding="async"
                             className="absolute inset-0 w-full h-full object-cover object-center scale-[1.06] transition-transform duration-300 group-hover:scale-110"
                           />
                         ) : (
@@ -225,7 +248,7 @@ export function PickYourLanguage() {
                             </Badge>
                           )}
                           {getDiscountPercent(product.offerPrice, product.originalPrice) && (
-                            <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 font-bold rounded-lg">
+                            <Badge className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs px-3 py-1.5 font-bold rounded-lg">
                               <motion.span
                                 className="inline-block"
                                 initial={promoTextAnimation.initial}
@@ -244,6 +267,25 @@ export function PickYourLanguage() {
               </div>
             ))}
           </Slider>
+
+          <div className="mt-4 flex md:hidden items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => sliderRef.current?.slickPrev()}
+              aria-label="Previous language card"
+              className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-full bg-white border border-gray-300 shadow-sm hover:bg-gray-50"
+            >
+              <ChevronLeft className="h-5 w-5 text-gray-800" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              onClick={() => sliderRef.current?.slickNext()}
+              aria-label="Next language card"
+              className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-full bg-white border border-gray-300 shadow-sm hover:bg-gray-50"
+            >
+              <ChevronRight className="h-5 w-5 text-gray-800" aria-hidden="true" />
+            </button>
+          </div>
         </div>
       </div>
     </section>

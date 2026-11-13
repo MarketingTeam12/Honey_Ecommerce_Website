@@ -5,14 +5,19 @@ const resend = require("../utils/resend");
 const { uploadFileFromRequest } = require("../services/s3Service");
 const siteData = require("../services/siteDataService");
 const { requireAuth } = require("../middleware/auth");
+const {
+  MAX_UPLOAD_SIZE_BYTES,
+  createDocumentFileFilter,
+} = require("../middleware/upload");
 
 const router = express.Router();
 
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 25 * 1024 * 1024,
+    fileSize: MAX_UPLOAD_SIZE_BYTES,
   },
+  fileFilter: createDocumentFileFilter(),
 });
 
 const getAttachmentContent = (content) => {
@@ -112,16 +117,12 @@ router.post('/send-document', upload.fields([
         ${attachmentNames.length > 0
           ? `<p>Attached file${attachmentNames.length > 1 ? "s" : ""}: ${attachmentNames.join(", ")}</p>`
           : ""}
-        ${uploadedToS3.length > 0
-          ? `<p>Stored in S3: ${uploadedToS3.map((item) => item.url).join(", ")}</p>`
-          : ""}
       `,
       text: [
         "Your document is ready.",
         "Please download the completed document attached to this email.",
         orderNumber ? `Order number: ${orderNumber}` : "",
         attachmentNames.length > 0 ? `Attached files: ${attachmentNames.join(", ")}` : "",
-        uploadedToS3.length > 0 ? `S3 files: ${uploadedToS3.map((item) => item.url).join(", ")}` : "",
       ].filter(Boolean).join("\n"),
       attachments
     });

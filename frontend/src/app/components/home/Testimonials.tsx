@@ -1,20 +1,22 @@
 import { motion } from 'motion/react';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
-import fratelliTestimonialLogo from '@/assets/fratelli-testimonial.jpg';
+import { CarouselPauseButton, useAutoplayControl } from '@/app/components/home/CarouselPlaybackControls';
+import fratelliTestimonialLogo from '@/assets/fratelli-testimonial.webp';
 import tvsLogoClean from '@/assets/tvs-logo-clean.png';
-import hpTestimonialLogo from '@/assets/hp-testimonial.jpeg';
-import aachiTestimonialLogo from '@/assets/aachi-testimonial.png';
+import hpTestimonialLogo from '@/assets/hp-testimonial.webp';
+import aachiTestimonialLogo from '@/assets/aachi-testimonial.webp';
 import arcTestimonialLogo from '@/assets/arc-testimonial.png';
 import royalEnfieldTestimonialLogo from '@/assets/royal-enfield-testimonial.webp';
 import brightLightSocietyLogo from '@/assets/bright-light-society-logo.png';
 import dbsLogo from '@/assets/dbs-logo-fixed.png';
 import identityLogo from '@/assets/identity-logo.png';
-import lrkLogo from '@/assets/lrk-logo.jpg';
+import lrkLogo from '@/assets/lrk-logo.webp';
 import muthootFinanceLogo from '@/assets/muthoot-finance-logo.webp';
-import newIndiaLogo from '@/assets/new-india-logo.jpg';
-import saintGobainLogo from '@/assets/saint-gobain-source.jpg';
+import newIndiaLogo from '@/assets/new-india-logo.webp';
+import saintGobainLogo from '@/assets/saint-gobain-source.webp';
 
 export function Testimonials() {
+  const { isPaused, togglePlayback } = useAutoplayControl(true);
   const testimonials = [
     { 
       company: 'Fratelli', 
@@ -90,24 +92,31 @@ export function Testimonials() {
   const extraLargeLogoCompanies = new Set(['Royal Enfield', 'Saint-Gobain']);
 
   return (
-    <section className="py-8 md:py-10 bg-white overflow-hidden">
+    <section className="py-8 md:py-10 bg-white overflow-hidden" aria-roledescription="carousel" aria-label="Our Testimonials">
       <div className="max-w-7xl mx-auto px-6">
         <motion.div
-          className="text-center mb-6"
+          className="flex flex-wrap items-end justify-between gap-4 mb-6"
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <h3 className="text-blue-600 font-semibold text-lg mb-2">What Client Says?</h3>
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900">
-            Our Testimonials
-          </h2>
+          <div>
+            <h3 className="text-blue-700 font-semibold text-lg mb-2">What Client Says?</h3>
+            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900">
+              Our Testimonials
+            </h2>
+          </div>
+          <CarouselPauseButton
+            isPaused={isPaused}
+            onToggle={togglePlayback}
+            carouselName="testimonials carousel"
+          />
         </motion.div>
 
         {/* Continuous scrolling container */}
         <div className="relative">
-          <div className="flex w-max animate-scroll-testimonials">
+          <div className={`flex w-max animate-scroll-testimonials ${isPaused ? 'carousel-paused' : ''}`}>
             {duplicatedTestimonials.map((testimonial, index) => (
               <motion.div
                 key={`${testimonial.company}-${index}`}
@@ -125,6 +134,10 @@ export function Testimonials() {
                     <ImageWithFallback
                       src={testimonial.logoSrc}
                       alt={testimonial.company}
+                      width={144}
+                      height={80}
+                      loading="lazy"
+                      decoding="async"
                       className={`${extraLargeLogoCompanies.has(testimonial.company) ? 'w-52 h-36' : 'w-36 h-20'} ${blendLogoCompanies.has(testimonial.company) ? 'mix-blend-multiply' : ''} object-contain mx-auto`}
                     />
                   </div>
@@ -144,7 +157,7 @@ export function Testimonials() {
                   </p>
                   <div className="flex justify-center gap-2 mt-2 testimonial-stars">
                     {[...Array(5)].map((_, i) => (
-                      <span key={i} className="text-yellow-300 text-4xl drop-shadow-[0_0_8px_rgba(253,224,71,1)]">{'\u2605'}</span>
+                      <span key={i} className="text-amber-700 text-4xl" aria-hidden="true">{'\u2605'}</span>
                     ))}
                   </div>
                 </div>
@@ -164,12 +177,19 @@ export function Testimonials() {
           }
         }
 
-        .animate-scroll-testimonials {
-          animation: scroll-testimonials 42s linear infinite;
-          will-change: transform;
+        @media (prefers-reduced-motion: no-preference) {
+          .animate-scroll-testimonials {
+            animation: scroll-testimonials 42s linear infinite;
+            will-change: transform;
+          }
+          .testimonial-stars span {
+            animation: testimonial-star-pulse 2.1s ease-in-out infinite;
+          }
         }
 
-        .animate-scroll-testimonials:hover {
+        .animate-scroll-testimonials:hover,
+        .animate-scroll-testimonials:focus-within,
+        .animate-scroll-testimonials.carousel-paused {
           animation-play-state: paused;
         }
 
@@ -195,10 +215,6 @@ export function Testimonials() {
         .testimonial-card:hover .testimonial-glow {
           opacity: 1;
           transform: translateX(28%);
-        }
-
-        .testimonial-stars span {
-          animation: testimonial-star-pulse 2.1s ease-in-out infinite;
         }
 
         .testimonial-stars span:nth-child(2) { animation-delay: 0.15s; }

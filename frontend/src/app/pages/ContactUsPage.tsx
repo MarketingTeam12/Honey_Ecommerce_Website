@@ -1,22 +1,72 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { motion } from 'motion/react';
 import { Phone, Mail, Send } from 'lucide-react';
 import { API_URL } from '@/app/utils/api';
+import { sanitizePhoneForCountry, validatePhoneForCountry } from '@/app/utils/phoneValidation';
+
+const countries = [
+  { code: 'IN', name: 'India', flag: '🇮🇳', dialCode: '+91', maxDigits: 10, minDigits: 10, pattern: /^[6-9]\d{9}$/, patternMessage: 'Indian mobile numbers must start with 6, 7, 8, or 9' },
+  { code: 'US', name: 'United States', flag: '🇺🇸', dialCode: '+1', maxDigits: 10, minDigits: 10, pattern: /^\d{10}$/ },
+  { code: 'GB', name: 'United Kingdom', flag: '🇬🇧', dialCode: '+44', maxDigits: 10, minDigits: 10, pattern: /^\d{10}$/ },
+  { code: 'AE', name: 'UAE', flag: '🇦🇪', dialCode: '+971', maxDigits: 9, minDigits: 9, pattern: /^\d{9}$/ },
+  { code: 'SG', name: 'Singapore', flag: '🇸🇬', dialCode: '+65', maxDigits: 8, minDigits: 8, pattern: /^\d{8}$/ },
+  { code: 'AU', name: 'Australia', flag: '🇦🇺', dialCode: '+61', maxDigits: 9, minDigits: 9, pattern: /^\d{9}$/ },
+  { code: 'CA', name: 'Canada', flag: '🇨🇦', dialCode: '+1', maxDigits: 10, minDigits: 10, pattern: /^\d{10}$/ },
+];
 
 function ContactUsPage() {
   const [formData, setFormData] = useState({
     name: '',
+    country: 'IN',
     mobile: '',
     email: '',
     message: '',
     verification: '',
+    website: '',
+  });
+  const [privacyConsent, setPrivacyConsent] = useState(false);
+  const [errors, setErrors] = useState({
+    name: '',
+    mobile: '',
+    email: '',
+    message: '',
+    consent: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const lastSubmittedAtRef = useRef<number>(0);
+
+  const selectedCountry = countries.find((c) => c.code === formData.country) || countries[0];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    if (Date.now() - lastSubmittedAtRef.current < 10_000) {
+      toast.error('Please wait a few seconds before sending another message.');
+      return;
+    }
+
+    const nameError = !formData.name.trim() ? 'Name is required' : '';
+    const phoneCheck = validatePhoneForCountry(formData.mobile, selectedCountry);
+    const mobileError = phoneCheck.isValid ? '' : (phoneCheck.error || `Invalid mobile number format for ${selectedCountry.name}`);
+    const emailError = !formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())
+      ? 'Please enter a valid email address'
+      : '';
+    const messageError = !formData.message.trim()
+      ? 'Message is required'
+      : formData.message.trim().length < 10
+        ? 'Message must be at least 10 characters'
+        : '';
+    const consentError = privacyConsent ? '' : 'Please agree to the Privacy Policy before submitting';
+
+    setErrors({ name: nameError, mobile: mobileError, email: emailError, message: messageError, consent: consentError });
+
+    if (nameError || mobileError || emailError || messageError || consentError) {
+      toast.error('Please fix the errors in the form');
+      return;
+    }
+
     // Verify the captcha
     if (formData.verification !== '10') {
       toast.error('Incorrect verification code. 7 + 3 = 10');
@@ -26,37 +76,45 @@ function ContactUsPage() {
     setIsSubmitting(true);
     
     try {
-      
       const response = await fetch(`${API_URL}/customer-queries`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: formData.name,
-          mobile: formData.mobile,
-          email: formData.email || '',
-          message: formData.message || ''
+          name: formData.name.trim(),
+          country: selectedCountry.name,
+          mobile: `${selectedCountry.dialCode} ${formData.mobile}`,
+          email: formData.email.trim(),
+          message: formData.message.trim(),
+          website: formData.website,
+          privacy_consent_accepted_at: new Date().toISOString(),
         })
       });
       
       if (!response.ok) {
-        throw new Error('Failed to submit message');
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err?.error || 'Failed to submit message');
       }
       
+      lastSubmittedAtRef.current = Date.now();
       toast.success('Message sent successfully! We will contact you soon.');
       
       // Reset form
       setFormData({
         name: '',
+        country: 'IN',
         mobile: '',
         email: '',
         message: '',
         verification: '',
+        website: '',
       });
-    } catch (error) {
+      setPrivacyConsent(false);
+      setErrors({ name: '', mobile: '', email: '', message: '', consent: '' });
+    } catch (error: any) {
       console.error('Error submitting message:', error);
-      toast.error('Failed to send message. Please try again.');
+      toast.error(error?.message || 'Failed to send message. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -95,50 +153,98 @@ function ContactUsPage() {
                   type="text"
                   required
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-600 outline-none transition-colors"
+                  onChange={(e) => {
+                    setFormData({ ...formData, name: e.target.value });
+                    setErrors({ ...errors, name: '' });
+                  }}
+                  className={`w-full px-4 py-3 border-2 ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:border-blue-600 outline-none transition-colors`}
                   placeholder="Your full name"
                 />
+                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+              </div>
+
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">
+                  Country <span className="text-red-600">*</span>
+                </label>
+                <select
+                  value={formData.country}
+                  onChange={(e) => {
+                    const nextCountry = countries.find((c) => c.code === e.target.value) || countries[0];
+                    const sanitized = sanitizePhoneForCountry(formData.mobile, nextCountry);
+                    setFormData({ ...formData, country: e.target.value, mobile: sanitized });
+                    setErrors({ ...errors, mobile: '' });
+                  }}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-600 outline-none transition-colors"
+                >
+                  {countries.map((country) => (
+                    <option key={country.code} value={country.code}>
+                      {country.flag} {country.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
                   Mobile <span className="text-red-600">*</span>
                 </label>
-                <input
-                  type="tel"
-                  required
-                  value={formData.mobile}
-                  onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-600 outline-none transition-colors"
-                  placeholder="+91 XXXXX XXXXX"
-                />
+                <div className="relative">
+                  <div className="absolute left-0 top-0 h-full flex items-center pl-4 pointer-events-none">
+                    <span className="text-xl mr-2">{selectedCountry.flag}</span>
+                    <span className="text-gray-600 font-medium">{selectedCountry.dialCode}</span>
+                  </div>
+                  <input
+                    type="tel"
+                    required
+                    value={formData.mobile}
+                    onChange={(e) => {
+                      const cleaned = sanitizePhoneForCountry(e.target.value, selectedCountry);
+                      const check = cleaned ? validatePhoneForCountry(cleaned, selectedCountry) : { isValid: true, error: '' };
+                      setFormData({ ...formData, mobile: cleaned });
+                      setErrors({ ...errors, mobile: check.isValid ? '' : (check.error || '') });
+                    }}
+                    className={`w-full pl-28 pr-4 py-3 border-2 ${errors.mobile ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:border-blue-600 outline-none transition-colors`}
+                    placeholder={`${selectedCountry.maxDigits} digits`}
+                  />
+                </div>
+                {errors.mobile && <p className="text-red-500 text-sm mt-1">{errors.mobile}</p>}
               </div>
 
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
-                  Email <span className="text-gray-400">(Optional)</span>
+                  Email <span className="text-red-600">*</span>
                 </label>
                 <input
                   type="email"
+                  required
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-600 outline-none transition-colors"
+                  onChange={(e) => {
+                    setFormData({ ...formData, email: e.target.value });
+                    setErrors({ ...errors, email: '' });
+                  }}
+                  className={`w-full px-4 py-3 border-2 ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:border-blue-600 outline-none transition-colors`}
                   placeholder="your.email@example.com"
                 />
+                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
               </div>
 
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
-                  Message <span className="text-gray-400">(Optional)</span>
+                  Message <span className="text-red-600">*</span>
                 </label>
                 <textarea
+                  required
                   value={formData.message}
-                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, message: e.target.value });
+                    setErrors({ ...errors, message: '' });
+                  }}
                   rows={5}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-600 outline-none transition-colors resize-none"
-                  placeholder="Tell us about your translation needs..."
+                  className={`w-full px-4 py-3 border-2 ${errors.message ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:border-blue-600 outline-none transition-colors resize-none`}
+                  placeholder="Tell us about your translation needs... (minimum 10 characters)"
                 ></textarea>
+                {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message}</p>}
               </div>
 
               <div>
@@ -160,9 +266,46 @@ function ContactUsPage() {
                 </div>
               </div>
 
+              <div className="hidden" aria-hidden="true">
+                <label htmlFor="contactus-website">Website</label>
+                <input
+                  id="contactus-website"
+                  name="website"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={formData.website}
+                  onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="flex items-start gap-2.5 text-sm text-gray-700 cursor-pointer">
+                  <input
+                    id="contactus-privacy-consent"
+                    type="checkbox"
+                    checked={privacyConsent}
+                    onChange={(e) => {
+                      setPrivacyConsent(e.target.checked);
+                      setErrors({ ...errors, consent: '' });
+                    }}
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-[#1a1f5c] focus:ring-[#1a1f5c]"
+                    required
+                  />
+                  <span>
+                    I agree to the{' '}
+                    <Link to="/privacy-policy" className="text-[#1a1f5c] underline font-medium hover:text-[#252b70]">
+                      Privacy Policy
+                    </Link>
+                    .
+                  </span>
+                </label>
+                {errors.consent && <p className="text-red-500 text-sm mt-1">{errors.consent}</p>}
+              </div>
+
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                className="w-full bg-[#1a1f5c] text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#252b70] transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                 disabled={isSubmitting}
               >
                 <Send className="w-5 h-5" />

@@ -10,6 +10,13 @@ function normalizeEmail(email) {
   return String(email || "").trim().toLowerCase();
 }
 
+function toMysqlDatetime(value) {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toISOString().slice(0, 19).replace("T", " ");
+}
+
 function publicUser(user) {
   if (!user) return null;
 
@@ -22,6 +29,7 @@ function publicUser(user) {
     avatar: user.avatar,
     source: user.source,
     status: user.status,
+    terms_accepted_at: user.terms_accepted_at || null,
     created_at: user.created_at,
     updated_at: user.updated_at,
     last_login_at: user.last_login_at,
@@ -41,7 +49,7 @@ async function findById(id) {
   return rows[0] || null;
 }
 
-async function createUser({ email, password, name, phone = "N/A", role = "customer", source = "Direct", avatar = null }) {
+async function createUser({ email, password, name, phone = "N/A", role = "customer", source = "Direct", avatar = null, termsAcceptedAt = null }) {
   const normalizedEmail = normalizeEmail(email);
   const existing = await findByEmail(normalizedEmail);
 
@@ -54,11 +62,12 @@ async function createUser({ email, password, name, phone = "N/A", role = "custom
   const id = crypto.randomUUID();
   const passwordHash = await bcrypt.hash(password, 12);
   const resolvedRole = ADMIN_EMAILS.has(normalizedEmail) ? "admin" : role;
+  const consentDate = toMysqlDatetime(termsAcceptedAt);
 
   await pool.query(
     `
-      INSERT INTO users (id, email, password_hash, name, phone, role, avatar, source, status)
-      VALUES (:id, :email, :passwordHash, :name, :phone, :role, :avatar, :source, 'active')
+      INSERT INTO users (id, email, password_hash, name, phone, role, avatar, source, status, terms_accepted_at)
+      VALUES (:id, :email, :passwordHash, :name, :phone, :role, :avatar, :source, 'active', :termsAcceptedAt)
     `,
     {
       id,
@@ -69,6 +78,7 @@ async function createUser({ email, password, name, phone = "N/A", role = "custom
       role: resolvedRole,
       avatar,
       source,
+      termsAcceptedAt: consentDate,
     },
   );
 
@@ -77,8 +87,178 @@ async function createUser({ email, password, name, phone = "N/A", role = "custom
   return user;
 }
 
+async function recordTermsConsent(userId, termsAcceptedAt) {
+  const consentDate = toMysqlDatetime(termsAcceptedAt) || toMysqlDatetime(new Date());
+  await pool.query(
+    "UPDATE users SET terms_accepted_at = COALESCE(terms_accepted_at, :consentDate) WHERE id = :userId",
+    { consentDate, userId },
+  );
+  return findById(userId);
+}
+
+async function createPasswordResetToken(userId, ttlMinutes = 30) {
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+  const id = crypto.randomUUID();
+
+  // Invalidate any older unused reset tokens for this user before issuing a new one.
+  await pool.query(
+    "UPDATE password_reset_tokens SET used_at = NOW() WHERE user_id = :userId AND used_at IS NULL",
+    { userId },
+  );
+
+  await pool.query(
+    `
+      INSERT INTO password_reset_tokens (id, user_id, token_hash, expires_at)
+      VALUES (:id, :userId, :tokenHash, DATE_ADD(NOW(), INTERVAL :ttlMinutes MINUTE))
+    `,
+    {
+      id,
+      userId,
+      tokenHash,
+      ttlMinutes: Number(ttlMinutes) || 30,
+    },
+  );
+
+  return rawToken;
+}
+
+async function consumePasswordResetToken(rawToken, newPassword) {
+  const tokenHash = crypto.createHash("sha256").update(String(rawToken || "")).digest("hex");
+  const [rows] = await pool.query(
+    `
+      SELECT id, user_id
+      FROM password_reset_tokens
+      WHERE token_hash = :tokenHash AND used_at IS NULL AND expires_at > NOW()
+      LIMIT 1
+    `,
+    { tokenHash },
+  );
+
+  const tokenRow = rows[0];
+  if (!tokenRow) {
+    const error = new Error("Reset link is invalid or has expired. Please request a new one.");
+    error.status = 400;
+    throw error;
+  }
+
+  const [consumeResult] = await pool.query(
+    `
+      UPDATE password_reset_tokens
+      SET used_at = NOW()
+      WHERE id = :id AND used_at IS NULL AND expires_at > NOW()
+    `,
+    { id: tokenRow.id },
+  );
+
+  if (!consumeResult || consumeResult.affectedRows === 0) {
+    const error = new Error("Reset link has already been used or expired.");
+    error.status = 400;
+    throw error;
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, 12);
+  await pool.query("UPDATE users SET password_hash = :passwordHash WHERE id = :userId", {
+    passwordHash,
+    userId: tokenRow.user_id,
+  });
+
+  return findById(tokenRow.user_id);
+}
+
 async function validatePassword(user, password) {
   return bcrypt.compare(password, user.password_hash);
+}
+
+function validatePasswordPolicy(password) {
+  const value = String(password || "");
+  if (value.length < 8) {
+    return "Password must be at least 8 characters long.";
+  }
+  if (!/[A-Za-z]/.test(value)) {
+    return "Password must contain at least one letter.";
+  }
+  if (!/\d/.test(value)) {
+    return "Password must contain at least one number.";
+  }
+  return null;
+}
+
+async function changePassword(userId, currentPassword, newPassword) {
+  const user = await findById(userId);
+  if (!user) {
+    const error = new Error("Account not found.");
+    error.status = 404;
+    throw error;
+  }
+
+  if (!user.password_hash) {
+    const error = new Error("Password change is unavailable for social-only accounts. Use Forgot Password to set a password.");
+    error.status = 400;
+    throw error;
+  }
+
+  const matches = await bcrypt.compare(String(currentPassword || ""), user.password_hash);
+  if (!matches) {
+    const error = new Error("Current password is incorrect.");
+    error.status = 400;
+    throw error;
+  }
+
+  const policyError = validatePasswordPolicy(newPassword);
+  if (policyError) {
+    const error = new Error(policyError);
+    error.status = 400;
+    throw error;
+  }
+
+  const passwordHash = await bcrypt.hash(String(newPassword), 12);
+  await pool.query("UPDATE users SET password_hash = :passwordHash WHERE id = :userId", {
+    passwordHash,
+    userId,
+  });
+
+  return findById(userId);
+}
+
+async function requestAccountDeletion(user, reason = "") {
+  const id = crypto.randomUUID();
+  const cleanReason = String(reason || "").trim().slice(0, 1000);
+  await pool.query(
+    `
+      INSERT INTO account_deletion_requests (id, user_id, email, name, reason, status)
+      VALUES (:id, :userId, :email, :name, :reason, 'pending')
+    `,
+    {
+      id,
+      userId: user.id,
+      email: user.email,
+      name: user.name || "",
+      reason: cleanReason || null,
+    },
+  );
+
+  if (typeof siteData.saveNotification === "function") {
+    try {
+      await siteData.saveNotification({
+        type: "account_deletion_request",
+        title: "Account Deletion Request",
+        message: `${user.name || user.email} (${user.email}) requested account deletion.`,
+        metadata: { type: "account_deletion_request", requestId: id, userId: user.id, email: user.email },
+      });
+    } catch (notifyErr) {
+      console.warn("Failed to create admin notification for deletion request:", notifyErr.message);
+    }
+  }
+
+  return {
+    id,
+    user_id: user.id,
+    email: user.email,
+    status: "pending",
+    reason: cleanReason,
+    requested_at: new Date().toISOString(),
+  };
 }
 
 async function touchLastLogin(userId) {
@@ -179,7 +359,13 @@ module.exports = {
   findByEmail,
   findById,
   createUser,
+  recordTermsConsent,
+  createPasswordResetToken,
+  consumePasswordResetToken,
   validatePassword,
+  validatePasswordPolicy,
+  changePassword,
+  requestAccountDeletion,
   touchLastLogin,
   updateProfile,
   setRole,

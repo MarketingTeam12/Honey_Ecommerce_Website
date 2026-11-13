@@ -42,7 +42,7 @@ export function WishlistPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl mb-2">My Wishlist</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">My Wishlist</h1>
           <p className="text-gray-600">
             {wishlistItems.length} {wishlistItems.length === 1 ? 'item' : 'items'} saved
           </p>
@@ -51,14 +51,14 @@ export function WishlistPage() {
         {/* Wishlist Items */}
         {wishlistItems.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-            <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h2 className="text-2xl mb-2">Your Wishlist is Empty</h2>
+            <Heart className="w-16 h-16 text-gray-400 mx-auto mb-4" aria-hidden="true" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Your Wishlist is Empty</h2>
             <p className="text-gray-600 mb-6">
               Save your favorite services to your wishlist
             </p>
             <Link
               to="/"
-              className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center justify-center min-h-[44px] bg-[#1a1f5c] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#252b70] transition-colors"
             >
               Browse Services
             </Link>

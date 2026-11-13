@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { ProductTemplate } from '@/app/components/product/ProductTemplate';
+import { NotFoundPage } from '@/app/pages/NotFoundPage';
+import { ProductScreenSkeleton } from '@/app/components/layout/PageSkeleton';
 import { productDataMap } from '@/app/data/productData';
 import { useProducts } from '@/app/context/ProductContext';
 import { publicAnonKey } from '@/app/utils/backendInfo';
@@ -8,7 +10,7 @@ import { API_URL } from '@/app/utils/api';
 import { buildHeaders } from '@/app/utils/buildHeaders';
 import { useAuth } from '@/app/context/AuthContext';
 import { normalizeProductImages } from '@/app/utils/imageUtils';
-import legacyFallbackImage from '@/assets/hero-banner-documents.png';
+import legacyFallbackImage from '@/assets/hero-banner-documents.webp';
 
 function buildProductHighlights(description?: string) {
   if (!description) {
@@ -78,10 +80,11 @@ interface DocumentType {
 
 export function ProductPage() {
   const { id } = useParams<{ id: string }>();
-  const { getProduct } = useProducts();
+  const { getProduct, isLoading: productsLoading } = useProducts();
   const { user } = useAuth();
   const [productConfig, setProductConfig] = useState<ProductConfig | null>(null);
   const [liveProduct, setLiveProduct] = useState<any | null>(null);
+  const [liveFetchDone, setLiveFetchDone] = useState(false);
   const [allSourceLanguages, setAllSourceLanguages] = useState<Language[]>([]);
   const [allTargetLanguages, setAllTargetLanguages] = useState<Language[]>([]);
   const [allDocumentTypes, setAllDocumentTypes] = useState<DocumentType[]>([]);
@@ -97,9 +100,12 @@ export function ProductPage() {
   useEffect(() => {
     if (!id) {
       setLiveProduct(null);
+      setLiveFetchDone(true);
       return;
     }
 
+    setLiveProduct(null);
+    setLiveFetchDone(false);
     const controller = new AbortController();
 
     const fetchProduct = async () => {
@@ -124,6 +130,10 @@ export function ProductPage() {
       } catch (error) {
         if (!controller.signal.aborted) {
           console.warn('Failed to fetch live product data:', error);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLiveFetchDone(true);
         }
       }
     };
@@ -190,11 +200,13 @@ export function ProductPage() {
   
   // Build product data with useMemo to avoid unnecessary recalculations
   const productData = useMemo(() => {
-    const staticFallbackProduct =
-      productDataMap[id || 'english-to-foreign'] || productDataMap['english-to-foreign'];
+    const staticFallbackProduct = id ? productDataMap[id] : undefined;
 
     if (!adminProduct) {
-      // Fallback to static product data
+      if (!staticFallbackProduct) {
+        return null;
+      }
+      // Fallback to matching static product data
       return {
         ...staticFallbackProduct,
         description: '',
@@ -275,7 +287,9 @@ export function ProductPage() {
     }
     
     const normalizedAdminImages = normalizeProductImages(adminProduct.images, adminProduct.name);
-    const fallbackStaticImages = normalizeProductImages(staticFallbackProduct.images, adminProduct.name);
+    const fallbackStaticImages = staticFallbackProduct
+      ? normalizeProductImages(staticFallbackProduct.images, adminProduct.name)
+      : [];
     const resolvedImages =
       normalizedAdminImages.length > 0
         ? normalizedAdminImages
@@ -323,8 +337,15 @@ export function ProductPage() {
     };
   }, [adminProduct, id, productConfig, allSourceLanguages, allTargetLanguages, allDocumentTypes]);
 
+  if (!productData) {
+    if (!liveFetchDone || productsLoading) {
+      return <ProductScreenSkeleton />;
+    }
+    return <NotFoundPage />;
+  }
+
   // Render immediately - no loading states!
-  return <ProductTemplate data={productData} productKey={id || 'english-to-foreign'} />;
+  return <ProductTemplate data={productData} productKey={id || ''} />;
 }
 
 export default ProductPage;

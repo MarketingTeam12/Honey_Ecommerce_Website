@@ -1,13 +1,17 @@
 import { useEffect, useRef } from 'react';
+import { scheduleAfterLoad } from '@/app/utils/deferredLoad';
+import { useCookieConsent } from '@/app/context/CookieConsentContext';
 
 const TRUSTINDEX_SCRIPT_SRC = 'https://cdn.trustindex.io/loader.js?18cf7ab7225a255f6c86ab7c666';
 
 export function TrustIndexReviewsSection() {
+  const { hasConsented, openSettings } = useCookieConsent();
   const mountRef = useRef<HTMLDivElement | null>(null);
   const reviewLinkRef = useRef<string>('');
 
   useEffect(() => {
-    if (!mountRef.current) return;
+    if (!hasConsented || !mountRef.current) return;
+    let script: HTMLScriptElement | null = null;
 
     const captureReviewLink = () => {
       if (!mountRef.current) return;
@@ -41,17 +45,20 @@ export function TrustIndexReviewsSection() {
 
     observer.observe(mountRef.current, { childList: true, subtree: true });
 
-    const script = document.createElement('script');
-    script.src = TRUSTINDEX_SCRIPT_SRC;
-    script.defer = true;
-    script.async = true;
-    mountRef.current.appendChild(script);
-
-    captureReviewLink();
+    const cancelSchedule = scheduleAfterLoad(() => {
+      if (!mountRef.current) return;
+      script = document.createElement('script');
+      script.src = TRUSTINDEX_SCRIPT_SRC;
+      script.defer = true;
+      script.async = true;
+      mountRef.current.appendChild(script);
+      captureReviewLink();
+    }, 1500);
 
     return () => {
+      cancelSchedule();
       observer.disconnect();
-      if (mountRef.current?.contains(script)) {
+      if (script && mountRef.current?.contains(script)) {
         mountRef.current.removeChild(script);
       }
     };
@@ -77,6 +84,20 @@ export function TrustIndexReviewsSection() {
   return (
     <section className="py-2 md:py-3 bg-white">
       <div className="max-w-7xl mx-auto px-6">
+        {!hasConsented ? (
+          <div className="rounded-xl border border-gray-200 bg-gray-50 p-6 text-center">
+            <p className="text-sm text-gray-700 mb-3">
+              External customer review widgets are hidden until optional cookies are accepted.
+            </p>
+            <button
+              type="button"
+              onClick={openSettings}
+              className="min-h-[44px] rounded-lg bg-[#1a1f5c] px-4 py-2 text-xs font-semibold text-white hover:bg-[#252b70] transition-colors"
+            >
+              Cookie settings
+            </button>
+          </div>
+        ) : (
         <div className="trustindex-home-widget-wrap">
           <div className="trustindex-home-widget" ref={mountRef} />
           <button
@@ -87,6 +108,7 @@ export function TrustIndexReviewsSection() {
             Write Review
           </button>
         </div>
+        )}
       </div>
       <style>{`
         .trustindex-home-widget-wrap {

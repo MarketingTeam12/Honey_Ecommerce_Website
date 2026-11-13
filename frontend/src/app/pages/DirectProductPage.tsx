@@ -1,6 +1,7 @@
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useMemo } from 'react';
 import { ProductTemplate } from '@/app/components/product/ProductTemplate';
+import { NotFoundPage } from '@/app/pages/NotFoundPage';
 import { getProductBySlug } from '@/app/data/directProductsMap';
 import { useProducts } from '@/app/context/ProductContext';
 import { normalizeProductImages } from '@/app/utils/imageUtils';
@@ -158,14 +159,7 @@ export function DirectProductPage() {
   }, [slug]);
 
   if (!resolvedProductData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Product Not Found</h1>
-          <p className="text-gray-600">The product you're looking for doesn't exist.</p>
-        </div>
-      </div>
-    );
+    return <NotFoundPage />;
   }
 
   // Extract product key from slug (e.g., "sworn-translation-german" -> use slug as key)

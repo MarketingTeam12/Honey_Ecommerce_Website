@@ -1,4 +1,5 @@
 import { motion } from 'motion/react';
+import { ConsentYouTubeEmbed } from '@/app/components/ConsentYouTubeEmbed';
 import { useNavigate } from 'react-router-dom';
 
 export function BrandMessage() {
@@ -42,16 +43,11 @@ export function BrandMessage() {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <iframe
-              width="100%"
-              height="100%"
-              src="https://www.youtube.com/embed/6UT1UkizejQ"
+            <ConsentYouTubeEmbed
+              videoId="6UT1UkizejQ"
               title="Brand Message"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
               className="w-full h-full"
-            ></iframe>
+            />
           </motion.div>
         </div>
       </div>

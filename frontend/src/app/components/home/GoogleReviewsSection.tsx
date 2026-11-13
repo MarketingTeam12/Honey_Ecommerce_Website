@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
-import googleLogo from 'figma:asset/30c364ea738ab38fa2916a630587ad5e3ff9dc67.png';
+import googleLogo from 'figma:asset/30c364ea738ab38fa2916a630587ad5e3ff9dc67.webp';
 
 interface Review {
   id: number;

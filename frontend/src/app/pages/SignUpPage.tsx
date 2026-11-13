@@ -7,6 +7,20 @@ import 'react-phone-input-2/lib/style.css';
 import logoImage from 'figma:asset/c63663e51387c858f000fbba9c714974dbc99e3e.png';
 import { toast } from 'sonner';
 import { GoogleSignInInfo } from '@/app/components/GoogleSignInInfo';
+import { validatePhoneForCountry } from '@/app/utils/phoneValidation';
+import { validatePasswordPolicy } from '@/app/utils/passwordValidation';
+import { PasswordRulesChecklist } from '@/app/components/auth/PasswordRulesChecklist';
+import { Button } from '@/app/components/ui/button';
+
+const INDIA_PHONE_RULE = {
+  code: 'IN',
+  name: 'India',
+  dialCode: '+91',
+  minDigits: 10,
+  maxDigits: 10,
+  pattern: /^[6-9]\d{9}$/,
+  patternMessage: 'Please enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9',
+};
 
 export function SignUpPage() {
   const navigate = useNavigate();
@@ -19,48 +33,73 @@ export function SignUpPage() {
     password: '',
     confirmPassword: ''
   });
+  const [phoneCountry, setPhoneCountry] = useState({ countryCode: 'in', dialCode: '91' });
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
+  const passwordCheck = validatePasswordPolicy(formData.password);
+  const isSubmitDisabled = loading || googleLoading || !passwordCheck.isValid || !termsAccepted;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // Validation
+    if (!passwordCheck.isValid) {
+      setError(passwordCheck.message);
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+    if (!termsAccepted) {
+      setError('Please agree to the Terms & Conditions and Privacy Policy to continue.');
       return;
     }
 
-    // Phone number validation - require at least 10 digits
-    if (!formData.phone || formData.phone.length < 10) {
+    // Phone number validation
+    const rawPhoneDigits = (formData.phone || '').replace(/\D/g, '');
+    const isIndiaSelected = phoneCountry.countryCode === 'in' || phoneCountry.dialCode === '91';
+    if (isIndiaSelected) {
+      const nationalNumber = rawPhoneDigits.startsWith('91')
+        ? rawPhoneDigits.slice(2)
+        : rawPhoneDigits;
+      const phoneCheck = validatePhoneForCountry(nationalNumber, INDIA_PHONE_RULE);
+      if (!phoneCheck.isValid) {
+        setError(phoneCheck.error || 'Please enter a valid 10-digit Indian mobile number');
+        return;
+      }
+    } else if (!rawPhoneDigits || rawPhoneDigits.length < 10) {
       setError('Please enter a valid phone number');
       return;
     }
 
     setLoading(true);
 
-    const result = await signup(formData.email, formData.password, formData.name, formData.phone);
+    const consentTimestamp = new Date().toISOString();
+    const result = await signup(formData.email, formData.password, formData.name, formData.phone, consentTimestamp);
     
     if (result.success) {
       // Check if user needs to manually login
       if (result.requiresLogin) {
-        // Show success message and redirect to login
-        setError(''); // Clear any errors
+        setError('');
         toast.success(result.message || 'Account created successfully! Please sign in.');
         navigate('/signin');
       } else {
-        // Auto-login was successful, redirect to home
         toast.success('Welcome to Honey Translations!');
-        navigate('/');
+        const redirectUrl = sessionStorage.getItem('redirectAfterLogin');
+        if (redirectUrl) {
+          sessionStorage.removeItem('redirectAfterLogin');
+          navigate(redirectUrl, { replace: true });
+        } else {
+          navigate('/');
+        }
       }
     } else {
       setError(result.message || 'Signup failed');
@@ -72,6 +111,14 @@ export function SignUpPage() {
 
   const handleGoogleSignup = async () => {
     setError('');
+    if (!termsAccepted) {
+      const msg = 'Please agree to the Terms & Conditions and Privacy Policy before continuing with Google.';
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
+
+    sessionStorage.setItem('pendingTermsConsentAt', new Date().toISOString());
     setGoogleLoading(true);
     
     try {
@@ -160,13 +207,23 @@ export function SignUpPage() {
                 Phone Number
               </label>
               <PhoneInput
-                country={'us'}
+                country={'in'}
                 value={formData.phone}
-                onChange={(phone) => setFormData({ ...formData, phone })}
+                onChange={(phone, countryData: { countryCode?: string; dialCode?: string }) => {
+                  setFormData({ ...formData, phone });
+                  if (countryData) {
+                    setPhoneCountry({
+                      countryCode: countryData.countryCode || 'in',
+                      dialCode: countryData.dialCode || '91',
+                    });
+                  }
+                }}
                 enableSearch={true}
                 countryCodeEditable={false}
                 inputProps={{
+                  id: 'phone',
                   name: 'phone',
+                  autoComplete: 'tel',
                   required: true,
                   autoFocus: false
                 }}
@@ -207,14 +264,19 @@ export function SignUpPage() {
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  minLength={8}
                   required
+                  aria-describedby="signup-password-rules"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a1f5c] focus:border-[#1a1f5c] transition-colors"
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword}
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
@@ -225,6 +287,7 @@ export function SignUpPage() {
                   )}
                 </button>
               </div>
+              <PasswordRulesChecklist id="signup-password-rules" password={formData.password} />
             </div>
 
             {/* Confirm Password Field */}
@@ -239,14 +302,18 @@ export function SignUpPage() {
                 <input
                   id="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  minLength={8}
                   required
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                  className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a1f5c] focus:border-[#1a1f5c] transition-colors"
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
+                  aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                  aria-pressed={showConfirmPassword}
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
@@ -259,18 +326,41 @@ export function SignUpPage() {
               </div>
             </div>
 
+            {/* Terms & Privacy Consent */}
+            <div className="flex items-start gap-2.5 pt-1">
+              <input
+                id="signup-terms-consent"
+                name="termsAccepted"
+                type="checkbox"
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+                required
+                className="mt-1 h-4 w-4 rounded border-gray-300 accent-[#1a1f5c] shrink-0"
+              />
+              <label htmlFor="signup-terms-consent" className="text-sm text-gray-700 leading-snug">
+                I agree to the{' '}
+                <Link to="/terms-and-conditions" className="font-medium text-[#1a1f5c] underline hover:text-[#252b70]">
+                  Terms &amp; Conditions
+                </Link>{' '}
+                and{' '}
+                <Link to="/privacy-policy" className="font-medium text-[#1a1f5c] underline hover:text-[#252b70]">
+                  Privacy Policy
+                </Link>
+              </label>
+            </div>
+
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm" role="alert">
                 {error}
               </div>
             )}
 
             {/* Submit Button */}
-            <button
+            <Button
               type="submit"
-              disabled={loading || googleLoading}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isSubmitDisabled}
+              className="w-full h-auto py-3 px-4 rounded-lg bg-[#1a1f5c] hover:bg-[#252b70] text-white text-base font-medium focus-visible:ring-[#1a1f5c]"
             >
               {loading ? (
                 <>
@@ -283,7 +373,7 @@ export function SignUpPage() {
                   Create Account
                 </>
               )}
-            </button>
+            </Button>
           </form>
 
           {/* Divider */}
@@ -303,8 +393,9 @@ export function SignUpPage() {
           <button
             type="button"
             onClick={handleGoogleSignup}
-            disabled={loading || googleLoading}
-            className="w-full bg-white border-2 border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={loading || googleLoading || !termsAccepted}
+            aria-disabled={!termsAccepted}
+            className="w-full bg-white border-2 border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1a1f5c] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {googleLoading ? (
               <>

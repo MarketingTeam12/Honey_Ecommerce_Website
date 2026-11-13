@@ -3,9 +3,10 @@ import { Heart } from 'lucide-react';
 import { useCurrency } from '@/app/context/CurrencyContext';
 import { useWishlist } from '@/app/context/WishlistContext';
 import { useProducts } from '@/app/context/ProductContext';
+import { ListingScreenSkeleton } from '@/app/components/layout/PageSkeleton';
 import { allProductsMap } from '@/app/data/allProductData';
 import { getFirstValidImage } from '@/app/utils/imageUtils';
-import legacyFallbackImage from '@/assets/hero-banner-documents.png';
+import legacyFallbackImage from '@/assets/hero-banner-documents.webp';
 
 interface Product {
   id: string;
@@ -93,14 +94,7 @@ export function AllLanguageProductsPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading language services...</p>
-        </div>
-      </div>
-    );
+    return <ListingScreenSkeleton />;
   }
 
   return (
@@ -145,6 +139,10 @@ export function AllLanguageProductsPage() {
                     <img
                       src={product.image}
                       alt={product.name}
+                      width={640}
+                      height={800}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-80 sm:h-96 object-cover bg-white group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (

@@ -60,7 +60,7 @@ function HomeScreenSkeleton() {
   );
 }
 
-function ProductScreenSkeleton() {
+export function ProductScreenSkeleton() {
   return (
     <div className="min-h-[70vh] bg-white px-4 py-8 sm:px-6 lg:px-8" aria-hidden="true">
       <div className="mx-auto max-w-7xl">
@@ -110,7 +110,7 @@ function ProductScreenSkeleton() {
   );
 }
 
-function ListingScreenSkeleton() {
+export function ListingScreenSkeleton() {
   return (
     <div className="min-h-[70vh] bg-white px-4 py-8 sm:px-6 lg:px-8" aria-hidden="true">
       <div className="mx-auto max-w-7xl">
@@ -194,9 +194,87 @@ function ContentScreenSkeleton() {
   );
 }
 
-export function PublicPageSkeleton() {
-  const { pathname } = useLocation();
-  const normalizedPath = pathname.toLowerCase();
+export function BlogScreenSkeleton() {
+  return (
+    <div className="min-h-[70vh] bg-gray-50 px-4 py-12 sm:px-6 lg:px-8" aria-hidden="true">
+      <div className="mx-auto max-w-7xl space-y-8">
+        <div className="space-y-3 text-center">
+          <Skeleton className="mx-auto h-10 w-64 max-w-full bg-gray-200" />
+          <Skeleton className="mx-auto h-5 w-96 max-w-full bg-gray-100" />
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <Skeleton className="h-11 w-full max-w-xs rounded-md bg-white border border-gray-200" />
+          <div className="flex flex-wrap gap-2">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <Skeleton key={index} className="h-10 w-28 rounded-full bg-gray-200" />
+            ))}
+          </div>
+        </div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="space-y-3 rounded-lg border border-gray-100 bg-white p-4">
+              <Skeleton className="h-44 w-full rounded-md bg-gray-100" />
+              <Skeleton className="h-4 w-24 rounded-full bg-gray-200" />
+              <Skeleton className="h-6 w-5/6 bg-gray-200" />
+              <Skeleton className="h-4 w-full bg-gray-100" />
+              <Skeleton className="h-4 w-3/4 bg-gray-100" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function FaqScreenSkeleton() {
+  return (
+    <div className="min-h-[70vh] bg-gray-50" aria-hidden="true">
+      <div className="bg-[#0a1247] py-16 px-6">
+        <div className="mx-auto max-w-7xl space-y-3">
+          <Skeleton className="h-11 w-40 bg-white/25" />
+          <Skeleton className="h-5 w-96 max-w-full bg-white/15" />
+        </div>
+      </div>
+      <div className="mx-auto max-w-5xl px-6 py-10 space-y-6">
+        <div className="flex flex-wrap gap-2">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <Skeleton key={index} className="h-10 w-36 rounded-md bg-gray-200" />
+          ))}
+        </div>
+        <div className="space-y-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <Skeleton key={index} className="h-16 w-full rounded-lg bg-white border border-gray-200" />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function WorkSampleListSkeleton() {
+  return (
+    <div className="space-y-8" aria-busy="true" aria-label="Loading work samples">
+      <div className="flex flex-wrap justify-center gap-3">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <Skeleton key={index} className="h-11 w-32 rounded-full bg-gray-200" />
+        ))}
+      </div>
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="space-y-3 rounded-xl border border-gray-200 bg-white p-5">
+            <Skeleton className="h-40 w-full rounded-lg bg-gray-100" />
+            <Skeleton className="h-6 w-3/4 bg-gray-200" />
+            <Skeleton className="h-4 w-full bg-gray-100" />
+            <Skeleton className="h-10 w-36 rounded-lg bg-gray-200" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function renderSkeletonForPath(pathname: string) {
+  const normalizedPath = (pathname || '/').toLowerCase();
 
   if (normalizedPath === '/') {
     return <HomeScreenSkeleton />;
@@ -206,6 +284,9 @@ export function PublicPageSkeleton() {
     normalizedPath.startsWith('/product/') ||
     normalizedPath.startsWith('/direct-product/') ||
     normalizedPath.startsWith('/sworn-translation/') ||
+    normalizedPath.startsWith('/apostille/') ||
+    normalizedPath.startsWith('/attestation/') ||
+    normalizedPath.startsWith('/startup/') ||
     normalizedPath.endsWith('-attestation') ||
     normalizedPath.endsWith('-package') ||
     normalizedPath.includes('-language')
@@ -219,9 +300,26 @@ export function PublicPageSkeleton() {
     normalizedPath === '/attestation' ||
     normalizedPath === '/apostille' ||
     normalizedPath === '/startup' ||
+    normalizedPath.includes('sworn-translations') ||
     normalizedPath.includes('translations-listing')
   ) {
     return <ListingScreenSkeleton />;
+  }
+
+  if (normalizedPath === '/blog' || normalizedPath.startsWith('/blog/')) {
+    return <BlogScreenSkeleton />;
+  }
+
+  if (normalizedPath === '/faq' || normalizedPath === '/faqs') {
+    return <FaqScreenSkeleton />;
+  }
+
+  if (normalizedPath.startsWith('/work-sample')) {
+    return (
+      <div className="min-h-[70vh] bg-white px-6 py-12 mx-auto max-w-7xl">
+        <WorkSampleListSkeleton />
+      </div>
+    );
   }
 
   if (normalizedPath.includes('contact')) {
@@ -229,6 +327,16 @@ export function PublicPageSkeleton() {
   }
 
   return <ContentScreenSkeleton />;
+}
+
+export function PublicPageSkeleton() {
+  const { pathname } = useLocation();
+  return renderSkeletonForPath(pathname);
+}
+
+export function InitialRouteSkeleton() {
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
+  return renderSkeletonForPath(pathname);
 }
 
 export function AdminPageSkeleton() {

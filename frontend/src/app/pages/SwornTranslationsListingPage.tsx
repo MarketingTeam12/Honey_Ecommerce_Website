@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useCurrency } from '@/app/context/CurrencyContext';
 import { useProducts } from '@/app/context/ProductContext';
+import { ListingScreenSkeleton } from '@/app/components/layout/PageSkeleton';
 import { Badge } from '@/app/components/ui/badge';
 import { useState } from 'react';
 import { getFirstValidImage } from '@/app/utils/imageUtils';
@@ -38,14 +39,7 @@ export function SwornTranslationsListingPage() {
   });
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading sworn translation services...</p>
-        </div>
-      </div>
-    );
+    return <ListingScreenSkeleton />;
   }
 
   return (
@@ -109,6 +103,10 @@ export function SwornTranslationsListingPage() {
                           <img
                             src={getFirstValidImage(product.images, 'https://images.unsplash.com/photo-1673515335152-f2589ba8bb7a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600')}
                             alt={product.name}
+                            width={400}
+                            height={400}
+                            loading="lazy"
+                            decoding="async"
                             className="w-full h-full object-contain object-center"
                           />
                           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-300" />

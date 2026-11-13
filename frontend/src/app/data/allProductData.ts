@@ -1,6 +1,6 @@
-import image_ed7cdf787729d6d1793cb1a6b477c320f0fcadeb from 'figma:asset/ed7cdf787729d6d1793cb1a6b477c320f0fcadeb.png';
-import image_b880db383a3f50e1c06c72934df4f8a177ab92f2 from 'figma:asset/b880db383a3f50e1c06c72934df4f8a177ab92f2.png';
-import image_english_to_indian from 'figma:asset/5d3738f42d25760a7464ddc4a8fe45a029b7fbfb.png';
+import image_ed7cdf787729d6d1793cb1a6b477c320f0fcadeb from 'figma:asset/ed7cdf787729d6d1793cb1a6b477c320f0fcadeb.webp';
+import image_b880db383a3f50e1c06c72934df4f8a177ab92f2 from 'figma:asset/b880db383a3f50e1c06c72934df4f8a177ab92f2.webp';
+import image_english_to_indian from 'figma:asset/5d3738f42d25760a7464ddc4a8fe45a029b7fbfb.webp';
 import { ProductData } from '@/app/components/product/ProductTemplate';
 
 // Helper function to create apostille product data
@@ -267,6 +267,10 @@ export const apostilleCountries: Record<string, ProductData> = {
   'poland': createApostilleData('Poland', 4800, 6800),
   'luxembourg': createApostilleData('Luxembourg', 5000, 7000),
   'dutch': createApostilleData('Dutch', 4800, 6800),
+  'belgium': createApostilleData('Belgium', 4800, 6800),
+  'switzerland': createApostilleData('Switzerland', 5000, 7000),
+  'portugal': createApostilleData('Portugal', 4800, 6800),
+  'new-zealand': createApostilleData('New Zealand', 5200, 7200),
 };
 
 // All Attestation Countries

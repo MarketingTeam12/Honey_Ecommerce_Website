@@ -1,4 +1,5 @@
 import { Component, ReactNode } from 'react';
+import { captureError } from '@/app/utils/errorTracking';
 
 interface Props {
   children: ReactNode;
@@ -21,9 +22,10 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: any) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
-    console.error('Error stack:', error.stack);
-    console.error('Component stack:', errorInfo.componentStack);
+    captureError(error, {
+      source: 'ErrorBoundary',
+      componentStack: errorInfo?.componentStack,
+    });
   }
 
   render() {
@@ -55,7 +57,7 @@ export class ErrorBoundary extends Component<Props, State> {
               </ul>
             </div>
 
-            {this.state.error && (
+            {(import.meta as any).env?.DEV && this.state.error && (
               <div className="bg-gray-100 border border-gray-300 rounded-lg p-4 mb-6 overflow-auto">
                 <h3 className="font-bold text-gray-900 mb-2">Error details:</h3>
                 <pre className="text-xs text-gray-700 whitespace-pre-wrap">

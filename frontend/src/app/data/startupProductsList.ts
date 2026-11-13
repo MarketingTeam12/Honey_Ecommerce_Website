@@ -1,6 +1,6 @@
-import image_basicStartup from 'figma:asset/d4b1f2e915e9cd79f93d6af750c3e12dca7eb069.png';
-import image_standardStartup from 'figma:asset/ee810d526fb09362f3adbdbf9eba4864e17e0e11.png';
-import image_premiumStartup from 'figma:asset/d8c18857369797e62f24a21531a9cf10b9c0dc81.png';
+import image_basicStartup from 'figma:asset/d4b1f2e915e9cd79f93d6af750c3e12dca7eb069.webp';
+import image_standardStartup from 'figma:asset/ee810d526fb09362f3adbdbf9eba4864e17e0e11.webp';
+import image_premiumStartup from 'figma:asset/d8c18857369797e62f24a21531a9cf10b9c0dc81.webp';
 
 export interface StartupProduct {
   id: string;

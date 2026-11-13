@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/app/components/ui/dropdown-menu';
-import honeyLogo from '@/assets/honey-log.png';
+import honeyLogo from '@/assets/honey-log.webp';
 import { projectId, publicAnonKey } from '@/app/utils/backendInfo';
 import { startupProducts } from '@/app/data/startupProductsList';
 import { getFirstValidImage } from '@/app/utils/imageUtils';
@@ -112,7 +112,7 @@ export function HeaderNew() {
               <div className="flex items-center gap-2 sm:gap-4">
                 <button
                   onClick={() => setQueryModalOpen(true)}
-                  className="hidden sm:flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-full transition-all text-[14px] font-semibold shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
+                  className="hidden sm:flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-orange-700 to-orange-800 hover:from-orange-800 hover:to-orange-900 text-white rounded-full transition-all text-[14px] font-semibold shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
                   title="Submit your query"
                 >
                   <MessageSquare className="w-4 h-4" />
@@ -150,16 +150,11 @@ export function HeaderNew() {
                     {canAccessAdmin && (
                       <>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => {
-                            navigate('/admin');
-                          }}
-                          className="cursor-pointer"
-                        >
-                          <span className="flex items-center">
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin" className="cursor-pointer flex items-center">
                             <Shield className="w-4 h-4 mr-2" />
                             Admin Panel
-                          </span>
+                          </Link>
                         </DropdownMenuItem>
                       </>
                     )}
@@ -179,45 +174,49 @@ export function HeaderNew() {
                 </button>
               </div>
             ) : (
-              <button
-                onClick={() => navigate('/signin')}
-                className="px-4 py-1.5 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-[15px]"
+              <Link
+                to="/signin"
+                className="px-4 py-1.5 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-[15px] inline-block"
               >
                 Sign In
-              </button>
+              </Link>
             )}
           </div>
         </div>
       </div>
 
       {/* Main Header */}
-      <header className="bg-white shadow-md sticky top-[80px] sm:top-[48px] z-40">
+      <header className="bg-white shadow-md sticky top-[80px] sm:top-[48px] z-40 w-full">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2.5">
-          <div className="flex items-center justify-between gap-5">
+          <div className="flex items-center justify-between gap-2 sm:gap-4">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3 flex-shrink-0">
+            <Link to="/" className="flex items-center gap-3 flex-shrink-0 min-w-0">
               <img 
                 src={honeyLogo} 
                 alt="Honey Translation Services" 
-                className="h-16 w-auto object-contain"
+                width={400}
+                height={131}
+                loading="eager"
+                decoding="async"
+                className="h-12 sm:h-16 w-auto object-contain"
               />
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-5 flex-grow justify-center">
+            <nav className="hidden lg:flex items-center gap-3 xl:gap-5 flex-grow justify-center">
               <Link
                 to="/"
-                className="bg-[#1a1f5c] text-white px-6 py-2 rounded-full hover:bg-[#252b70] transition-colors font-bold text-lg"
+                className="bg-[#1a1f5c] text-white px-4 xl:px-6 py-2 rounded-full hover:bg-[#252b70] transition-colors font-bold text-sm xl:text-base whitespace-nowrap"
               >
                 Home
               </Link>
 
-              {/* Language Dropdown */}
+              {/* Translation Services Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger
-                  className="flex items-center gap-1 text-gray-700 hover:text-[#1a1f5c] transition-colors font-bold text-lg"
+                  className="flex items-center gap-1 text-gray-700 hover:text-[#1a1f5c] transition-colors font-bold text-sm xl:text-base whitespace-nowrap"
                 >
-                  Language <ChevronDown className="w-4 h-4" />
+                  Translation Services <ChevronDown className="w-4 h-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-64">
                   <DropdownMenuItem asChild>
@@ -246,16 +245,16 @@ export function HeaderNew() {
 
               <Link
                 to="/apostille/netherlands"
-                className="text-gray-700 hover:text-[#1a1f5c] transition-colors font-bold text-lg"
+                className="text-gray-700 hover:text-[#1a1f5c] transition-colors font-bold text-sm xl:text-base whitespace-nowrap"
               >
-                Apostille
+                Apostille Services
               </Link>
-              {/* Attestation Dropdown */}
+              {/* Attestation Services Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger
-                  className="flex items-center gap-1 text-gray-700 hover:text-[#1a1f5c] transition-colors font-bold text-lg"
+                  className="flex items-center gap-1 text-gray-700 hover:text-[#1a1f5c] transition-colors font-bold text-sm xl:text-base whitespace-nowrap"
                 >
-                  Attestation <ChevronDown className="w-4 h-4" />
+                  Attestation Services <ChevronDown className="w-4 h-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuItem asChild>
@@ -282,12 +281,12 @@ export function HeaderNew() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Startup Package Dropdown */}
+              {/* Startup Packages Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger
-                  className="flex items-center gap-1 text-gray-700 hover:text-[#1a1f5c] transition-colors font-bold text-lg"
+                  className="flex items-center gap-1 text-gray-700 hover:text-[#1a1f5c] transition-colors font-bold text-sm xl:text-base whitespace-nowrap"
                 >
-                  Startup <ChevronDown className="w-4 h-4" />
+                  Startup Packages <ChevronDown className="w-4 h-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuItem asChild>
@@ -309,7 +308,7 @@ export function HeaderNew() {
               {/* More Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger
-                  className="flex items-center gap-1 text-gray-700 hover:text-[#1a1f5c] transition-colors font-bold text-lg"
+                  className="flex items-center gap-1 text-gray-700 hover:text-[#1a1f5c] transition-colors font-bold text-sm xl:text-base whitespace-nowrap"
                 >
                   More <ChevronDown className="w-4 h-4" />
                 </DropdownMenuTrigger>
@@ -321,16 +320,16 @@ export function HeaderNew() {
                     <Link to="/contact-us">Contact Us</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/track-order">Track Your Order</Link>
+                    <Link to="/track-order">Track Order</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/terms-and-conditions">Terms and Conditions</Link>
+                    <Link to="/terms-and-conditions">Terms & Conditions</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/privacy-policy">Privacy & Policy</Link>
+                    <Link to="/privacy-policy">Privacy Policy</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/refund-cancellation-policy">Refund and Cancellation Policy</Link>
+                    <Link to="/refund-cancellation-policy">Refund & Cancellation Policy</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to="/faq">FAQ</Link>
@@ -346,7 +345,7 @@ export function HeaderNew() {
             </nav>
 
             {/* Right Side Actions */}
-            <div className="flex items-center gap-1 sm:gap-3">
+            <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
               <Link
                 to="/all-language-products"
                 className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1a1f5c] text-white font-semibold text-sm hover:bg-[#252b70] transition-colors"
@@ -358,11 +357,11 @@ export function HeaderNew() {
               {/* Wishlist */}
               <Link
                 to="/wishlist"
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors relative"
+                className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2.5 hover:bg-gray-100 rounded-full transition-colors relative"
                 aria-label="Wishlist"
               >
-                <Heart className="w-5 h-5 text-gray-700" />
-                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center">
+                <Heart className="w-5 h-5 text-gray-700" aria-hidden="true" />
+                  <span className="absolute top-0.5 right-0.5 bg-red-600 text-white text-[10px] w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center">
                   {getWishlistCount()}
                 </span>
               </Link>
@@ -371,11 +370,11 @@ export function HeaderNew() {
               {!isViewAllServicesPage && (
                 <Link
                   to="/cart"
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors relative"
+                  className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2.5 hover:bg-gray-100 rounded-full transition-colors relative"
                   aria-label="Cart"
                 >
-                  <ShoppingCart className="w-5 h-5 text-gray-700" />
-                  <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center">
+                  <ShoppingCart className="w-5 h-5 text-gray-700" aria-hidden="true" />
+                  <span className="absolute top-0.5 right-0.5 bg-blue-600 text-white text-[10px] w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center">
                     {getCartCount()}
                   </span>
                 </Link>
@@ -385,12 +384,16 @@ export function HeaderNew() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="flex items-center justify-center gap-2 min-h-[44px] min-w-[44px] p-2 hover:bg-gray-100 rounded-lg transition-colors"
                     aria-label="Select Currency"
                   >
                     <img 
                       src={currency.flag} 
                       alt={currency.code} 
+                      width={24}
+                      height={24}
+                      loading="eager"
+                      decoding="async"
                       className="w-6 h-6 rounded-full object-cover border border-gray-200"
                     />
                     <span className="text-sm font-medium text-gray-700 hidden sm:inline">
@@ -411,6 +414,10 @@ export function HeaderNew() {
                       <img 
                         src={curr.flag} 
                         alt={curr.code} 
+                        width={20}
+                        height={20}
+                        loading="lazy"
+                        decoding="async"
                         className="w-5 h-5 rounded-full object-cover border border-gray-200"
                       />
                       <div className="flex-1">
@@ -427,9 +434,11 @@ export function HeaderNew() {
 
               {/* Mobile Menu Toggle */}
               <button
-                className="lg:hidden p-2"
+                type="button"
+                className="lg:hidden min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2 flex-shrink-0"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label="Toggle menu"
+                aria-expanded={mobileMenuOpen}
               >
                 {mobileMenuOpen ? (
                   <X className="w-6 h-6" />
@@ -444,8 +453,8 @@ export function HeaderNew() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-gray-200 bg-white max-h-[calc(100vh-8rem)] overflow-y-auto">
-            <div className="px-4 sm:px-6 py-4 space-y-3">
+          <div className="lg:hidden absolute left-0 right-0 top-full z-40 border-t border-gray-200 bg-white shadow-lg max-h-[calc(100vh-8rem)] overflow-y-auto">
+            <div className="max-w-7xl mx-auto px-5 sm:px-8 py-4 space-y-2.5">
               {/* User Section in Mobile */}
               {user ? (
                 <div className="border-b pb-3 mb-3">
@@ -461,7 +470,7 @@ export function HeaderNew() {
                   <div className="space-y-2">
                     <Link
                       to="/my-profile"
-                      className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-lg"
+                      className="flex items-center gap-2 min-h-[44px] px-4 py-2.5 hover:bg-gray-100 rounded-lg"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <User className="w-4 h-4" />
@@ -469,7 +478,7 @@ export function HeaderNew() {
                     </Link>
                     <Link
                       to="/my-orders"
-                      className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-lg"
+                      className="flex items-center gap-2 min-h-[44px] px-4 py-2.5 hover:bg-gray-100 rounded-lg"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <Package className="w-4 h-4" />
@@ -477,7 +486,7 @@ export function HeaderNew() {
                     </Link>
                     <Link
                       to="/my-address"
-                      className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-lg"
+                      className="flex items-center gap-2 min-h-[44px] px-4 py-2.5 hover:bg-gray-100 rounded-lg"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <MapPin className="w-4 h-4" />
@@ -486,7 +495,7 @@ export function HeaderNew() {
                     {canAccessAdmin && (
                       <Link
                         to="/admin"
-                        className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-lg"
+                        className="flex items-center gap-2 min-h-[44px] px-4 py-2.5 hover:bg-gray-100 rounded-lg"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         <Shield className="w-4 h-4" />
@@ -499,7 +508,7 @@ export function HeaderNew() {
                         navigate('/');
                         setMobileMenuOpen(false);
                       }}
-                      className="w-full flex items-center gap-2 px-4 py-2 hover:bg-red-50 text-red-600 rounded-lg"
+                      className="w-full flex items-center gap-2 min-h-[44px] px-4 py-2.5 hover:bg-red-50 text-red-600 rounded-lg"
                     >
                       <LogOut className="w-4 h-4" />
                       Sign Out
@@ -507,72 +516,71 @@ export function HeaderNew() {
                   </div>
                 </div>
               ) : (
-                <button
-                  onClick={() => {
-                    navigate('/signin');
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                <Link
+                  to="/signin"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full flex items-center justify-center gap-2 min-h-[44px] px-4 py-2.5 bg-[#1a1f5c] text-white rounded-lg hover:bg-[#252b70] transition-colors font-medium"
                 >
                   <User className="w-4 h-4" />
                   Sign In
-                </button>
+                </Link>
               )}
               
               <Link
                 to="/"
-                className="block px-4 py-2 bg-[#1a1f5c] text-white rounded-lg text-center"
+                className="flex items-center justify-center min-h-[44px] px-4 py-2.5 bg-[#1a1f5c] text-white rounded-lg text-center"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Home
               </Link>
               <Link
                 to="/all-language-products"
-                className="block px-4 py-2 bg-blue-600 text-white rounded-lg text-center font-medium hover:bg-blue-700 transition-colors"
+                className="flex items-center justify-center min-h-[44px] px-4 py-2.5 bg-[#1a1f5c] text-white rounded-lg text-center font-medium hover:bg-[#252b70] transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Order Now
               </Link>
               <Link
                 to="/all-translation-products"
-                className="block px-4 py-2 hover:bg-gray-100 rounded-lg"
+                className="flex items-center min-h-[44px] px-4 py-2.5 hover:bg-gray-100 rounded-lg"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Translation Services
               </Link>
               <Link
                 to="/apostille/netherlands"
-                className="block px-4 py-2 hover:bg-gray-100 rounded-lg"
+                className="flex items-center min-h-[44px] px-4 py-2.5 hover:bg-gray-100 rounded-lg"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Apostille
+                Apostille Services
               </Link>
               <Link
                 to="/all-attestation-products"
-                className="block px-4 py-2 hover:bg-gray-100 rounded-lg"
+                className="flex items-center min-h-[44px] px-4 py-2.5 hover:bg-gray-100 rounded-lg"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Attestation Services
               </Link>
               <Link
                 to="/all-startup-products"
-                className="block px-4 py-2 hover:bg-gray-100 rounded-lg"
+                className="flex items-center min-h-[44px] px-4 py-2.5 hover:bg-gray-100 rounded-lg"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Startup Packages
               </Link>
               <Link
                 to="/services"
-                className="block px-4 py-2 hover:bg-gray-100 rounded-lg"
+                className="flex items-center min-h-[44px] px-4 py-2.5 hover:bg-gray-100 rounded-lg"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Services
               </Link>
               <Link
-                to="/contact"
-                className="block px-4 py-2 hover:bg-gray-100 rounded-lg"
-                onClick={() => setMobileMenuOpen(false)}>
-                Contact
+                to="/contact-us"
+                className="flex items-center min-h-[44px] px-4 py-2.5 hover:bg-gray-100 rounded-lg"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Contact Us
               </Link>
             </div>
           </div>
