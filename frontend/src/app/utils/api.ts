@@ -44,6 +44,17 @@ export function toApiUrl(path: string) {
     );
   }
 
+  // Prevent double prefixing if path already starts with API_URL or /api
+  if (API_URL && (path === API_URL || path.startsWith(`${API_URL}/`))) {
+    return path;
+  }
+  if (path.startsWith("/api/")) {
+    return path;
+  }
+  if (path.startsWith("/make-server-a67f0635")) {
+    return path.replace(/^\/make-server-a67f0635/, API_URL);
+  }
+
   return `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
 }
 

@@ -182,6 +182,7 @@ const CSP_REPORT_ONLY_DIRECTIVES = {
     "https://accounts.google.com",
   ],
   frameAncestors: ["'self'"],
+  upgradeInsecureRequests: null,
 };
 
 app.use(
