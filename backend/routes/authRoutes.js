@@ -17,34 +17,48 @@ function isPasswordPolicyValid(password) {
   return value.length >= 8 && /[A-Za-z]/.test(value) && /\d/.test(value);
 }
 
-const DEFAULT_FRONTEND_ORIGIN = (
-  process.env.FRONTEND_URL ||
-  process.env.FRONTEND_OAUTH_CALLBACK_URL ||
-  "http://localhost:5173"
-)
-  .split(",")[0]
-  .trim()
-  .replace(/\/auth\/callback.*/, "")
-  .replace(/\/$/, "");
+function getFrontendOrigin(req) {
+  const envOrigin = (
+    process.env.FRONTEND_URL ||
+    process.env.FRONTEND_OAUTH_CALLBACK_URL ||
+    process.env.BACKEND_PUBLIC_URL ||
+    ""
+  )
+    .split(",")[0]
+    .trim()
+    .replace(/\/auth\/callback.*/, "")
+    .replace(/\/$/, "");
 
-const DEFAULT_FRONTEND_CALLBACK =
-  process.env.FRONTEND_OAUTH_CALLBACK_URL ||
-  process.env.FRONTEND_URL ||
-  "http://localhost:5173/auth/callback";
+  if (envOrigin) return envOrigin;
+  if (req && req.get("host")) {
+    const proto = req.protocol || "http";
+    return `${proto}://${req.get("host")}`.replace(/\/$/, "");
+  }
+  return "https://honeyuniversal.com";
+}
 
-function resolveRedirectTarget(value) {
-  if (!value) return DEFAULT_FRONTEND_CALLBACK;
+function getDefaultFrontendCallback(req) {
+  if (process.env.FRONTEND_OAUTH_CALLBACK_URL) {
+    return process.env.FRONTEND_OAUTH_CALLBACK_URL;
+  }
+  const origin = getFrontendOrigin(req);
+  return `${origin}/auth/callback`;
+}
+
+function resolveRedirectTarget(value, req) {
+  const fallback = getDefaultFrontendCallback(req);
+  if (!value) return fallback;
 
   const raw = String(value).trim();
-  if (!raw) return DEFAULT_FRONTEND_CALLBACK;
+  if (!raw) return fallback;
 
   if (/^https?:\/\//i.test(raw)) return raw;
   if (raw.startsWith("/")) {
-    const base = DEFAULT_FRONTEND_CALLBACK.replace(/\/auth\/callback.*/, "");
+    const base = getFrontendOrigin(req);
     return `${base}${raw}`;
   }
 
-  return DEFAULT_FRONTEND_CALLBACK;
+  return fallback;
 }
 
 router.post("/auth/signup", async (req, res, next) => {
@@ -101,7 +115,8 @@ router.post("/auth/forgot-password", async (req, res) => {
     }
 
     const token = await userService.createPasswordResetToken(user.id, 30);
-    const resetUrl = `${DEFAULT_FRONTEND_ORIGIN}/reset-password?token=${encodeURIComponent(token)}`;
+    const frontendOrigin = getFrontendOrigin(req);
+    const resetUrl = `${frontendOrigin}/reset-password?token=${encodeURIComponent(token)}`;
 
     if (process.env.RESEND_API_KEY) {
       await resend.emails.send({
@@ -314,7 +329,7 @@ router.get("/auth/google", (req, res, next) => {
     });
   }
 
-  const redirectTo = resolveRedirectTarget(req.query.redirectTo);
+  const redirectTo = resolveRedirectTarget(req.query.redirectTo, req);
   return passport.authenticate("google", {
     session: false,
     scope: ["profile", "email"],
@@ -337,7 +352,7 @@ router.get("/auth/google/callback", (req, res, next) => {
     try {
       if (error) return next(error);
       if (!user) {
-        const target = resolveRedirectTarget(req.query.state);
+        const target = resolveRedirectTarget(req.query.state, req);
         const message = encodeURIComponent(info?.message || "Google sign-in failed");
         return res.redirect(`${target}?error=${message}`);
       }
@@ -345,7 +360,7 @@ router.get("/auth/google/callback", (req, res, next) => {
       await userService.touchLastLogin(user.id);
       const refreshedUser = await userService.findById(user.id);
       const token = signToken(refreshedUser || user);
-      const target = resolveRedirectTarget(req.query.state);
+      const target = resolveRedirectTarget(req.query.state, req);
       const redirectUrl = new URL(target);
       redirectUrl.searchParams.set("code", token);
       redirectUrl.searchParams.set("provider", "google");

@@ -24,7 +24,7 @@ app.set("trust proxy", 1);
 // CORS CONFIGURATION
 // ======================================================
 
-const allowedOrigins = new Set([
+const staticAllowedOrigins = new Set([
   "https://honeyuniversal.com",
   "https://www.honeyuniversal.com",
   "http://localhost:3000",
@@ -35,26 +35,45 @@ const allowedOrigins = new Set([
   "http://127.0.0.1:4173",
 ]);
 
-app.use(
-  cors({
-    origin(origin, callback) {
-      // Allow requests without Origin header (same-origin browser navigation, curl, Postman, mobile apps)
-      if (!origin) {
-        return callback(null, true);
-      }
+function getCorsOptions(req, callback) {
+  const origin = req.get("Origin");
 
-      const normalized = origin.trim().replace(/\/$/, "");
-      if (allowedOrigins.has(normalized)) {
-        return callback(null, true);
-      }
+  // Allow requests without Origin header (same-origin browser navigation, curl, Postman, mobile apps)
+  if (!origin) {
+    return callback(null, { origin: true, credentials: true });
+  }
 
-      const corsError = new Error(`CORS blocked for origin: ${origin}`);
-      corsError.status = 403;
-      return callback(corsError);
-    },
-    credentials: true,
-  })
-);
+  const normalized = origin.trim().replace(/\/$/, "");
+
+  // Read FRONTEND_URL and FRONTEND_URLS environment variables (comma-separated)
+  const envOrigins = [process.env.FRONTEND_URL, process.env.FRONTEND_URLS]
+    .filter(Boolean)
+    .flatMap((val) => String(val).split(","))
+    .map((val) => val.trim().replace(/\/$/, ""))
+    .filter(Boolean);
+
+  const allowedOriginsSet = new Set([...staticAllowedOrigins, ...envOrigins]);
+  if (allowedOriginsSet.has(normalized)) {
+    return callback(null, { origin: true, credentials: true });
+  }
+
+  // Same-origin requests: Origin equal to the site's own host (e.g. req.headers.host)
+  try {
+    const originUrl = new URL(normalized);
+    const hostHeader = req.get("host"); // Takes X-Forwarded-Host into account via trust proxy
+    if (hostHeader && originUrl.host.toLowerCase() === hostHeader.toLowerCase()) {
+      return callback(null, { origin: true, credentials: true });
+    }
+  } catch (err) {
+    // Malformed Origin header
+  }
+
+  const corsError = new Error(`CORS blocked for origin: ${origin}`);
+  corsError.status = 403;
+  return callback(corsError);
+}
+
+app.use(cors(getCorsOptions));
 
 // ======================================================
 // BODY PARSER

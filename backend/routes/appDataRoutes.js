@@ -582,10 +582,15 @@ router.post("/subscribe-email", async (req, res, next) => {
     const subscriber = await siteData.saveSubscriber(email, { subscribedAt: now(), status: "active" });
 
     if (process.env.RESEND_API_KEY) {
-      const apiBase = (process.env.BACKEND_PUBLIC_URL || process.env.FRONTEND_URL || "https://honeyuniversal.com")
+      const envApiBase = (process.env.BACKEND_PUBLIC_URL || process.env.FRONTEND_URL || "")
         .split(",")[0]
         .trim()
         .replace(/\/$/, "");
+      const apiBase =
+        envApiBase ||
+        (req.get("host")
+          ? `${req.protocol || "https"}://${req.get("host")}`
+          : "https://honeyuniversal.com");
       const unsubToken = makeUnsubscribeToken(email);
       const unsubscribeUrl = `${apiBase}/api/unsubscribe-email?email=${encodeURIComponent(email)}&token=${unsubToken}`;
       resend.emails

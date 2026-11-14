@@ -10,9 +10,24 @@ try {
   GoogleStrategy = null;
 }
 
-const GOOGLE_CALLBACK_URL =
-  process.env.GOOGLE_CALLBACK_URL ||
-  "http://localhost:3000/api/auth/google/callback";
+function resolveGoogleCallbackUrl() {
+  if (process.env.GOOGLE_CALLBACK_URL) {
+    return process.env.GOOGLE_CALLBACK_URL;
+  }
+  const base = (
+    process.env.BACKEND_PUBLIC_URL ||
+    process.env.FRONTEND_URL ||
+    ""
+  )
+    .split(",")[0]
+    .trim()
+    .replace(/\/$/, "");
+
+  if (base) {
+    return `${base}/api/auth/google/callback`;
+  }
+  return "http://localhost:3000/api/auth/google/callback";
+}
 
 function configurePassport() {
   passport.use(
@@ -70,7 +85,7 @@ function configurePassport() {
         {
           clientID: process.env.GOOGLE_CLIENT_ID,
           clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          callbackURL: GOOGLE_CALLBACK_URL,
+          callbackURL: resolveGoogleCallbackUrl(),
         },
         async (accessToken, refreshToken, profile, done) => {
           try {

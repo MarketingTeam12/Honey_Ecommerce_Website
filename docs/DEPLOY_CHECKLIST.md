@@ -81,7 +81,7 @@ In Hostinger hPanel → **Websites** → **Node.js**:
 |---|---|---|
 | `PORT` | `3000` (or injected by Hostinger) | Server listen port |
 | `NODE_ENV` | `production` | Enables production security & optimizations |
-| `FRONTEND_URL` | `https://honeyuniversal.com,https://www.honeyuniversal.com` | Allowed CORS origins (restricted) |
+| `FRONTEND_URL` | `https://honeyuniversal.com,https://www.honeyuniversal.com,https://darkorange-weasel-454822.hostingersite.com` | Allowed CORS origins (comma-separated; includes Hostinger test domain & staging domains) |
 | `BACKEND_PUBLIC_URL` | `https://honeyuniversal.com` | Public URL for email links |
 | `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE` | Hostinger MySQL credentials | Strong credentials |
 | `JWT_SECRET` | Signs user session tokens | High-entropy random string |
