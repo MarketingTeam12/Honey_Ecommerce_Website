@@ -176,8 +176,17 @@ app.use("/make-server-a67f0635/api/s3", s3Routes);
 app.use("/api/s3", s3Routes);
 
 // ======================================================
-// TEST ROUTE
+// HEALTH CHECK & TEST ROUTE
 // ======================================================
+
+app.get(["/health", "/api/health"], (req, res) => {
+  res.json({
+    status: "ok",
+    message: "Server is running",
+    storage: "mysql",
+    timestamp: new Date().toISOString(),
+  });
+});
 
 app.get("/", (req, res) => {
   res.send("Backend Running");
