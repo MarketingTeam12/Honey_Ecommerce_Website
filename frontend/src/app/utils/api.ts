@@ -26,14 +26,14 @@ export const API_BASE_URL = (() => {
     }
   }
 
-  if (typeof window !== "undefined") {
+  if (import.meta.env.DEV && typeof window !== "undefined") {
     return window.location.origin;
   }
-  return "http://localhost:3000";
+  return "/api";
 })();
 
-export const API_PREFIX = "/make-server-a67f0635";
-export const API_URL = `${API_BASE_URL}${API_PREFIX}`;
+export const API_PREFIX = API_BASE_URL.endsWith("/api") ? "" : "/make-server-a67f0635";
+export const API_URL = `${API_BASE_URL}${API_PREFIX}`.replace(/\/$/, "") || "/api";
 const TOKEN_KEY = "honey_access_token";
 
 export function toApiUrl(path: string) {

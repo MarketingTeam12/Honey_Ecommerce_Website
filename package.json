@@ -1,0 +1,13 @@
+{
+  "name": "honey-universal-ecommerce",
+  "version": "1.0.0",
+  "description": "Honey Universal Services - Single Hostinger Node.js Application",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "npm --prefix frontend install && npm --prefix frontend run build && npm --prefix backend install --omit=dev",
+    "start": "node backend/server.js"
+  }
+}
