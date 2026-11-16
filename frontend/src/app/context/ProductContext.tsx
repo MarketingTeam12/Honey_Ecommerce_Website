@@ -124,9 +124,15 @@ function toStringArray(value: unknown): string[] {
   return [];
 }
 
+function cleanImageUrl(url: string): string {
+  if (typeof url !== 'string') return url;
+  return url.replace(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/api\/s3\/files\/|\/s3\/files\/)/i, '/api/s3/files/');
+}
+
 function normalizeProduct(product: any): Product {
   const imagesFromMetadata = toStringArray(product?.metadata?.images);
   const images = toStringArray(product?.images);
+  const resolvedImages = (images.length > 0 ? images : imagesFromMetadata).map(cleanImageUrl);
   return {
     ...product,
     id: String(product?.id || '').trim() || `product-${Date.now()}`,
@@ -148,7 +154,7 @@ function normalizeProduct(product: any): Product {
     sku: product?.sku ? String(product.sku) : undefined,
     barcode: product?.barcode ? String(product.barcode) : undefined,
     tags: Array.isArray(product?.tags) ? product.tags : [],
-    images: images.length > 0 ? images : imagesFromMetadata,
+    images: resolvedImages,
     metaTitle: product?.metaTitle ? String(product.metaTitle) : undefined,
     metaDescription: product?.metaDescription ? String(product.metaDescription) : undefined,
     createdAt: product?.createdAt || new Date().toISOString(),

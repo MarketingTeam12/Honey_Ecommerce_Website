@@ -310,14 +310,22 @@ app.post(["/create-order", "/api/create-order"], async (req, res) => {
 
     res.json(order);
   } catch (error) {
+    const errorDescription =
+      error?.error?.description ||
+      error?.description ||
+      error?.message ||
+      "Unknown error";
+
     console.error(
       "Razorpay order creation failed:",
-      error
+      errorDescription
     );
 
-    res.status(500).json({
+    const statusCode = Number(error?.statusCode || error?.status) || 500;
+
+    res.status(statusCode).json({
       message: "Order creation failed",
-      error: error?.message || "Unknown error",
+      error: errorDescription,
     });
   }
 });

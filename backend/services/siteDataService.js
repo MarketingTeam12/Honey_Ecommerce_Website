@@ -30,18 +30,24 @@ function parseJson(value) {
   }
 }
 
+function normalizeImageUrl(url) {
+  if (typeof url !== "string") return url;
+  return url.replace(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/api\/s3\/files\/|\/s3\/files\/)/i, "/api/s3/files/");
+}
+
 function normalizeProduct(row) {
   if (!row) return null;
   const metadata = parseJson(row.metadata);
   const rowImages = parseJson(row.images);
   const metadataImages = metadata && typeof metadata === "object" ? metadata.images : null;
-  const normalizedImages = Array.isArray(rowImages)
+  const rawImages = Array.isArray(rowImages)
     ? rowImages
     : Array.isArray(metadataImages)
       ? metadataImages
       : row.image_url
         ? [row.image_url]
         : [];
+  const normalizedImages = rawImages.map(normalizeImageUrl);
   return {
     ...row,
     oldPrice: row.old_price,
@@ -49,7 +55,7 @@ function normalizeProduct(row) {
     // field as `compareAtPrice`, not `oldPrice` — without this alias the
     // saved compare price was never actually visible to the UI.
     compareAtPrice: row.old_price !== null && row.old_price !== undefined ? Number(row.old_price) : null,
-    imageUrl: row.image_url,
+    imageUrl: normalizeImageUrl(row.image_url),
     images: normalizedImages,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -148,8 +154,8 @@ function normalizeWorkSample(row) {
   const metaObj = metadata && typeof metadata === "object" ? metadata : {};
   return {
     ...row,
-    imageUrl: row.image_url,
-    fileUrl: row.file_url,
+    imageUrl: normalizeImageUrl(row.image_url),
+    fileUrl: normalizeImageUrl(row.file_url),
     fileName: metaObj.fileName || metaObj.file_name || row.file_name || "",
     status: metaObj.status || row.status || "active",
     order: Number(metaObj.order ?? row.order ?? 0),
