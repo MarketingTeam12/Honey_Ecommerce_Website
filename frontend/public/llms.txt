@@ -1,0 +1,59 @@
+# Honey Universal Services (Honey Translations)
+> Professional Certified Translation, Sworn Translation, Apostille, and Embassy Attestation Services in India.
+
+Official Website: https://honeyuniversal.com
+Contact Email: salesteam@honeytranslations.com
+Phone / WhatsApp: +91 72990 05577
+Headquarters: Chennai, Tamil Nadu, India (Pan-India and International Services)
+
+## About the Organization
+Honey Universal Digital Private Limited (operating as Honey Translation Services / Honey Universal Services) is an ISO 9001:2015 and ISO 17100:2015 certified language service and legal documentation provider in India. We provide certified, sworn, notarized translations, MEA apostille services, and embassy attestations accepted globally by government agencies, immigration departments, courts, and educational institutions.
+
+## Core Services
+
+### 1. Certified Translation
+* **Description:** Official document translations stamped, sealed, and certified on company letterhead with a certificate of authenticity.
+* **Accepted By:** USCIS (USA), IRCC (Canada), UKVI (UK), Australian Home Affairs, MEA India, European embassies, universities (WES, IQAS), and courts.
+* **Common Documents:**
+  * Academic transcripts, degrees, diplomas, mark sheets.
+  * Vital records: Birth certificates, marriage certificates, death certificates, divorce decrees.
+  * Legal documents: Affidavits, police clearance certificates (PCC), court orders, powers of attorney (POA).
+  * Business & Financial: Bank statements, audited financial reports, tax returns, incorporation documents.
+* **Turnaround Time:** 24 to 48 hours (Express 12-hour delivery available).
+* **Delivery:** Instant digitally signed PDF via email + physical hard copies delivered Pan-India.
+
+### 2. Sworn Translation
+* **Description:** Translations completed and stamped by court-approved, sworn translators for European and Latin American jurisdictions.
+* **Key Languages:** German (for Germany/Austria), French (for France/Belgium), Spanish (for Spain/Latin America), Italian, Dutch, and Portuguese.
+* **Use Cases:** Work visas, student admissions, family reunification, permanent residency, and international litigation.
+
+### 3. Apostille Services (Hague Convention)
+* **Description:** MEA (Ministry of External Affairs, Government of India) Apostille stickers on personal, educational, and commercial documents under the Hague Convention of 1961.
+* **Popular Countries:** Netherlands, Germany, USA, UK, France, Australia, Italy, Poland, Spain, Japan, South Korea.
+* **Process:** Notary attestation -> State Home Department / HRD / SDM -> MEA Apostille.
+
+### 4. Embassy Attestation
+* **Description:** Consular and embassy legalization for non-Hague member countries.
+* **Key Destinations:** UAE, Kuwait, Qatar, Saudi Arabia, Bahrain, Oman, Malaysia, China.
+* **Process:** Notary -> SDM/State HRD -> MEA -> Target Country Embassy/Consulate -> MOFA.
+
+### 5. Startup & Business Incorporation Packages
+* **Description:** End-to-end legal and business documentation services including Company Incorporation, Trademark Registration, GST Registration, and ISO Compliance.
+
+## Key Features & Quality Assurance
+* **ISO 17100:2015 Certified:** Specialized translation quality management system with native subject-matter translators and dual-stage proofreading.
+* **Complete Confidentiality & Security:** 256-bit encrypted file storage via AWS S3 private signed URLs; NDAs with all linguists; GDPR and DPDP Act 2023 compliant.
+* **Transparent Pricing:** Clear per-page pricing in INR with zero hidden fees.
+
+## Links & Site Map
+* Home: https://honeyuniversal.com/
+* About: https://honeyuniversal.com/about
+* Certified Translation: https://honeyuniversal.com/product/certified-translation
+* Sworn Translation: https://honeyuniversal.com/product/sworn-translation
+* Apostille Services: https://honeyuniversal.com/all-apostille-products
+* Netherlands Apostille: https://honeyuniversal.com/apostille/netherlands
+* Work Samples: https://honeyuniversal.com/work-sample
+* Blog & Knowledge Base: https://honeyuniversal.com/blog
+* FAQ: https://honeyuniversal.com/faq
+* Contact Us: https://honeyuniversal.com/contact
+* XML Sitemap: https://honeyuniversal.com/sitemap.xml
