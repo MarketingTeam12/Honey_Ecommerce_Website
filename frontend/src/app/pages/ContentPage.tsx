@@ -464,10 +464,39 @@ export function ContentPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">ISO 17100:2015 Certification</h2>
-            <p className="text-gray-700 leading-relaxed">
-              We are proud to be  certified for our Quality Management System. This certification, awarded by AQC Middle East LLC and accredited by IAS and IAF, demonstrates our commitment to maintaining the highest quality standards in all our services.
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Quality & ISO Certifications</h2>
+            <p className="text-gray-700 leading-relaxed mb-3">
+              We are proud to be <strong>ISO 9001:2015</strong> (Quality Management System) and <strong>ISO 17100:2015</strong> (Translation Services Quality Standard) certified. These certifications, accredited by IAS and IAF, demonstrate our rigorous adherence to global linguistic, confidentiality, and procedural standards.
             </p>
+            <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r-lg">
+              <p className="text-sm text-gray-800">
+                <strong>Quality Assurance Guarantee:</strong> Every translation undergoes dual-stage proofreading by native subject-matter experts, accompanied by an official certificate of authenticity with stamp and signature.
+              </p>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Corporate & Registered Details</h2>
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 space-y-3 text-sm text-gray-700">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <span className="font-semibold text-gray-900 block">Legal Entity Name</span>
+                  <span>Honey Universal Digital Private Limited</span>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-900 block">Brand Names</span>
+                  <span>Honey Translation Services / Honey Universal Services</span>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-900 block">Operational Headquarters</span>
+                  <span>Chennai, Tamil Nadu, India (Pan-India & Global Delivery)</span>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-900 block">Official Support Channels</span>
+                  <span>salesteam@honeytranslations.com &bull; +91 72990 05577</span>
+                </div>
+              </div>
+            </div>
           </section>
 
           <section>

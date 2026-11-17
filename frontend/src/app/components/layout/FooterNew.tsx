@@ -1,4 +1,4 @@
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, Youtube } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -134,15 +134,6 @@ export function FooterNew() {
                   Terms & Conditions
                 </Link>
               </li>
-              <li>
-                <Link
-                  to="/terms-of-service"
-                  onClick={scrollToTop}
-                  className="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2 text-left min-h-[44px] md:min-h-0 py-1 md:py-0"
-                >
-                  Terms of Service
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -254,13 +245,13 @@ export function FooterNew() {
                 <Instagram className="w-5 h-5" aria-hidden="true" />
               </a>
               <a
-                href="https://www.youtube.com/channel/UCXv7v7v7v7v7v7v7v7v7v7"
+                href="https://wa.me/917299005577?text=Hello%20Honey%20Translations"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-11 h-11 min-w-[44px] min-h-[44px] bg-gray-800 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
-                aria-label="YouTube"
+                className="w-11 h-11 min-w-[44px] min-h-[44px] bg-gray-800 rounded-full flex items-center justify-center hover:bg-emerald-600 transition-colors"
+                aria-label="WhatsApp"
               >
-                <Youtube className="w-5 h-5" aria-hidden="true" />
+                <MessageCircle className="w-5 h-5 text-emerald-400" aria-hidden="true" />
               </a>
             </div>
           </div>
@@ -309,17 +300,22 @@ export function FooterNew() {
           </div>
         </div>
 
-        <div className="border-t border-gray-800 pt-4 text-center flex flex-col sm:flex-row items-center justify-center gap-3">
-          <p className="text-gray-300">
-            &copy; {new Date().getFullYear()} Honey Universal Digital Private Limited. All rights reserved.
+        <div className="border-t border-gray-800 pt-4 text-center flex flex-col items-center justify-center gap-2">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <p className="text-gray-300">
+              &copy; {new Date().getFullYear()} Honey Universal Digital Private Limited. All rights reserved.
+            </p>
+            <button
+              type="button"
+              onClick={openSettings}
+              className="min-h-[44px] px-2 text-sm text-gray-300 underline hover:text-white transition-colors"
+            >
+              Cookie settings
+            </button>
+          </div>
+          <p className="text-xs text-gray-400">
+            ISO 9001:2015 &amp; ISO 17100:2015 Certified Language Service Provider &bull; Chennai, Tamil Nadu, India &bull; Global Acceptance (USCIS, IRCC, MEA, Embassies &amp; Courts)
           </p>
-          <button
-            type="button"
-            onClick={openSettings}
-            className="min-h-[44px] px-2 text-sm text-gray-300 underline hover:text-white transition-colors"
-          >
-            Cookie settings
-          </button>
         </div>
       </div>
     </footer>
