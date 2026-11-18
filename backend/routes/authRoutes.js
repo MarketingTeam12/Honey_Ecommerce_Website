@@ -94,6 +94,29 @@ router.post("/auth/signup", async (req, res, next) => {
       termsAcceptedAt: resolvedConsentAt,
     });
 
+    if (user && user.email && process.env.RESEND_API_KEY) {
+      resend.emails
+        .send({
+          from: process.env.RESEND_FROM_EMAIL || "Honey Universal <support@honeyuniversal.com>",
+          to: [user.email],
+          subject: "Welcome to Honey Universal Services",
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+              <h2 style="color: #1a1f5c;">Welcome to Honey Universal Services!</h2>
+              <p>Hello ${user.name || "Customer"},</p>
+              <p>Your account has been registered successfully. You can now track your orders, download certified translations, and manage invoices.</p>
+              <p style="margin: 20px 0;">
+                <a href="https://honeyuniversal.com/login" style="background-color: #1a1f5c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Log in to Your Account</a>
+              </p>
+              <p>For any queries, please reach out to us at <a href="mailto:support@honeyuniversal.com">support@honeyuniversal.com</a>.</p>
+              <br/>
+              <p style="color: #666; font-size: 13px;">Honey Universal Digital Private Limited<br/>Chennai, Tamil Nadu, India</p>
+            </div>
+          `,
+        })
+        .catch((err) => console.warn("Welcome email dispatch failed:", err.message));
+    }
+
     return res.status(201).json({
       ...authResponse(user),
       message: "Account created successfully",

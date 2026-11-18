@@ -1057,12 +1057,42 @@ router.get("/orders/:id", optionalAuth, async (req, res, next) => {
 
 router.patch(["/orders/:id/status", "/orders/:id/notes"], requireAuth, async (req, res, next) => {
   try {
-    const order = req.path.endsWith("/status")
+    const isStatusUpdate = req.path.endsWith("/status");
+    const order = isStatusUpdate
       ? await siteData.updateOrderStatus(req.params.id, req.body?.status, {
           tracking_number: req.body?.tracking_number,
           shipping_carrier: req.body?.shipping_carrier,
         })
       : await siteData.updateOrderNotes(req.params.id, req.body?.notes || req.body?.admin_notes);
+
+    if (isStatusUpdate && order) {
+      const recipientEmail = order.customer_email || order.customerEmail;
+      const orderNum = order.order_number || order.orderNumber || req.params.id;
+      const newStatus = req.body?.status;
+      const trackingNumber = req.body?.tracking_number || order.tracking_number;
+
+      if (recipientEmail && process.env.RESEND_API_KEY) {
+        resend.emails
+          .send({
+            from: process.env.RESEND_FROM_EMAIL || "Honey Universal <support@honeyuniversal.com>",
+            to: [recipientEmail],
+            subject: `Order #${orderNum} Status Update: ${String(newStatus || '').toUpperCase()}`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+                <h2 style="color: #1a1f5c;">Honey Universal Services</h2>
+                <p>Dear Customer,</p>
+                <p>Your order <strong>#${orderNum}</strong> status has been updated to: <span style="font-weight: bold; color: #2563eb;">${String(newStatus || '').toUpperCase()}</span>.</p>
+                ${trackingNumber ? `<p><strong>Tracking Number:</strong> ${trackingNumber}</p>` : ''}
+                <p>You can track your live order progress anytime at: <a href="https://honeyuniversal.com/track-order" style="color: #2563eb;">Track Your Order</a>.</p>
+                <br/>
+                <p style="color: #666; font-size: 13px;">Honey Universal Digital Private Limited<br/>Support: support@honeyuniversal.com | +91 72990 05577</p>
+              </div>
+            `,
+          })
+          .catch((err) => console.warn("Order status email dispatch failed:", err.message));
+      }
+    }
+
     res.json({ success: true, order });
   } catch (error) {
     next(error);

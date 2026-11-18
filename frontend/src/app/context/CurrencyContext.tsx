@@ -15,10 +15,10 @@ export interface Currency {
 
 const currencies: Currency[] = [
   { code: 'INR', symbol: '₹', flag: indiaFlag, rate: 1, name: 'Indian Rupee' },
-  { code: 'USD', symbol: '$', flag: usaFlag, rate: 0.012, name: 'US Dollar' },
-  { code: 'EUR', symbol: '€', flag: euFlag, rate: 0.011, name: 'Euro' },
-  { code: 'GBP', symbol: '£', flag: britishFlag, rate: 0.0095, name: 'British Pound' },
-  { code: 'CAD', symbol: 'C$', flag: canadaFlag, rate: 0.017, name: 'Canadian Dollar' },
+  { code: 'USD', symbol: '$', flag: usaFlag, rate: 0.0118, name: 'US Dollar' },
+  { code: 'EUR', symbol: '€', flag: euFlag, rate: 0.0109, name: 'Euro' },
+  { code: 'GBP', symbol: '£', flag: britishFlag, rate: 0.00935, name: 'British Pound' },
+  { code: 'CAD', symbol: 'C$', flag: canadaFlag, rate: 0.0164, name: 'Canadian Dollar' },
 ];
 
 interface CurrencyContextType {
