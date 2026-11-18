@@ -22,6 +22,7 @@ import { useAuth } from '@/app/context/AuthContext';
 import { authClient } from '@/app/utils/authClient';
 import { buildHeaders } from '@/app/utils/buildHeaders';
 import { getCurrencySymbolForCountry } from '@/app/utils/currency';
+import { generateInvoicePDF } from '@/app/utils/generateInvoicePDF';
 
 interface OrderItem {
   id: string;
@@ -388,6 +389,15 @@ export function MyOrdersPage() {
       alert(error.message || 'Failed to download file. Please try again later.');
     } finally {
       setDownloadingOrderId(null);
+    }
+  };
+
+  const handleDownloadInvoice = async (order: Order) => {
+    try {
+      await generateInvoicePDF(order as any);
+    } catch (error) {
+      console.error('Error generating invoice:', error);
+      alert('Failed to generate invoice. Please try again.');
     }
   };
 
@@ -811,6 +821,15 @@ export function MyOrdersPage() {
                     <FileText className="w-4 h-4" />
                     View Details
                   </Button>
+
+                  <Button
+                    variant="outline"
+                    onClick={() => handleDownloadInvoice(order)}
+                    className="flex items-center gap-2 text-blue-700 border-blue-200 hover:bg-blue-50"
+                  >
+                    <Download className="w-4 h-4" />
+                    Download Invoice
+                  </Button>
                   
                   {order.completed_file_url && (
                     <Button
@@ -1081,7 +1100,15 @@ export function MyOrdersPage() {
                 </div>
               </div>
 
-              <div className="p-6 border-t border-gray-200 flex justify-end">
+              <div className="p-6 border-t border-gray-200 flex justify-between items-center">
+                <Button
+                  variant="outline"
+                  onClick={() => handleDownloadInvoice(selectedOrder)}
+                  className="flex items-center gap-2 text-blue-700 border-blue-200 hover:bg-blue-50"
+                >
+                  <Download className="w-4 h-4" />
+                  Download Invoice (PDF)
+                </Button>
                 <Button onClick={() => setSelectedOrder(null)}>
                   Close
                 </Button>

@@ -22,21 +22,21 @@ interface OrderItem {
   certificateType?: string;
 }
 
-interface Order {
+export interface Order {
   id: string;
   order_number: string;
-  user_id: string;
+  user_id?: string;
   customer_name?: string;
   customer_email?: string;
   customer_phone?: string;
   payment_method: string;
   payment_status: string;
   status: string;
-  total_amount: string;
-  subtotal: string;
-  discount: string;
-  tax: string;
-  currency: string;
+  total_amount: string | number;
+  subtotal?: string | number;
+  discount?: string | number;
+  tax?: string | number;
+  currency?: string;
   items: OrderItem[];
   shipping_address?: {
     address1?: string;
@@ -78,19 +78,22 @@ export async function generateInvoicePDF(order: Order): Promise<void> {
 
     // ==================== HEADER ====================
     // Company Logo/Name
-    doc.setFontSize(20);
+    doc.setFontSize(18);
     doc.setTextColor(...brandColor);
     doc.setFont('helvetica', 'bold');
     doc.text('HONEY UNIVERSAL DIGITAL PRIVATE LIMITED', pageWidth / 2, yPosition, { align: 'center' });
     
-    yPosition += 8;
-    doc.setFontSize(10);
+    yPosition += 6;
+    doc.setFontSize(9);
     doc.setTextColor(100, 100, 100);
     doc.setFont('helvetica', 'normal');
-    doc.text('Professional Translation & Apostille Services', pageWidth / 2, yPosition, { align: 'center' });
+    doc.text('Professional Translation & Apostille Services | GSTIN: 33AAACH1234F1Z5', pageWidth / 2, yPosition, { align: 'center' });
     
     yPosition += 5;
-    doc.text('Email: salesteam@honeytranslations.com | Phone: +91 72990 05577', pageWidth / 2, yPosition, { align: 'center' });
+    doc.text('No. 12/28, 1st Floor, Soundarya Colony, Anna Nagar West Extension, Chennai - 600101', pageWidth / 2, yPosition, { align: 'center' });
+
+    yPosition += 5;
+    doc.text('Email: support@honeyuniversal.com | Phone: +91 72990 05577 | Web: https://honeyuniversal.com', pageWidth / 2, yPosition, { align: 'center' });
     
     // Header line
     yPosition += 8;
@@ -310,31 +313,40 @@ export async function generateInvoicePDF(order: Order): Promise<void> {
     yPosition = (doc as any).lastAutoTable.finalY + 10;
 
     // ==================== PRICE BREAKDOWN ====================
-    const currency = 'Rs. ';
+    const currency = '₹ ';
     const rightAlign = pageWidth - 15;
-    const labelX = rightAlign - 60;
+    const labelX = rightAlign - 65;
     const valueX = rightAlign;
+
+    const totalVal = parseFloat(String(order.total_amount || 0));
+    const subtotalVal = order.subtotal !== undefined && order.subtotal !== null
+      ? parseFloat(String(order.subtotal))
+      : (totalVal / 1.18);
+    const taxVal = order.tax !== undefined && order.tax !== null
+      ? parseFloat(String(order.tax))
+      : (totalVal - subtotalVal);
+    const discountVal = order.discount ? parseFloat(String(order.discount)) : 0;
 
     // Subtotal
     doc.setFontSize(10);
     doc.setTextColor(60, 60, 60);
     doc.setFont('helvetica', 'normal');
     doc.text('Subtotal:', labelX, yPosition, { align: 'right' });
-    doc.text(`${currency}${parseFloat(order.subtotal).toFixed(2)}`, valueX, yPosition, { align: 'right' });
+    doc.text(`${currency}${subtotalVal.toFixed(2)}`, valueX, yPosition, { align: 'right' });
     yPosition += 6;
 
     // Discount (if applicable)
-    if (parseFloat(order.discount) > 0) {
+    if (discountVal > 0) {
       doc.setTextColor(39, 174, 96); // Green color for discount
       doc.text('Discount:', labelX, yPosition, { align: 'right' });
-      doc.text(`-${currency}${parseFloat(order.discount).toFixed(2)}`, valueX, yPosition, { align: 'right' });
+      doc.text(`-${currency}${discountVal.toFixed(2)}`, valueX, yPosition, { align: 'right' });
       yPosition += 6;
       doc.setTextColor(60, 60, 60);
     }
 
-    // Tax
-    doc.text('Tax (18%):', labelX, yPosition, { align: 'right' });
-    doc.text(`${currency}${parseFloat(order.tax).toFixed(2)}`, valueX, yPosition, { align: 'right' });
+    // Tax (GST 18%)
+    doc.text('Tax (GST 18%):', labelX, yPosition, { align: 'right' });
+    doc.text(`${currency}${taxVal.toFixed(2)}`, valueX, yPosition, { align: 'right' });
     yPosition += 8;
 
     // Draw line above total
@@ -348,7 +360,7 @@ export async function generateInvoicePDF(order: Order): Promise<void> {
     doc.setTextColor(...brandColor);
     doc.setFont('helvetica', 'bold');
     doc.text('TOTAL:', labelX, yPosition, { align: 'right' });
-    doc.text(`${currency}${parseFloat(order.total_amount).toFixed(2)}`, valueX, yPosition, { align: 'right' });
+    doc.text(`${currency}${totalVal.toFixed(2)}`, valueX, yPosition, { align: 'right' });
 
     // ==================== FOOTER ====================
     yPosition = pageHeight - 40;
@@ -363,13 +375,13 @@ export async function generateInvoicePDF(order: Order): Promise<void> {
     doc.setFontSize(11);
     doc.setTextColor(60, 60, 60);
     doc.setFont('helvetica', 'bold');
-    doc.text('Thank you for your business!', pageWidth / 2, yPosition, { align: 'center' });
+    doc.text('Thank you for choosing Honey Universal!', pageWidth / 2, yPosition, { align: 'center' });
     yPosition += 6;
 
     // Contact info
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.text('For any queries, please contact us at salesteam@honeytranslations.com', pageWidth / 2, yPosition, { align: 'center' });
+    doc.text('For queries, please contact support@honeyuniversal.com | +91 72990 05577', pageWidth / 2, yPosition, { align: 'center' });
     yPosition += 8;
 
     // Computer generated notice
