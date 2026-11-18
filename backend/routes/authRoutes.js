@@ -18,27 +18,36 @@ function isPasswordPolicyValid(password) {
 }
 
 function getFrontendOrigin(req) {
-  const envOrigin = (
+  if (req && req.get("host")) {
+    const host = req.get("x-forwarded-host") || req.get("host");
+    const proto = req.get("x-forwarded-proto") || req.protocol || "https";
+    if (host && !host.includes("localhost") && !host.includes("127.0.0.1")) {
+      return `${proto}://${host}`.replace(/\/$/, "");
+    }
+  }
+
+  const urls = (
     process.env.FRONTEND_URL ||
     process.env.FRONTEND_OAUTH_CALLBACK_URL ||
     process.env.BACKEND_PUBLIC_URL ||
     ""
   )
-    .split(",")[0]
-    .trim()
-    .replace(/\/auth\/callback.*/, "")
-    .replace(/\/$/, "");
+    .split(",")
+    .map((u) => u.trim().replace(/\/auth\/callback.*/, "").replace(/\/$/, ""))
+    .filter(Boolean);
 
-  if (envOrigin) return envOrigin;
-  if (req && req.get("host")) {
-    const proto = req.protocol || "http";
-    return `${proto}://${req.get("host")}`.replace(/\/$/, "");
-  }
+  const prodUrl = urls.find((u) => !u.includes("localhost") && !u.includes("127.0.0.1"));
+  if (prodUrl) return prodUrl;
+  if (urls.length > 0) return urls[0];
+
   return "https://honeyuniversal.com";
 }
 
 function getDefaultFrontendCallback(req) {
-  if (process.env.FRONTEND_OAUTH_CALLBACK_URL) {
+  if (
+    process.env.FRONTEND_OAUTH_CALLBACK_URL &&
+    !process.env.FRONTEND_OAUTH_CALLBACK_URL.includes("localhost")
+  ) {
     return process.env.FRONTEND_OAUTH_CALLBACK_URL;
   }
   const origin = getFrontendOrigin(req);

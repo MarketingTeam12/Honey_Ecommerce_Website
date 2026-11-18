@@ -11,22 +11,26 @@ try {
 }
 
 function resolveGoogleCallbackUrl() {
-  if (process.env.GOOGLE_CALLBACK_URL) {
+  if (process.env.GOOGLE_CALLBACK_URL && !process.env.GOOGLE_CALLBACK_URL.includes("localhost")) {
     return process.env.GOOGLE_CALLBACK_URL;
   }
-  const base = (
+  const urls = (
     process.env.BACKEND_PUBLIC_URL ||
     process.env.FRONTEND_URL ||
     ""
   )
-    .split(",")[0]
-    .trim()
-    .replace(/\/$/, "");
+    .split(",")
+    .map((u) => u.trim().replace(/\/$/, ""))
+    .filter(Boolean);
 
-  if (base) {
-    return `${base}/api/auth/google/callback`;
+  const prodBase = urls.find((u) => !u.includes("localhost") && !u.includes("127.0.0.1"));
+  if (prodBase) {
+    return `${prodBase}/api/auth/google/callback`;
   }
-  return "http://localhost:3000/api/auth/google/callback";
+  if (process.env.GOOGLE_CALLBACK_URL) {
+    return process.env.GOOGLE_CALLBACK_URL;
+  }
+  return "https://honeyuniversal.com/api/auth/google/callback";
 }
 
 function configurePassport() {
