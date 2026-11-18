@@ -244,7 +244,7 @@ export function HeaderNew() {
               </DropdownMenu>
 
               <Link
-                to="/apostille/netherlands"
+                to="/all-apostille-products"
                 className="text-gray-700 hover:text-[#1a1f5c] transition-colors font-bold text-sm xl:text-base whitespace-nowrap"
               >
                 Apostille Services
@@ -314,13 +314,25 @@ export function HeaderNew() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuItem asChild>
+                    <Link to="/about">About Us</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
                     <Link to="/services">Services</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/work-sample">Work Samples</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to="/contact-us">Contact Us</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to="/track-order">Track Order</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/faq">FAQ</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/blog">Blog</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to="/terms-and-conditions">Terms & Conditions</Link>
@@ -330,15 +342,6 @@ export function HeaderNew() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to="/refund-cancellation-policy">Refund & Cancellation Policy</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/faq">FAQ</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/blog">Blog</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/terms-of-service">Terms of Service</Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -548,7 +551,7 @@ export function HeaderNew() {
                 Translation Services
               </Link>
               <Link
-                to="/apostille/netherlands"
+                to="/all-apostille-products"
                 className="flex items-center min-h-[44px] px-4 py-2.5 hover:bg-gray-100 rounded-lg"
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -569,11 +572,39 @@ export function HeaderNew() {
                 Startup Packages
               </Link>
               <Link
+                to="/about"
+                className="flex items-center min-h-[44px] px-4 py-2.5 hover:bg-gray-100 rounded-lg"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                About Us
+              </Link>
+              <Link
                 to="/services"
                 className="flex items-center min-h-[44px] px-4 py-2.5 hover:bg-gray-100 rounded-lg"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Services
+              </Link>
+              <Link
+                to="/work-sample"
+                className="flex items-center min-h-[44px] px-4 py-2.5 hover:bg-gray-100 rounded-lg"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Work Samples
+              </Link>
+              <Link
+                to="/faq"
+                className="flex items-center min-h-[44px] px-4 py-2.5 hover:bg-gray-100 rounded-lg"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                FAQ
+              </Link>
+              <Link
+                to="/blog"
+                className="flex items-center min-h-[44px] px-4 py-2.5 hover:bg-gray-100 rounded-lg"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Blog
               </Link>
               <Link
                 to="/contact-us"

@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { publicAnonKey } from '@/app/utils/backendInfo';
 import { API_URL } from '@/app/utils/api';
 import { motion } from 'motion/react';
-import { Phone, Mail, Send } from 'lucide-react';
+import { Phone, Mail, Send, MapPin, Building2, ShieldCheck } from 'lucide-react';
 import { sanitizePhoneForCountry, validatePhoneForCountry } from '@/app/utils/phoneValidation';
 
 // Country configurations with flags and validation
@@ -387,11 +387,42 @@ export function ContactPage() {
                   </div>
                   <div>
                     <h4 className="font-bold mb-2">Email</h4>
-                    <a href="mailto:salesteam@honeytranslations.com" className="text-blue-100 hover:text-white transition-colors">
-                      salesteam@honeytranslations.com
-                    </a>
+                    <div className="space-y-1">
+                      <a href="mailto:support@honeyuniversal.com" className="block text-blue-100 hover:text-white transition-colors">
+                        support@honeyuniversal.com
+                      </a>
+                      <a href="mailto:salesteam@honeytranslations.com" className="block text-blue-100 hover:text-white transition-colors text-sm">
+                        salesteam@honeytranslations.com
+                      </a>
+                    </div>
                   </div>
                 </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold mb-2">Corporate Office</h4>
+                    <p className="text-blue-100 leading-relaxed text-sm">
+                      Honey Universal Digital Private Limited<br />
+                      No. 12, Ground Floor, Anna Salai,<br />
+                      Chennai, Tamil Nadu 600002, India
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+              <div className="flex items-center gap-3 mb-4">
+                <Building2 className="w-6 h-6 text-blue-600" />
+                <h3 className="text-xl font-bold text-gray-900">Corporate & Accreditation</h3>
+              </div>
+              <div className="space-y-2 text-sm text-gray-600">
+                <p><span className="font-semibold text-gray-800">Entity:</span> Honey Universal Digital Private Limited</p>
+                <p><span className="font-semibold text-gray-800">Certifications:</span> ISO 9001:2015 &amp; ISO 17100:2015 Certified</p>
+                <p><span className="font-semibold text-gray-800">Global Acceptance:</span> USCIS, IRCC, MEA, Embassies &amp; Courts</p>
               </div>
             </div>
 

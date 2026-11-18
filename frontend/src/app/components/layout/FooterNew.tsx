@@ -201,9 +201,14 @@ export function FooterNew() {
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-red-400" aria-hidden="true" />
-                <a href="mailto:salesteam@honeytranslations.com" className="text-gray-300 hover:text-white transition-colors min-h-[44px] md:min-h-0 inline-flex items-center">
-                  salesteam@honeytranslations.com
-                </a>
+                <div className="flex flex-col">
+                  <a href="mailto:support@honeyuniversal.com" className="text-gray-300 hover:text-white transition-colors min-h-[44px] md:min-h-0 inline-flex items-center">
+                    support@honeyuniversal.com
+                  </a>
+                  <a href="mailto:salesteam@honeytranslations.com" className="text-gray-400 hover:text-white transition-colors text-xs inline-flex items-center">
+                    salesteam@honeytranslations.com
+                  </a>
+                </div>
               </li>
             </ul>
 
@@ -314,7 +319,7 @@ export function FooterNew() {
             </button>
           </div>
           <p className="text-xs text-gray-400">
-            ISO 9001:2015 &amp; ISO 17100:2015 Certified Language Service Provider &bull; Chennai, Tamil Nadu, India &bull; Global Acceptance (USCIS, IRCC, MEA, Embassies &amp; Courts)
+            Honey Universal Digital Private Limited &bull; No. 12, Anna Salai, Chennai, Tamil Nadu 600002, India &bull; ISO 9001:2015 &amp; ISO 17100:2015 Certified &bull; Global Acceptance (USCIS, IRCC, MEA, Embassies &amp; Courts)
           </p>
         </div>
       </div>

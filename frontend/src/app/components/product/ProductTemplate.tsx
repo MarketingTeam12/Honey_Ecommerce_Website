@@ -38,7 +38,7 @@ import {
   SITE_NAME,
 } from '@/app/utils/seo';
 
-const PROMO_TAGS = ['Top Rated', 'Best Offer', 'Popular Choice', 'Exclusive Deal', 'Best Seller', 'Limited Time Offer'];
+const PROMO_TAGS = ['Top Rated', 'Best Offer', 'Popular Choice', 'Exclusive Deal', 'Best Seller', 'Limited Time Deal (Nov 2026)'];
 const POPULAR_CHOICE_APOSTILLE_KEYS = ['poland-apostille', 'dutch-apostille', 'serbia-apostille', 'netherlands-apostille'];
 const MAX_UPLOAD_SIZE_MB = 50;
 const MAX_UPLOAD_SIZE_BYTES = MAX_UPLOAD_SIZE_MB * 1024 * 1024;
@@ -1368,9 +1368,17 @@ export function ProductTemplate({ data, productKey }: ProductTemplateProps) {
                   </>
                 )}
               </div>
+              {pageCount > 1 && (
+                <div className="text-sm font-semibold text-blue-900 bg-blue-50 border border-blue-200 rounded px-3 py-1.5 inline-block">
+                  Subtotal for {pageCount} pages: {convertPrice(currentPrice * pageCount)}
+                </div>
+              )}
+              <p className="text-xs text-gray-500 font-medium">
+                + 18% GST calculated transparently at checkout &bull; No hidden charges
+              </p>
               {currentOriginalPrice && currentOriginalPrice > currentPrice && (
                 <p className="text-sm text-green-700 font-medium">
-                  You save {convertPrice(currentOriginalPrice - currentPrice)}
+                  You save {convertPrice((currentOriginalPrice - currentPrice) * pageCount)}
                 </p>
               )}
               <Badge className="bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-1.5 font-bold">
@@ -1803,7 +1811,7 @@ export function ProductTemplate({ data, productKey }: ProductTemplateProps) {
                     d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
                   />
                 </svg>
-                                Add to Cart
+                {pageCount > 1 ? `Add to Cart · ${convertPrice(currentPrice * pageCount)}` : 'Add to Cart'}
               </Button>
 
               {/* Secure Checkout Info - Below Add to Cart */}

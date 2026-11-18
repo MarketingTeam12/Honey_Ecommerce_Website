@@ -244,6 +244,19 @@ export function GoogleReviewsSection({ compact = false }: GoogleReviewsSectionPr
               />
             ))}
           </div>
+
+          {/* Link to Google Business Profile */}
+          <div className="text-center mt-6">
+            <a
+              href="https://www.google.com/search?q=Honey+Translation+Services+Chennai+reviews"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              <span>Read all 120+ verified reviews on Google Business Profile</span>
+              <span aria-hidden="true">&rarr;</span>
+            </a>
+          </div>
         </div>
       </div>
     </section>

@@ -4,6 +4,7 @@ import { ISOCertificationSection } from '@/app/components/home/ISOCertificationS
 import { TranslatorExperience } from '@/app/components/home/TranslatorExperience';
 import { PickYourLanguage } from '@/app/components/home/PickYourLanguage';
 import { Testimonials } from '@/app/components/home/Testimonials';
+import { GoogleReviewsSection } from '@/app/components/home/GoogleReviewsSection';
 
 function HomePage() {
   return (
@@ -14,6 +15,7 @@ function HomePage() {
       <TranslatorExperience />
       <PickYourLanguage />
       <Testimonials />
+      <GoogleReviewsSection />
     </div>
   );
 }
