@@ -17,13 +17,12 @@ export const FAQ_CATEGORIES: FAQCategory[] = [
       {
         question: 'How do I place my order for translation?',
         answer: [
-          'First of all, go to "Order a translation" (Menu)',
-          'Then choose the service you want to receive.',
-          'Select your source/target language.',
-          'Select the number of pages all the documents contain.',
-          'Select the document type, and delivery option, in the delivery option choose "Yes" if it is an urgent delivery.',
-          'Generally people requiring translation also need MEA Apostille so choose the option accordingly.',
-          'Verify/edit the details we ask for - Pay - Place the order.',
+          'Select "Translation Services" or "Order Now" from the header navigation.',
+          'Choose your desired language pair (Indian or International languages).',
+          'Specify or auto-calculate the number of pages (uploading a PDF calculates page count automatically).',
+          'Upload your document files (up to 50 MB) or provide a Google Drive link.',
+          'Optionally select MEA Apostille or Attestation if your documents require international legalization.',
+          'Click "Add to Cart", review your transparent price (including 18% GST), and complete payment via secure Razorpay.',
         ],
       },
       {
@@ -70,7 +69,7 @@ export const FAQ_CATEGORIES: FAQCategory[] = [
       {
         question: 'Where is Honey Universal based?',
         answer:
-          'Honey Universal operates from India and serves customers across the country and internationally through our online platform at store.honeyuniversal.com.',
+          'Honey Universal operates from Chennai, Tamil Nadu, India and serves customers across the country and internationally through our online platform at https://honeyuniversal.com.',
       },
       {
         question: 'When is a certified translation required?',
@@ -110,7 +109,7 @@ export const FAQ_CATEGORIES: FAQCategory[] = [
       {
         question: 'How can I submit documents for translation?',
         answer:
-          'You can place your order completely online through store.honeyuniversal.com: Go to Order a Translation, Select the required service and language pair, Upload your documents, Complete checkout. If you need help, you can contact us via email or WhatsApp, and our team will assist you.',
+          'You can place your order completely online through honeyuniversal.com: Go to Translation Services, select your required service and language pair, upload your documents or share a link, and complete checkout. If you need assistance, you can also contact us via email or WhatsApp (+91 72990 05577), and our team will guide you.',
       },
       {
         question: 'Do I need to submit original documents?',
@@ -154,9 +153,9 @@ export const FAQ_CATEGORIES: FAQCategory[] = [
     title: 'Payment',
     faqs: [
       {
-        question: 'Which payment options can I use on store.honeyuniversal.com?',
+        question: 'Which payment options can I use on honeyuniversal.com?',
         answer:
-          "Currently, we accept Razorpay only for all transactions on our website. You can safely complete your order using Zoho's secure payment gateway.",
+          'We accept all major payment methods powered securely by Razorpay: UPI (Google Pay, PhonePe, Paytm, BHIM), Credit/Debit Cards (Visa, Mastercard, RuPay), NetBanking across 50+ banks, and Wallets.',
       },
       {
         question: 'Is my payment information safe when I pay online?',
@@ -187,7 +186,7 @@ export const FAQ_CATEGORIES: FAQCategory[] = [
       {
         question: 'How can I share my documents via WhatsApp?',
         answer:
-          'You can easily send your documents to us using WhatsApp. Simply click on the WhatsApp button on store.honeyuniversal.com or save our official number and send the scanned copies or clear photos of your documents. Our team will confirm once we receive them.',
+          'You can easily send your documents to us using WhatsApp. Simply click on the WhatsApp button on honeyuniversal.com or message our official number (+91 72990 05577) with scanned copies or clear photos of your documents. Our team will promptly confirm receipt and pricing.',
       },
       {
         question: 'Can I request a price quote through WhatsApp?',
@@ -202,7 +201,7 @@ export const FAQ_CATEGORIES: FAQCategory[] = [
       {
         question: 'Can I place an order completely through WhatsApp?',
         answer:
-          'Yes, you can start your order via WhatsApp, but payment and final confirmation will still be completed securely through store.honeyuniversal.com using Razorpay.',
+          'Yes, you can start your order via WhatsApp, but payment and final confirmation will still be completed securely through honeyuniversal.com using Razorpay.',
       },
       {
         question: 'Will I receive updates about my order on WhatsApp?',
@@ -218,7 +217,7 @@ export const FAQ_CATEGORIES: FAQCategory[] = [
       {
         question: 'Can I apply for MEA Apostille services online?',
         answer:
-          'Yes. You can easily place an order for MEA Apostille services online through store.honeyuniversal.com. Simply select the MEA Apostille option on our website and complete the order process.',
+          'Yes. You can easily place an order for MEA Apostille services online through honeyuniversal.com. Simply select the MEA Apostille option on our website and complete the order process.',
       },
       {
         question: 'What should I do if my document type is not listed on the Apostille page?',

@@ -271,7 +271,7 @@ router.post("/admin/initialize-storage", requireAuth, requireAdmin, (req, res) =
   res.json({ success: true, message: "AWS S3 upload storage is ready." });
 });
 
-router.post("/admin/upload-image", requireAuth, requireAdmin, upload.any(), async (req, res, next) => {
+router.post("/admin/upload-image", requireAuth, requireAdmin, upload.any(), upload.scanUploadedFiles, async (req, res, next) => {
   try {
     const uploadedFile = Array.isArray(req.files) ? req.files[0] : req.file;
     if (!uploadedFile) {
@@ -292,7 +292,7 @@ router.post("/admin/upload-image", requireAuth, requireAdmin, upload.any(), asyn
   }
 });
 
-router.post("/admin/upload-work-sample", requireAuth, requireAdmin, upload.single("file"), async (req, res, next) => {
+router.post("/admin/upload-work-sample", requireAuth, requireAdmin, upload.single("file"), upload.scanUploadedFiles, async (req, res, next) => {
   try {
     if (!req.file) {
       const fileUrl = req.body?.fileUrl || "";

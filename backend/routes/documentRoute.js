@@ -8,6 +8,7 @@ const { requireAuth } = require("../middleware/auth");
 const {
   MAX_UPLOAD_SIZE_BYTES,
   createDocumentFileFilter,
+  scanUploadedFiles,
 } = require("../middleware/upload");
 
 const router = express.Router();
@@ -76,7 +77,7 @@ const getAttachmentNames = (attachments) =>
 router.post('/send-document', upload.fields([
   { name: 'document', maxCount: 1 },
   { name: 'documents', maxCount: 20 }
-]), async (req, res) => {
+]), scanUploadedFiles, async (req, res) => {
   try {
     const email = req.body.email || req.body.customerEmail;
     const orderNumber = req.body.orderNumber;

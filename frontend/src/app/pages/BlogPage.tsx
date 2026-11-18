@@ -324,6 +324,26 @@ export function BlogPage() {
                   {selectedPost.content}
                 </div>
               </div>
+
+              {/* Author Bio Box */}
+              <div className="mt-8 pt-6 border-t border-gray-200 bg-gray-50 p-6 rounded-xl flex items-start gap-4">
+                <div className="w-12 h-12 rounded-full bg-[#0a1247] text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
+                  {selectedPost.author.charAt(0)}
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900 text-base">{selectedPost.author}</h4>
+                  <p className="text-xs font-semibold text-blue-600 mb-1">
+                    {selectedPost.author === 'Sarah Mitchell'
+                      ? 'Senior Translation Quality Lead · ISO 17100 Certified Auditor'
+                      : selectedPost.author === 'Rajesh Kumar'
+                      ? 'MEA Legalization Specialist · Hague Apostille Lead'
+                      : 'International Localization Consultant · Multilingual Communications Lead'}
+                  </p>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    Linguistic and consular documentation expert at Honey Universal Digital Private Limited, ensuring certified accuracy and global legal acceptance for visas, courts, and corporate filings.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

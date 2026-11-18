@@ -1,98 +1,209 @@
+import { Link } from 'react-router-dom';
+import { Shield, Lock, FileText, Clock, Trash2, Mail, MapPin, CheckCircle2, UserCheck, AlertCircle } from 'lucide-react';
+
 export function PrivacyPolicyPage() {
   return (
-    <main className="bg-gradient-to-b from-[#0a1247]/5 to-gray-50 min-h-screen">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-16">
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 sm:p-8 md:p-12">
-      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#0a1247] mb-2 break-words">Privacy Policy</h1>
-          <div className="w-16 h-1 bg-[#0a1247] rounded-full mb-6 sm:mb-8"></div>
-      
-      <p className="text-gray-700 text-sm sm:text-base mb-6 sm:mb-8">
-        This Privacy Policy describes Our policies and procedures on the collection, use and disclosure of Your information when You use the Service and tells You about Your privacy rights and how the law protects You.
-      </p>
+    <main className="bg-gradient-to-b from-[#0a1247]/5 to-gray-50 min-h-screen py-8 sm:py-16">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-10 md:p-12">
+          {/* Header */}
+          <div className="border-b border-gray-100 pb-6 mb-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-semibold mb-3">
+              <Shield className="w-3.5 h-3.5" />
+              DPDP Act 2023 Compliant &bull; ISO 9001:2015 &bull; ISO 17100:2015
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-bold text-[#0a1247] mb-3">Privacy Policy</h1>
+            <p className="text-sm text-gray-500">
+              <strong>Last Updated:</strong> 18 November 2026 &bull; <strong>Website:</strong>{' '}
+              <a href="https://honeyuniversal.com" className="text-blue-600 underline">https://honeyuniversal.com</a>
+            </p>
+          </div>
 
-      <section className="mb-6 sm:mb-8 pb-6 sm:pb-8 border-b border-gray-100 last:border-b-0 last:pb-0">
-        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-[#0a1247] mb-4 sm:mb-6 flex items-center gap-2"><span className="w-1.5 h-6 bg-[#0a1247] rounded-full inline-block flex-shrink-0"></span>Interpretation and Definitions</h2>
-        
-        <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Interpretation</h3>
-        <p className="text-gray-700 text-sm sm:text-base mb-6">
-          The words of which the initial letter is capitalized have meanings defined under the following conditions. The following definitions shall have the same meaning regardless of whether they appear in singular or in plural.
-        </p>
+          <p className="text-gray-700 text-sm sm:text-base leading-relaxed mb-8">
+            Honey Universal Digital Private Limited (&ldquo;Company&rdquo;, &ldquo;We&rdquo;, &ldquo;Us&rdquo;, or &ldquo;Our&rdquo;) is committed to safeguarding the privacy and confidentiality of our clients&rsquo; personal information and sensitive documents. This Privacy Policy outlines our data protection practices in accordance with the <strong>Digital Personal Data Protection Act, 2023 (DPDP Act)</strong>, Information Technology Act 2000, and international data protection standards.
+          </p>
 
-        <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Definitions</h3>
-        <p className="text-gray-700 text-sm sm:text-base mb-4">For the purposes of this Privacy Policy:</p>
-        
-        <div className="grid gap-3 sm:grid-cols-2">
-          <p className="text-gray-700 text-sm bg-gray-50 border border-gray-100 rounded-lg p-3">
-            <strong>Account</strong> means a unique account created for You to access our Service or parts of our Service.
-          </p>
-          <p className="text-gray-700 text-sm bg-gray-50 border border-gray-100 rounded-lg p-3">
-            <strong>Affiliate</strong> means an entity that controls, is controlled by or is under common control with a party, where "control" means ownership of 50% or more of the shares, equity interest or other securities entitled to vote for election of directors or other managing authority.
-          </p>
-          <p className="text-gray-700 text-sm bg-gray-50 border border-gray-100 rounded-lg p-3">
-            <strong>Company</strong> (referred to as either "the Company", "We", "Us" or "Our" in this Agreement) refers to honey translations.
-          </p>
-          <p className="text-gray-700 text-sm bg-gray-50 border border-gray-100 rounded-lg p-3">
-            <strong>Cookies</strong> are small files that are placed on Your computer, mobile device or any other device by a website, containing the details of Your browsing history on that website among its many uses.
-          </p>
-          <p className="text-gray-700 text-sm bg-gray-50 border border-gray-100 rounded-lg p-3">
-            <strong>Country</strong> refers to: Tamil Nadu, India
-          </p>
-          <p className="text-gray-700 text-sm bg-gray-50 border border-gray-100 rounded-lg p-3">
-            <strong>Device</strong> means any device that can access the Service such as a computer, a cellphone or a digital tablet.
-          </p>
-          <p className="text-gray-700 text-sm bg-gray-50 border border-gray-100 rounded-lg p-3">
-            <strong>Personal Data</strong> is any information that relates to an identified or identifiable individual.
-          </p>
-          <p className="text-gray-700 text-sm bg-gray-50 border border-gray-100 rounded-lg p-3">
-            <strong>Service</strong> refers to the Website.
-          </p>
-          <p className="text-gray-700 text-sm bg-gray-50 border border-gray-100 rounded-lg p-3">
-            <strong>Service Provider</strong> means any natural or legal person who processes the data on behalf of the Company.
-          </p>
-          <p className="text-gray-700 text-sm bg-gray-50 border border-gray-100 rounded-lg p-3">
-            <strong>Usage Data</strong> refers to data collected automatically, either generated by the use of the Service or from the Service infrastructure itself.
-          </p>
-          <p className="text-gray-700 text-sm bg-gray-50 border border-gray-100 rounded-lg p-3">
-            <strong>Website</strong> refers to honey translations, accessible from https://honeytranslations.com/
-          </p>
-          <p className="text-gray-700 text-sm bg-gray-50 border border-gray-100 rounded-lg p-3">
-            <strong>You</strong> means the individual accessing or using the Service, or the company, or other legal entity on behalf of which such individual is accessing or using the Service, as applicable.
-          </p>
-        </div>
-      </section>
+          {/* Section 1: Data Controller */}
+          <section className="mb-10 pb-8 border-b border-gray-100">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#0a1247] mb-4 flex items-center gap-2">
+              <span className="w-1.5 h-6 bg-[#0a1247] rounded-full inline-block flex-shrink-0"></span>
+              1. Data Fiduciary &amp; Corporate Information
+            </h2>
+            <div className="bg-gray-50 rounded-xl p-5 border border-gray-200/60 text-sm sm:text-base text-gray-700 space-y-2">
+              <p><strong>Legal Entity:</strong> Honey Universal Digital Private Limited</p>
+              <p><strong>Brand / Platform:</strong> Honey Universal Services (<a href="https://honeyuniversal.com" className="text-blue-600 underline">honeyuniversal.com</a>)</p>
+              <p><strong>Registered &amp; Corporate Office:</strong> No. 12, Ground Floor, Anna Salai, Chennai, Tamil Nadu 600002, India</p>
+              <p><strong>Quality Certifications:</strong> ISO 9001:2015 (Quality Management) &amp; ISO 17100:2015 (Translation Services Management)</p>
+              <p><strong>Contact Email:</strong> <a href="mailto:support@honeyuniversal.com" className="text-blue-600 underline">support@honeyuniversal.com</a></p>
+            </div>
+          </section>
 
-      <section className="mb-6 sm:mb-8 pb-6 sm:pb-8 border-b border-gray-100 last:border-b-0 last:pb-0">
-        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-[#0a1247] mb-4 sm:mb-6 flex items-center gap-2"><span className="w-1.5 h-6 bg-[#0a1247] rounded-full inline-block flex-shrink-0"></span>Collecting and Using Your Personal Data</h2>
-        
-        <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Types of Data Collected</h3>
-        
-        <h4 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 mb-3">Personal Data</h4>
-        <p className="text-gray-700 text-sm sm:text-base mb-4">
-          While using Our Service, We may ask You to provide Us with certain personally identifiable information that can be used to contact or identify You. Personally identifiable information may include, but is not limited to:
-        </p>
-        <ul className="list-disc ml-6 sm:ml-8 mb-6 text-gray-700 text-sm sm:text-base">
-          <li>Email address</li>
-          <li>Usage Data</li>
-        </ul>
+          {/* Section 2: Data Collected */}
+          <section className="mb-10 pb-8 border-b border-gray-100">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#0a1247] mb-4 flex items-center gap-2">
+              <span className="w-1.5 h-6 bg-[#0a1247] rounded-full inline-block flex-shrink-0"></span>
+              2. Personal Data We Collect
+            </h2>
+            <p className="text-gray-700 text-sm sm:text-base mb-4 leading-relaxed">
+              We collect personal data solely to provide certified translation, attestation, apostille, and business localization services requested by you:
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2 text-sm">
+              <div className="bg-gray-50 border border-gray-100 rounded-lg p-4">
+                <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                  <UserCheck className="w-4 h-4 text-blue-600" /> Account &amp; Identity Data
+                </h3>
+                <p className="text-gray-600">Full name, billing and delivery addresses, verified email address, mobile number, and Google OAuth profile information when signing in with Google.</p>
+              </div>
+              <div className="bg-gray-50 border border-gray-100 rounded-lg p-4">
+                <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-blue-600" /> Document Content for Services
+                </h3>
+                <p className="text-gray-600">Certificates, affidavits, commercial deeds, educational transcripts, and legal filings uploaded by you strictly for linguistic translation, sworn notary, or MEA apostille certification.</p>
+              </div>
+              <div className="bg-gray-50 border border-gray-100 rounded-lg p-4">
+                <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-blue-600" /> Transaction &amp; Payment Data
+                </h3>
+                <p className="text-gray-600">Order IDs, transaction receipts, invoice numbers, and payment status. Card and UPI credentials are encrypted directly through Razorpay without touching our application servers.</p>
+              </div>
+              <div className="bg-gray-50 border border-gray-100 rounded-lg p-4">
+                <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-blue-600" /> Technical &amp; Usage Telemetry
+                </h3>
+                <p className="text-gray-600">IP addresses, browser client fingerprints, chosen currency preferences, and anonymous session telemetry to ensure site reliability and prevent fraudulent queries.</p>
+              </div>
+            </div>
+          </section>
 
-        <h4 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 mb-3">Usage Data</h4>
-        <p className="text-gray-700 text-sm sm:text-base mb-4">
-          Usage Data is collected automatically when using the Service.
-        </p>
-        <p className="text-gray-700 text-sm sm:text-base mb-4">
-          Usage Data may include information such as Your Device's Internet Protocol address (e.g. IP address), browser type, browser version, the pages of our Service that You visit, the time and date of Your visit, the time spent on those pages, unique device identifiers and other diagnostic data.
-        </p>
-      </section>
+          {/* Section 3: Document Security & Retention Policy */}
+          <section className="mb-10 pb-8 border-b border-gray-100">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#0a1247] mb-4 flex items-center gap-2">
+              <span className="w-1.5 h-6 bg-[#0a1247] rounded-full inline-block flex-shrink-0"></span>
+              3. Document Security &amp; 30-Day Retention Policy
+            </h2>
+            <div className="bg-blue-50/70 border border-blue-200 rounded-xl p-5 mb-4 text-sm sm:text-base text-gray-800 space-y-3">
+              <div className="flex items-start gap-3">
+                <Lock className="w-5 h-5 text-blue-700 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-bold text-blue-950">AES-256 Storage Encryption &amp; NDA Protection</h4>
+                  <p className="text-gray-700 text-sm mt-1">All uploaded source documents and translated deliverables are transmitted over TLS 1.3 and stored with industry-standard AES-256 encryption. Our accredited linguists and case managers operate under binding Non-Disclosure Agreements (NDAs).</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Clock className="w-5 h-5 text-blue-700 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-bold text-blue-950">Standard 30-Day Retention Period</h4>
+                  <p className="text-gray-700 text-sm mt-1">Uploaded documents and completed certification drafts are retained for <strong>30 calendar days</strong> following order delivery. This retention window allows clients to re-download copies, request adjustments, or produce certified duplicates for visa authorities.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Trash2 className="w-5 h-5 text-blue-700 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-bold text-blue-950">Automated Permanent Purge &amp; Right to Immediate Deletion</h4>
+                  <p className="text-gray-700 text-sm mt-1">Upon expiration of the 30-day window, uploaded source files are automatically purged from our servers. Clients may also request an <em>immediate manual purge</em> immediately upon order delivery by contacting <a href="mailto:support@honeyuniversal.com" className="text-blue-700 font-medium underline">support@honeyuniversal.com</a>.</p>
+                </div>
+              </div>
+            </div>
+          </section>
 
-      <section className="mb-6 sm:mb-8 pb-6 sm:pb-8 border-b border-gray-100 last:border-b-0 last:pb-0">
-        <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Contact Us</h3>
-        <p className="text-gray-700 text-sm sm:text-base mb-4">
-          If you have any questions about this Privacy Policy, You can contact us:
-        </p>
-        <p className="text-gray-700 text-sm sm:text-base break-words">
-          By visiting this page on our website: <a href="https://honeytranslations.com/" className="text-blue-600 hover:underline break-all">https://honeytranslations.com/</a>
-        </p>
-      </section>
+          {/* Section 4: Rights under DPDP Act 2023 */}
+          <section className="mb-10 pb-8 border-b border-gray-100">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#0a1247] mb-4 flex items-center gap-2">
+              <span className="w-1.5 h-6 bg-[#0a1247] rounded-full inline-block flex-shrink-0"></span>
+              4. Your Rights under the DPDP Act, 2023
+            </h2>
+            <p className="text-gray-700 text-sm sm:text-base mb-4 leading-relaxed">
+              As a Data Principal under India&rsquo;s Digital Personal Data Protection Act, you are entitled to exercise the following rights:
+            </p>
+            <ul className="space-y-3 text-sm sm:text-base text-gray-700">
+              <li className="flex items-start gap-2.5">
+                <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <span><strong>Right to Access:</strong> You may request a summary of the personal data processed by us and the identities of any third parties with whom it was shared.</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <span><strong>Right to Correction &amp; Erasure:</strong> You have the right to correct inaccurate or outdated information and request erasure of personal data that is no longer necessary for the purpose it was collected.</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <span><strong>Right of Grievance Redressal:</strong> You have the right to readily accessible grievance redressal mechanisms regarding our data processing policies.</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <span><strong>Right to Nominate:</strong> You have the right to nominate any individual to exercise your rights under the Act in the event of death or incapacity.</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <span><strong>Consent Withdrawal:</strong> You may withdraw your consent for future data processing at any time, subject to legal or contractual obligations.</span>
+              </li>
+            </ul>
+          </section>
+
+          {/* Section 5: Third-Party Processors */}
+          <section className="mb-10 pb-8 border-b border-gray-100">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#0a1247] mb-4 flex items-center gap-2">
+              <span className="w-1.5 h-6 bg-[#0a1247] rounded-full inline-block flex-shrink-0"></span>
+              5. Authorized Third-Party Processors
+            </h2>
+            <p className="text-gray-700 text-sm sm:text-base mb-4 leading-relaxed">
+              We share minimum required data strictly with certified technology partners necessary to execute payments, identity verification, and client communications:
+            </p>
+            <div className="grid gap-3 sm:grid-cols-3 text-sm">
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <h4 className="font-bold text-gray-900 mb-1">Razorpay Software Pvt Ltd</h4>
+                <p className="text-gray-600 text-xs">Payment Gateway (PCI-DSS compliant). Handles cards, NetBanking, UPI, and wallets securely.</p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <h4 className="font-bold text-gray-900 mb-1">Google LLC</h4>
+                <p className="text-gray-600 text-xs">Google OAuth sign-in, Google Business reviews display, and transactional email infrastructure.</p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <h4 className="font-bold text-gray-900 mb-1">Zoho Corporation</h4>
+                <p className="text-gray-600 text-xs">Customer live-chat support infrastructure and case ticketing management.</p>
+              </div>
+            </div>
+          </section>
+
+          {/* Section 6: Cookies & Tracking */}
+          <section className="mb-10 pb-8 border-b border-gray-100">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#0a1247] mb-4 flex items-center gap-2">
+              <span className="w-1.5 h-6 bg-[#0a1247] rounded-full inline-block flex-shrink-0"></span>
+              6. Cookies &amp; Consent Management
+            </h2>
+            <p className="text-gray-700 text-sm sm:text-base mb-3 leading-relaxed">
+              We employ essential cookies to keep you signed in, remember your cart, and preserve your currency selection. Optional performance cookies and chat widgets are governed by your consent preferences, which can be modified at any time via the <strong>Cookie settings</strong> button in our website footer.
+            </p>
+          </section>
+
+          {/* Section 7: Grievance Officer */}
+          <section className="mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#0a1247] mb-4 flex items-center gap-2">
+              <span className="w-1.5 h-6 bg-[#0a1247] rounded-full inline-block flex-shrink-0"></span>
+              7. Grievance Redressal &amp; Data Protection Officer
+            </h2>
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 text-gray-800">
+              <p className="text-sm sm:text-base mb-4 leading-relaxed">
+                In compliance with Section 10 of the DPDP Act, 2023 and Rule 3(2) of the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021, the details of our designated <strong>Grievance Redressal Officer</strong> are as follows:
+              </p>
+              <div className="grid sm:grid-cols-2 gap-4 text-sm font-medium">
+                <div>
+                  <p className="text-gray-600">Officer Name:</p>
+                  <p className="text-gray-900 font-bold">Mano Rakshahan</p>
+                  <p className="text-gray-600 mt-2">Designation:</p>
+                  <p className="text-gray-900 font-bold">Data Protection &amp; Legal Compliance Officer</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Email Address:</p>
+                  <p><a href="mailto:grievance@honeyuniversal.com" className="text-blue-600 font-bold underline">grievance@honeyuniversal.com</a> / <a href="mailto:support@honeyuniversal.com" className="text-blue-600 underline">support@honeyuniversal.com</a></p>
+                  <p className="text-gray-600 mt-2">Office Address:</p>
+                  <p className="text-gray-900">No. 12, Ground Floor, Anna Salai, Chennai, Tamil Nadu 600002, India</p>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 mt-4">
+                <em>All privacy grievances will be acknowledged within 24 business hours and redressed within a maximum of 15 calendar days from receipt.</em>
+              </p>
+            </div>
+          </section>
         </div>
       </div>
     </main>

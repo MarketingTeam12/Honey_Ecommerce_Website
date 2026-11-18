@@ -49,7 +49,7 @@ router.get("/health", (req, res) => {
   });
 });
 
-router.post("/upload", requireAuth, upload.single("file"), async (req, res, next) => {
+router.post("/upload", requireAuth, upload.single("file"), upload.scanUploadedFiles, async (req, res, next) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, message: "No file uploaded" });
@@ -71,7 +71,7 @@ router.post("/upload", requireAuth, upload.single("file"), async (req, res, next
   }
 });
 
-router.post("/upload-multiple", requireAuth, upload.array("files", 20), async (req, res, next) => {
+router.post("/upload-multiple", requireAuth, upload.array("files", 20), upload.scanUploadedFiles, async (req, res, next) => {
   try {
     const files = Array.isArray(req.files) ? req.files : [];
     const admin = await userService.isAdmin(req.user);
