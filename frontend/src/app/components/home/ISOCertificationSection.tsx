@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { Award, CheckCircle } from 'lucide-react';
+import { Award, CheckCircle, Download } from 'lucide-react';
 import { useState } from 'react';
 import isoCertificate from 'figma:asset/a216a26c38b8e6c28e205fed28b8b38049b797db.webp';
 
@@ -24,7 +24,7 @@ export function ISOCertificationSection() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="relative flex items-center"
+            className="flex flex-col items-center justify-center gap-4 w-full"
           >
             <div 
               className="relative overflow-hidden rounded-2xl shadow-2xl bg-white p-4 border-2 border-[#0a1247] cursor-zoom-in w-full"
@@ -47,6 +47,17 @@ export function ISOCertificationSection() {
                 />
               </div>
             </div>
+            <a
+              href={isoCertificate}
+              download="ISO-17100-2015-Certificate-Honey-Universal.webp"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0a1247] hover:bg-[#1a2457] text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
+              aria-label="Download ISO 17100 certificate for verification"
+            >
+              <Download className="w-4 h-4" />
+              <span>Download Certificate for Verification</span>
+            </a>
           </motion.div>
 
           {/* Right: Content */}
