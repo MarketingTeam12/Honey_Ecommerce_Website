@@ -5,6 +5,7 @@ import { API_URL, API_BASE_URL } from '@/app/utils/api';
 import { useAuth } from '@/app/context/AuthContext';
 import { toast } from 'sonner';
 import { generateInvoicePDF } from '@/app/utils/generateInvoicePDF';
+import { trackPurchase } from '@/app/utils/analytics';
 
 // Was reading VITE_BACKEND_URL (never set) with a localhost:3000 fallback —
 // broke invoice generation on any deployment other than local dev.
@@ -107,6 +108,9 @@ export function OrderSuccessPage() {
         setOrder(data.order);
         const storedInvoicePath = orderId ? localStorage.getItem(`invoicePath_${orderId}`) : null;
         setInvoicePath(data.order?.invoicePath || data.order?.invoice_path || storedInvoicePath || null);
+        if (data.order?.order_number && data.order?.total_amount) {
+          trackPurchase(data.order.order_number, parseFloat(String(data.order.total_amount)));
+        }
       }
     } catch (error) {
       console.error('Error fetching order:', error);

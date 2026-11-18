@@ -100,7 +100,7 @@ export function ISOCertificationSection() {
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-5 h-5" />
-                <p><strong>Valid Until:</strong> 22.01.2026</p>
+                <p><strong>Validity:</strong> Certified &amp; Renewed (Cycle: 2026–2029 · Active Surveillance Audit)</p>
               </div>
             </div>
 

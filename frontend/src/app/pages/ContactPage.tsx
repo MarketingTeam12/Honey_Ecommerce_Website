@@ -6,6 +6,7 @@ import { API_URL } from '@/app/utils/api';
 import { motion } from 'motion/react';
 import { Phone, Mail, Send, MapPin, Building2, ShieldCheck } from 'lucide-react';
 import { sanitizePhoneForCountry, validatePhoneForCountry } from '@/app/utils/phoneValidation';
+import { trackLead } from '@/app/utils/analytics';
 
 // Country configurations with flags and validation
 const countries = [
@@ -147,6 +148,7 @@ export function ContactPage() {
       
       lastSubmittedAtRef.current = Date.now();
       toast.success('Message sent successfully! We will contact you soon.');
+      trackLead(formData.name || 'General Enquiry', 'contact_page');
       
       // Reset form
       setFormData({
