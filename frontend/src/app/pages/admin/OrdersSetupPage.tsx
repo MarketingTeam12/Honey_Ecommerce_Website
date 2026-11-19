@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { CheckCircle, Copy, Database, Download, Upload, AlertTriangle, Trash2, RefreshCw, XCircle, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { AdminLayout } from '@/app/components/admin/AdminLayout';
-import { publicAnonKey } from '@/app/utils/backendInfo';
+import { projectId, publicAnonKey } from '@/app/utils/backendInfo';
 import { API_URL } from '@/app/utils/api';
 import { copyToClipboard } from '@/app/utils/clipboard';
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { AdminLayout } from '@/app/components/admin/AdminLayout';
 import { AlertTriangle, CheckCircle, XCircle, RefreshCw, Database, Server, Zap } from 'lucide-react';
 import { toast } from 'sonner';
-import { publicAnonKey } from '@/app/utils/backendInfo';
+import { projectId, publicAnonKey } from '@/app/utils/backendInfo';
 import { API_URL } from '@/app/utils/api';
 
 interface DiagnosticResult {

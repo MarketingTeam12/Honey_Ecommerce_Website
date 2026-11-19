@@ -57,13 +57,15 @@ export class ErrorBoundary extends Component<Props, State> {
               </ul>
             </div>
 
-            {(import.meta as any).env?.DEV && this.state.error && (
-              <div className="bg-gray-100 border border-gray-300 rounded-lg p-4 mb-6 overflow-auto">
-                <h3 className="font-bold text-gray-900 mb-2">Error details:</h3>
-                <pre className="text-xs text-gray-700 whitespace-pre-wrap">
+            {this.state.error && (
+              <details className="bg-gray-100 border border-gray-300 rounded-lg p-3 mb-6 overflow-auto text-left">
+                <summary className="font-semibold text-gray-800 text-xs cursor-pointer select-none">
+                  Click to view technical error details
+                </summary>
+                <pre className="text-xs text-red-700 whitespace-pre-wrap mt-2 p-2 bg-white rounded border">
                   {this.state.error.toString()}
                 </pre>
-              </div>
+              </details>
             )}
 
             <div className="flex flex-col sm:flex-row gap-3">
