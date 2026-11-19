@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { AdminLayout } from '@/app/components/admin/AdminLayout';
 import { AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
-import { publicAnonKey } from '@/app/utils/backendInfo';
+import { projectId, publicAnonKey } from '@/app/utils/backendInfo';
 import { API_URL } from '@/app/utils/api';
 
 export function DebugCustomersPage() {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { AdminLayout } from '@/app/components/admin/AdminLayout';
 import { RefreshCw, Database, HardDrive, AlertCircle, CheckCircle, XCircle, Copy, ExternalLink } from 'lucide-react';
-import { publicAnonKey } from '@/app/utils/backendInfo';
+import { projectId, publicAnonKey } from '@/app/utils/backendInfo';
 import { API_URL } from '@/app/utils/api';
 import { useAuth } from '@/app/context/AuthContext';
 import { toast } from 'sonner';
@@ -192,9 +192,9 @@ export function OrdersDiagnosticsPage() {
                   Environment
                 </h2>
                 <div className="space-y-2 font-mono text-sm">
-                  <div><span className="text-gray-600">Project ID:</span> <span className="font-semibold">{diagnostics.environment.projectId}</span></div>
-                  <div><span className="text-gray-600">Has Anon Key:</span> <span className={diagnostics.environment.hasAnonKey ? 'text-green-600' : 'text-red-600'}>{diagnostics.environment.hasAnonKey ? 'Yes' : 'No'}</span></div>
-                  <div><span className="text-gray-600">Has Access Token:</span> <span className={diagnostics.environment.hasAccessToken ? 'text-green-600' : 'text-red-600'}>{diagnostics.environment.hasAccessToken ? 'Yes' : 'No'}</span></div>
+                  <div><span className="text-gray-600">Project ID:</span> <span className="font-semibold">{diagnostics.environment?.projectId || 'N/A'}</span></div>
+                  <div><span className="text-gray-600">Has Anon Key:</span> <span className={diagnostics.environment?.hasAnonKey ? 'text-green-600' : 'text-red-600'}>{diagnostics.environment?.hasAnonKey ? 'Yes' : 'No'}</span></div>
+                  <div><span className="text-gray-600">Has Access Token:</span> <span className={diagnostics.environment?.hasAccessToken ? 'text-green-600' : 'text-red-600'}>{diagnostics.environment?.hasAccessToken ? 'Yes' : 'No'}</span></div>
                 </div>
               </div>
 
