@@ -32,7 +32,7 @@ export function PrivacyPolicyPage() {
             <div className="bg-gray-50 rounded-xl p-5 border border-gray-200/60 text-sm sm:text-base text-gray-700 space-y-2">
               <p><strong>Legal Entity:</strong> Honey Universal Digital Private Limited</p>
               <p><strong>Brand / Platform:</strong> Honey Universal Services (<a href="https://honeyuniversal.com" className="text-blue-600 underline">honeyuniversal.com</a>)</p>
-              <p><strong>Registered &amp; Corporate Office:</strong> 184/3, 2nd floor, Arcot Rd, opposite Hotel Aadithya, near Viveks, Vadapalani, Chennai, Tamil Nadu 600026, India</p>
+              <p><strong>Registered &amp; Corporate Office:</strong> 184/3, 2nd floor, Arcot Rd, opposite to Hotel Aadithya, near Viveks, Vadapalani, Chennai, Tamil Nadu 600026, India</p>
               <p><strong>Quality Certifications:</strong> ISO 9001:2015 certified – Quality Management System for language translation services (Certificate No. 25EQQO18, Assurance Quality Certification LLC, EGAC accredited, valid until 18/11/2028)</p>
               <p><strong>Contact Email:</strong> <a href="mailto:support@honeyuniversal.com" className="text-blue-600 underline">support@honeyuniversal.com</a></p>
             </div>
@@ -196,7 +196,7 @@ export function PrivacyPolicyPage() {
                   <p className="text-gray-600">Email Address:</p>
                   <p><a href="mailto:grievance@honeyuniversal.com" className="text-blue-600 font-bold underline">grievance@honeyuniversal.com</a> / <a href="mailto:support@honeyuniversal.com" className="text-blue-600 underline">support@honeyuniversal.com</a></p>
                   <p className="text-gray-600 mt-2">Office Address:</p>
-                  <p className="text-gray-900">184/3, 2nd floor, Arcot Rd, opposite Hotel Aadithya, near Viveks, Vadapalani, Chennai, Tamil Nadu 600026, India</p>
+                  <p className="text-gray-900">184/3, 2nd floor, Arcot Rd, opposite to Hotel Aadithya, near Viveks, Vadapalani, Chennai, Tamil Nadu 600026, India</p>
                 </div>
               </div>
               <p className="text-xs text-gray-500 mt-4">

@@ -40,7 +40,7 @@ export function ISOCertificationSection() {
                     Honey Universal Digital Private Limited
                   </h4>
                   <p className="text-xs text-gray-600 mt-1">
-                    184/3, 2nd floor, Arcot Rd, opposite Hotel Aadithya, near Viveks, Vadapalani, Chennai, Tamil Nadu 600026, India
+                    184/3, 2nd floor, Arcot Rd, opposite to Hotel Aadithya, near Viveks, Vadapalani, Chennai, Tamil Nadu 600026, India
                   </p>
                 </div>
 

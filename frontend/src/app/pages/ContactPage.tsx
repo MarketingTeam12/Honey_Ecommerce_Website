@@ -408,7 +408,7 @@ export function ContactPage() {
                     <h4 className="font-bold mb-2">Corporate Office</h4>
                     <p className="text-blue-100 leading-relaxed text-sm">
                       Honey Universal Digital Private Limited<br />
-                      184/3, 2nd floor, Arcot Rd, opposite Hotel Aadithya,<br />
+                      184/3, 2nd floor, Arcot Rd, opposite to Hotel Aadithya,<br />
                       near Viveks, Vadapalani, Chennai, Tamil Nadu 600026, India
                     </p>
                   </div>

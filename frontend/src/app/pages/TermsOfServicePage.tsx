@@ -97,7 +97,7 @@ export function TermsOfServicePage() {
             📞 Phone: <a href="tel:+917299005577" className="text-blue-600 hover:underline">+91 72990 05577</a>
           </p>
           <p>
-            📍 Address: 184/3, 2nd floor, Arcot Rd, opposite Hotel Aadithya, near Viveks, Vadapalani, Chennai, Tamil Nadu 600026, India
+            📍 Address: 184/3, 2nd floor, Arcot Rd, opposite to Hotel Aadithya, near Viveks, Vadapalani, Chennai, Tamil Nadu 600026, India
           </p>
         </div>
       </section>
