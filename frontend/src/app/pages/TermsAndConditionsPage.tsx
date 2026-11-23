@@ -31,7 +31,7 @@ export function TermsAndConditionsPage() {
         </p>
         <h3 className="text-xl font-semibold text-gray-900 mb-3">How do I withdraw my consent?</h3>
         <p className="text-gray-700 mb-4">
-          If after you opt-in, you change your mind, you may withdraw your consent for us to contact you, for the continued collection, use or disclosure of your information, at any time, by contacting us at support@honeyuniversal.com / grievance@honeyuniversal.com or mailing us at: Honey Universal Digital Private Limited, No. 12, Ground Floor, Anna Salai, Chennai, Tamil Nadu 600002, India.
+          If after you opt-in, you change your mind, you may withdraw your consent for us to contact you, for the continued collection, use or disclosure of your information, at any time, by contacting us at support@honeyuniversal.com / grievance@honeyuniversal.com or mailing us at: Honey Universal Digital Private Limited, 184/3, 2nd floor, Arcot Rd, opposite Hotel Aadithya, near Viveks, Vadapalani, Chennai, Tamil Nadu 600026, India.
         </p>
       </section>
 

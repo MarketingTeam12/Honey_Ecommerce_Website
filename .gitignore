@@ -37,6 +37,7 @@ invoices/
 temp/
 tmp/
 *.pdf
+!frontend/public/*.pdf
 
 # OS / Editor files
 .DS_Store
@@ -50,6 +51,7 @@ Thumbs.db
 AUDIT_PROGRESS.md
 Honey_Universal_Audit_Tracking_Checklist.html
 *Tracking_Checklist*.pdf
+!frontend/public/*.pdf
 frontend/*_GUIDE*.md
 frontend/*_SUMMARY*.md
 frontend/*_FIX*.md

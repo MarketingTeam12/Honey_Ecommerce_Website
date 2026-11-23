@@ -334,7 +334,7 @@ export function BlogPage() {
                   <h4 className="font-bold text-gray-900 text-base">{selectedPost.author}</h4>
                   <p className="text-xs font-semibold text-blue-600 mb-1">
                     {selectedPost.author === 'Sarah Mitchell'
-                      ? 'Senior Translation Quality Lead · ISO 17100 Certified Auditor'
+                      ? 'Senior Translation Quality Lead · ISO 9001:2015 Quality Auditor'
                       : selectedPost.author === 'Rajesh Kumar'
                       ? 'MEA Legalization Specialist · Hague Apostille Lead'
                       : 'International Localization Consultant · Multilingual Communications Lead'}

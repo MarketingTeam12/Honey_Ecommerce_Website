@@ -408,8 +408,8 @@ export function ContactPage() {
                     <h4 className="font-bold mb-2">Corporate Office</h4>
                     <p className="text-blue-100 leading-relaxed text-sm">
                       Honey Universal Digital Private Limited<br />
-                      No. 12, Ground Floor, Anna Salai,<br />
-                      Chennai, Tamil Nadu 600002, India
+                      184/3, 2nd floor, Arcot Rd, opposite Hotel Aadithya,<br />
+                      near Viveks, Vadapalani, Chennai, Tamil Nadu 600026, India
                     </p>
                   </div>
                 </div>
@@ -423,7 +423,7 @@ export function ContactPage() {
               </div>
               <div className="space-y-2 text-sm text-gray-600">
                 <p><span className="font-semibold text-gray-800">Entity:</span> Honey Universal Digital Private Limited</p>
-                <p><span className="font-semibold text-gray-800">Certifications:</span> ISO 9001:2015 &amp; ISO 17100:2015 Certified</p>
+                <p><span className="font-semibold text-gray-800">Certifications:</span> ISO 9001:2015 Certified (Certificate No. 25EQQO18, Assurance Quality Certification LLC, EGAC accredited)</p>
                 <p><span className="font-semibold text-gray-800">Global Acceptance:</span> USCIS, IRCC, MEA, Embassies &amp; Courts</p>
               </div>
             </div>
