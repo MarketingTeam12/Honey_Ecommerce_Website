@@ -54,7 +54,7 @@ export function RefundCancellationPolicyPage() {
           📧 <a href="mailto:support@honeyuniversal.com" className="text-blue-600 hover:underline">support@honeyuniversal.com</a> / <a href="mailto:accounts@honeyuniversal.com" className="text-blue-600 hover:underline">accounts@honeyuniversal.com</a>
         </p>
         <p className="text-gray-700 text-sm sm:text-base mt-2">
-          📍 Honey Universal Digital Private Limited, No. 12/28, 1st Floor, Soundarya Colony, Anna Nagar West Extension, Chennai - 600101, Tamil Nadu, India.<br />
+          📍 Honey Universal Digital Private Limited, 184/3, 2nd floor, Arcot Rd, opposite to Hotel Aadithya, near Viveks, Vadapalani, Chennai, Tamil Nadu 600026, India.<br />
           📞 Customer Support: +91 72990 05577 (Mon–Sat, 9:30 AM–6:30 PM IST)
         </p>
       </section>

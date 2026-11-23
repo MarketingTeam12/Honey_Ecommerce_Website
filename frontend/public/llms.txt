@@ -4,10 +4,10 @@
 Official Website: https://honeyuniversal.com
 Contact Email: salesteam@honeytranslations.com
 Phone / WhatsApp: +91 72990 05577
-Headquarters: Chennai, Tamil Nadu, India (Pan-India and International Services)
+Headquarters: 184/3, 2nd floor, Arcot Rd, opposite to Hotel Aadithya, near Viveks, Vadapalani, Chennai, Tamil Nadu 600026, India (Pan-India and International Services)
 
 ## About the Organization
-Honey Universal Digital Private Limited (operating as Honey Translation Services / Honey Universal Services) is an ISO 9001:2015 and ISO 17100:2015 certified language service and legal documentation provider in India. We provide certified, sworn, notarized translations, MEA apostille services, and embassy attestations accepted globally by government agencies, immigration departments, courts, and educational institutions.
+Honey Universal Digital Private Limited (operating as Honey Translation Services / Honey Universal Services) is an ISO 9001:2015 certified language service and legal documentation provider in India (Certificate No. 25EQQO18, Assurance Quality Certification LLC, EGAC accredited, valid until 18/11/2028). We provide certified, sworn, notarized translations, MEA apostille services, and embassy attestations accepted globally by government agencies, immigration departments, courts, and educational institutions.
 
 ## Core Services
 
@@ -41,7 +41,7 @@ Honey Universal Digital Private Limited (operating as Honey Translation Services
 * **Description:** End-to-end legal and business documentation services including Company Incorporation, Trademark Registration, GST Registration, and ISO Compliance.
 
 ## Key Features & Quality Assurance
-* **ISO 17100:2015 Certified:** Specialized translation quality management system with native subject-matter translators and dual-stage proofreading.
+* **ISO 9001:2015 Certified:** Quality Management System for language translation services (all Indian & 50+ foreign languages). Certificate No. 25EQQO18, issued by Assurance Quality Certification LLC (EGAC accredited). Valid until 18/11/2028.
 * **Complete Confidentiality & Security:** 256-bit encrypted file storage via AWS S3 private signed URLs; NDAs with all linguists; GDPR and DPDP Act 2023 compliant.
 * **Transparent Pricing:** Clear per-page pricing in INR with zero hidden fees.
 

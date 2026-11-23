@@ -1,13 +1,11 @@
 const mysql = require("mysql2/promise");
 
-const {
-  MYSQL_HOST = "localhost",
-  MYSQL_PORT = "3306",
-  MYSQL_USER = "root",
-  MYSQL_PASSWORD = "",
-  MYSQL_DATABASE = "honey_translations",
-  MYSQL_CONNECTION_LIMIT = "10",
-} = process.env;
+const MYSQL_HOST = process.env.MYSQL_HOST || process.env.DB_HOST || "localhost";
+const MYSQL_PORT = process.env.MYSQL_PORT || process.env.DB_PORT || "3306";
+const MYSQL_USER = process.env.MYSQL_USER || process.env.DB_USER || "root";
+const MYSQL_PASSWORD = process.env.MYSQL_PASSWORD || process.env.DB_PASSWORD || "";
+const MYSQL_DATABASE = process.env.MYSQL_DATABASE || process.env.DB_NAME || "honey_translations";
+const MYSQL_CONNECTION_LIMIT = process.env.MYSQL_CONNECTION_LIMIT || "10";
 
 const pool = mysql.createPool({
   host: MYSQL_HOST,

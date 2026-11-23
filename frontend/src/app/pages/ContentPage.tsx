@@ -301,7 +301,7 @@ export function ContentPage() {
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Quality Assurance</h2>
             <p className="text-gray-700 leading-relaxed">
-              We are ISO 17100:2015 certified and maintain the highest quality standards. All translations are performed by qualified professionals and undergo quality checks before delivery.
+              We are ISO 9001:2015 certified (Quality Management System for language translation services, Certificate No. 25EQQO18, Assurance Quality Certification LLC, EGAC accredited, valid until 18/11/2028) and maintain the highest quality standards. All translations are performed by qualified professionals and undergo quality checks before delivery.
             </p>
           </section>
 
@@ -466,7 +466,7 @@ export function ContentPage() {
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Quality & ISO Certifications</h2>
             <p className="text-gray-700 leading-relaxed mb-3">
-              We are proud to be <strong>ISO 9001:2015</strong> (Quality Management System) and <strong>ISO 17100:2015</strong> (Translation Services Quality Standard) certified. These certifications, accredited by IAS and IAF, demonstrate our rigorous adherence to global linguistic, confidentiality, and procedural standards.
+              We are proud to be <strong>ISO 9001:2015</strong> certified – Quality Management System for language translation services (all Indian &amp; 50+ foreign languages). Certificate No. 25EQQO18, issued by Assurance Quality Certification LLC (EGAC accredited). Valid until 18/11/2028. This certification demonstrates our rigorous adherence to global linguistic, confidentiality, and procedural quality standards.
             </p>
             <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r-lg">
               <p className="text-sm text-gray-800">

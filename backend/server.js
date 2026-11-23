@@ -1,5 +1,36 @@
 const path = require("path");
+const fs = require("fs");
+
+// Load environment variables from backend/.env and root .env if present
 require("dotenv").config({ path: path.join(__dirname, ".env") });
+require("dotenv").config({ path: path.join(__dirname, "../.env") });
+
+// ======================================================
+// PRE-FLIGHT ENVIRONMENT & CONFIGURATION VALIDATION
+// ======================================================
+
+const requiredEnvVars = [
+  { key: "MYSQL_HOST", fallback: "DB_HOST" },
+  { key: "MYSQL_USER", fallback: "DB_USER" },
+  { key: "MYSQL_PASSWORD", fallback: "DB_PASSWORD" },
+  { key: "MYSQL_DATABASE", fallback: "DB_NAME" },
+  { key: "JWT_SECRET" }
+];
+
+const missingEnvVars = requiredEnvVars
+  .filter(({ key, fallback }) => !process.env[key] && (!fallback || !process.env[fallback]))
+  .map(({ key, fallback }) => (fallback ? `${key} (or ${fallback})` : key));
+
+if (missingEnvVars.length > 0) {
+  console.error("==================================================================");
+  console.error("❌ [HOSTINGER STARTUP ERROR] Missing Required Environment Variables:");
+  missingEnvVars.forEach((name) => console.error(`   - ${name}`));
+  console.error("\nPlease configure these environment variables in:");
+  console.error("Hostinger hPanel > Websites > honeyuniversal.com > Node.js > Environment Variables");
+  console.error("or create/upload a .env file to the backend/ folder on your server.");
+  console.error("==================================================================");
+  process.exit(1);
+}
 
 const express = require("express");
 const documentRoute = require("./routes/documentRoute");
@@ -422,33 +453,36 @@ app.use((error, req, res, next) => {
 // START SERVER
 // ======================================================
 
+const dbHost = process.env.MYSQL_HOST || process.env.DB_HOST;
+const dbPort = process.env.MYSQL_PORT || process.env.DB_PORT || 3306;
+const dbName = process.env.MYSQL_DATABASE || process.env.DB_NAME;
+
+console.log(`Connecting to MySQL database at ${dbHost}:${dbPort} (${dbName})...`);
+
 initializeDatabase()
   .then(() => {
     const port = Number(process.env.PORT || 3000);
 
     app.listen(port, () => {
-      console.log(
-        `Server running on port ${port}`
-      );
-
-      console.log(
-        "Authentication : Passport.js"
-      );
-
-      console.log(
-        "Database : MySQL"
-      );
-
-      console.log(
-        "CORS : Enabled"
-      );
+      console.log(`✅ Server successfully started and running on port ${port}`);
+      console.log(`   Node.js version : ${process.version}`);
+      console.log(`   Environment     : ${process.env.NODE_ENV || "production"}`);
+      console.log("   Authentication  : Passport.js");
+      console.log("   Database        : MySQL");
+      console.log("   CORS            : Enabled");
     });
   })
   .catch((error) => {
-    console.error(
-      "Failed to initialize MySQL database:",
-      error
-    );
+    console.error("==================================================================");
+    console.error("❌ [DATABASE INITIALIZATION FAILED]");
+    console.error(`Failed to connect to MySQL database at ${dbHost}:${dbPort} (${dbName}):`, error.message || error);
+    if (error.code) {
+      console.error(`Error Code: ${error.code}`);
+    }
+    console.error("\nTroubleshooting Hostinger MySQL:");
+    console.error("1. Verify MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, and MYSQL_DATABASE in hPanel.");
+    console.error("2. If using Remote MySQL, verify that connections from this host are allowed.");
+    console.error("==================================================================");
 
     process.exit(1);
   });

@@ -110,6 +110,45 @@ router.get("/health", (req, res) => {
   res.json({ status: "ok", message: "Server is running", storage: "mysql" });
 });
 
+router.get("/google-rating", async (req, res) => {
+  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+  const placeId = process.env.GOOGLE_PLACE_ID;
+
+  if (apiKey && placeId) {
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,rating,user_ratings_total,reviews&key=${apiKey}`
+      );
+      if (response.ok) {
+        const placeData = await response.json();
+        if (placeData.result) {
+          return res.json({
+            success: true,
+            live: true,
+            rating: placeData.result.rating || 4.6,
+            reviewCount: placeData.result.user_ratings_total || 582,
+            businessName: placeData.result.name || "Honey Translation Services",
+            location: "Vadapalani, Chennai",
+            reviews: (placeData.result.reviews || []).slice(0, 5),
+          });
+        }
+      }
+    } catch (err) {
+      console.warn("[Google Places API] Live fetch error, falling back to static:", err.message);
+    }
+  }
+
+  return res.json({
+    success: true,
+    live: false,
+    rating: 4.6,
+    reviewCount: 582,
+    businessName: "Honey Translation Services",
+    location: "Vadapalani, Chennai",
+    reviews: [],
+  });
+});
+
 router.get("/storage/bootstrap", (req, res) => {
   const clientId = ensureStorageClientId(req, res);
   res.json({
