@@ -57,6 +57,7 @@ type RazorpayOrderResponse = {
   currency: string;
   receipt?: string;
   status?: string;
+  key_id?: string | null;
 };
 
 type PaymentCreateOrderResponse = {
@@ -66,6 +67,7 @@ type PaymentCreateOrderResponse = {
   amount?: number;
   currency?: string;
   razorpayOrder?: RazorpayOrderResponse | null;
+  keyId?: string | null;
   paymentUrl?: string | null;
   zohoHostedpageId?: string | null;
   gateway?: string;
@@ -432,11 +434,6 @@ export function NewPaymentPage() {
       return;
     }
 
-    if (!RAZORPAY_KEY_ID || RAZORPAY_KEY_ID === 'YOUR_RAZORPAY_KEY_ID') {
-      setError('Set VITE_RAZORPAY_KEY_ID to open the Razorpay checkout.');
-      return;
-    }
-
     paymentInFlightRef.current = true;
     setProcessing(true);
     setError('');
@@ -679,8 +676,22 @@ export function NewPaymentPage() {
         throw new Error('Payment amount or currency mismatch detected. Please refresh and try again.');
       }
 
+      // Use the key_id the backend created this order with. A Razorpay order can only be
+      // opened with the key of the account/mode that created it; a stale build-time
+      // VITE_RAZORPAY_KEY_ID makes Checkout fail with "Uh! oh! Something went wrong".
+      const checkoutKeyId =
+        paymentCreateResponse?.keyId ||
+        razorpayOrder.key_id ||
+        (RAZORPAY_KEY_ID !== 'YOUR_RAZORPAY_KEY_ID' ? RAZORPAY_KEY_ID : '');
+      if (!checkoutKeyId) {
+        throw new Error('Razorpay key is not configured. Set RAZORPAY_KEY_ID on the server.');
+      }
+      if (RAZORPAY_KEY_ID && RAZORPAY_KEY_ID !== checkoutKeyId && import.meta.env.DEV) {
+        console.warn('VITE_RAZORPAY_KEY_ID differs from the backend RAZORPAY_KEY_ID; using the backend key.');
+      }
+
       const options = {
-        key: RAZORPAY_KEY_ID,
+        key: checkoutKeyId,
         amount: orderPaise,
         currency: 'INR',
         name: 'Honey Translation Services',

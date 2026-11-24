@@ -60,11 +60,22 @@ async function createOrder({ amount, currency = "INR", receipt }) {
     throw error;
   }
 
-  return getRazorpay().orders.create({
+  const order = await getRazorpay().orders.create({
     amount: amountPaise,
     currency: "INR",
     receipt: resolvedReceipt,
   });
+
+  // Return the public key_id the order was created with so Checkout always opens
+  // with the matching key (the key secret is never exposed).
+  return { ...order, key_id: getPublicKeyId() };
+}
+
+/**
+ * Public Razorpay key_id (safe to share with the browser; never the secret).
+ */
+function getPublicKeyId() {
+  return process.env.RAZORPAY_KEY_ID || null;
 }
 
 /**
@@ -106,6 +117,7 @@ function verifyWebhookSignature(rawBody, signatureHeader) {
 
 module.exports = {
   createOrder,
+  getPublicKeyId,
   verifyPaymentSignature,
   verifyWebhookSignature,
 };

@@ -1555,6 +1555,7 @@ router.post("/payment/create-order", async (req, res, next) => {
       amount: numericAmount,
       currency: "INR",
       razorpayOrder,
+      keyId: razorpayService.getPublicKeyId(),
       order: savedOrder,
     });
   } catch (error) {
