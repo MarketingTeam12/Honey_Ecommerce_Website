@@ -840,6 +840,13 @@ export function NewPaymentPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
+    const paymentStatus = params.get('paymentStatus');
+    if (paymentStatus === 'failed') {
+      setError('Payment was not completed or was declined. Your cart items are preserved — please retry.');
+    } else if (paymentStatus === 'cancelled') {
+      setError('Payment was cancelled. Your cart items are preserved — click below to retry.');
+    }
+
     const shouldAutoPay = params.get('autopay') === '1';
 
     if (!shouldAutoPay || autoPayTriggeredRef.current || !user || processing || cart.length === 0) {

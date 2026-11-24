@@ -52,6 +52,22 @@ export function OrderSuccessPage() {
   const [loading, setLoading] = useState(true);
   const [downloadingInvoice, setDownloadingInvoice] = useState(false);
   const [invoicePath, setInvoicePath] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState<number>(5);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          navigate('/my-orders');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [navigate]);
 
   useEffect(() => {
     if (orderId) {
@@ -274,6 +290,15 @@ export function OrderSuccessPage() {
           <p className="text-lg text-gray-600 mb-2">
             Thank you for your order. Your payment has been confirmed.
           </p>
+          <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium my-3 border border-blue-200">
+            <span>Redirecting to your orders in <strong className="font-bold text-blue-900">{countdown}</strong> seconds...</span>
+            <button
+              onClick={() => navigate('/my-orders')}
+              className="ml-2 underline font-semibold hover:text-blue-900"
+            >
+              Go Now
+            </button>
+          </div>
           <p className="text-sm text-gray-500">
             A confirmation email has been sent to <span className="font-semibold">{order?.customer_email || user?.email}</span>
           </p>
