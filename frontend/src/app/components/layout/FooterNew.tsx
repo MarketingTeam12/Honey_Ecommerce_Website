@@ -1,4 +1,4 @@
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MessageCircle } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MessageCircle, Youtube } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -248,6 +248,15 @@ export function FooterNew() {
                 aria-label="Instagram"
               >
                 <Instagram className="w-5 h-5" aria-hidden="true" />
+              </a>
+              <a
+                href="https://www.youtube.com/@HoneyUniversalDigitalPrivateLi"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-11 h-11 min-w-[44px] min-h-[44px] bg-gray-800 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                aria-label="YouTube"
+              >
+                <Youtube className="w-5 h-5" aria-hidden="true" />
               </a>
               <a
                 href="https://wa.me/917299005577?text=Hello%20Honey%20Translations"
