@@ -774,9 +774,7 @@ export function NewPaymentPage() {
             clearCart();
             paymentInFlightRef.current = false;
             setProcessing(false);
-            navigate(
-              `/order-success?orderId=${orderId}&orderNumber=${orderNumber}&trackingNumber=${trackingNumber}&gateway=razorpay&payment_id=${razorpayResponse.razorpay_payment_id || ''}`,
-            );
+            navigate(`/my-orders?payment=success&orderId=${orderId}&orderNumber=${orderNumber}`);
           } catch (verifyError) {
             console.error('Payment verification request failed:', verifyError);
             const message =

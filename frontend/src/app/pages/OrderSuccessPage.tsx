@@ -52,21 +52,8 @@ export function OrderSuccessPage() {
   const [loading, setLoading] = useState(true);
   const [downloadingInvoice, setDownloadingInvoice] = useState(false);
   const [invoicePath, setInvoicePath] = useState<string | null>(null);
-  const [countdown, setCountdown] = useState<number>(5);
-
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          navigate('/my-orders');
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
+    navigate('/my-orders', { replace: true });
   }, [navigate]);
 
   useEffect(() => {
