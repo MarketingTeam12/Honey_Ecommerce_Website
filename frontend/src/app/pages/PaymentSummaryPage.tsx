@@ -6,13 +6,14 @@ import { useAuth } from '@/app/context/AuthContext';
 import { useAuthGate } from '@/app/context/AuthGateContext';
 import { useCurrency } from '@/app/context/CurrencyContext';
 import { publicAnonKey } from '@/app/utils/backendInfo';
+import { buildHeaders } from '@/app/utils/buildHeaders';
 import { API_URL } from '@/app/utils/api';
 import { toast } from 'sonner';
 
 export function PaymentSummaryPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, accessToken } = useAuth();
   const { requireAuth } = useAuthGate();
   const { currency } = useCurrency();
   const { getCartTotal, cart, appliedCoupon, getDiscountAmount } = useCart();
@@ -74,9 +75,7 @@ export function PaymentSummaryPage() {
       const response = await fetch(
         `${API_URL}/orders/${orderId}`,
         {
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: buildHeaders(accessToken),
         }
       );
 

@@ -62,6 +62,7 @@ const OrdersDiagnosticsPage = lazy(() => import("@/app/pages/admin/OrdersDiagnos
 const APIKeysPage = lazy(() => import("@/app/pages/admin/APIKeysPage").then((m) => ({ default: m.APIKeysPage })));
 const PaymentSettingsPage = lazy(() => import("@/app/pages/admin/PaymentSettingsPage").then((m) => ({ default: m.PaymentSettingsPage })));
 const ItemReviewsPage = lazy(() => import("@/app/pages/admin/ItemReviewsPage").then((m) => ({ default: m.ItemReviewsPage })));
+const SiteReviewsPage = lazy(() => import("@/app/pages/admin/SiteReviewsPage").then((m) => ({ default: m.SiteReviewsPage })));
 const DataCleanupPage = lazy(() => import("@/app/pages/admin/DataCleanupPage").then((m) => ({ default: m.DataCleanupPage })));
 const OrdersSetupPage = lazy(() => import("@/app/pages/admin/OrdersSetupPage"));
 const OrdersSetupChecklistPage = lazy(() => import("@/app/pages/admin/OrdersSetupChecklistPage").then((m) => ({ default: m.OrdersSetupChecklistPage })));
@@ -278,6 +279,10 @@ function App() {
                     <Route
                       path="/admin/item-reviews"
                       element={<ItemReviewsPage />}
+                    />
+                    <Route
+                      path="/admin/site-reviews"
+                      element={<SiteReviewsPage />}
                     />
                     <Route
                       path="/admin/collections"

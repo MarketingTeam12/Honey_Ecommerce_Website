@@ -351,7 +351,7 @@ router.post("/admin/upload-work-sample", requireAuth, requireAdmin, upload.singl
   }
 });
 
-router.get("/customers", optionalAuth, async (req, res, next) => {
+router.get("/customers", requireAuth, requireAdmin, async (req, res, next) => {
   try {
     const customers = await siteData.listCustomers();
     res.json({ customers, data: customers });
@@ -360,10 +360,21 @@ router.get("/customers", optionalAuth, async (req, res, next) => {
   }
 });
 
-router.get("/customers/:id", optionalAuth, async (req, res, next) => {
+router.get("/customers/:id", requireAuth, async (req, res, next) => {
   try {
     const customer = await siteData.getCustomer(req.params.id);
     if (!customer) return res.status(404).json({ error: "Customer not found" });
+
+    const isAdmin = await userService.isAdmin(req.user);
+    if (!isAdmin) {
+      const reqEmail = String(req.user?.email || "").trim().toLowerCase();
+      const custEmail = String(customer.email || "").trim().toLowerCase();
+      const isSelf = req.user?.id === customer.id || (reqEmail && custEmail && reqEmail === custEmail);
+      if (!isSelf) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+    }
+
     res.json({ customer });
   } catch (error) {
     next(error);
@@ -943,12 +954,13 @@ router.get("/reviews/:productId", async (req, res, next) => {
 
 router.post("/reviews", optionalAuth, async (req, res, next) => {
   try {
+    const { id: _ignoredId, status: _ignoredStatus, votes: _ignoredVotes, userId: _ignoredUserId, ...safeBody } = req.body || {};
     const review = await siteData.saveReview({
-      ...req.body,
-      userId: req.user?.id || req.body?.userId,
-      customerName: req.body?.customerName || req.user?.name || req.user?.email || "Anonymous",
-      status: req.body?.status || "pending",
-      votes: req.body?.votes || 0,
+      ...safeBody,
+      userId: req.user?.id || null,
+      customerName: safeBody.customerName || req.user?.name || req.user?.email || "Anonymous",
+      status: "pending",
+      votes: 0,
     });
 
     // Create the admin bell notification so new reviews show up in the admin panel.
@@ -988,10 +1000,24 @@ router.put("/admin/reviews/:reviewId", requireAuth, requireAdmin, async (req, re
   }
 });
 
-router.put("/reviews/:reviewId", optionalAuth, async (req, res, next) => {
+router.put("/reviews/:reviewId", requireAuth, async (req, res, next) => {
   try {
     const reviewId = req.params.reviewId;
-    const review = await siteData.saveReview(req.body || {}, reviewId);
+    const existing = await siteData.getReview(reviewId);
+    if (!existing) {
+      return res.status(404).json({ success: false, error: "Review not found" });
+    }
+    if (!req.user || existing.userId !== req.user.id) {
+      return res.status(403).json({ success: false, error: "Not authorized to edit this review" });
+    }
+    const updatePayload = {
+      productId: existing.productId,
+      rating: req.body?.rating !== undefined ? req.body.rating : existing.rating,
+      title: req.body?.title !== undefined ? req.body.title : existing.title,
+      reviewText: req.body?.reviewText !== undefined ? req.body.reviewText : (req.body?.comment || existing.comment || existing.reviewText),
+      comment: req.body?.reviewText !== undefined ? req.body.reviewText : (req.body?.comment || existing.comment || existing.reviewText),
+    };
+    const review = await siteData.saveReview(updatePayload, reviewId);
     res.json({ success: true, review });
   } catch (error) {
     next(error);
@@ -1021,7 +1047,56 @@ router.delete("/admin/reviews/:reviewId", requireAuth, requireAdmin, async (req,
   }
 });
 
-router.get(["/orders", "/debug/orders"], optionalAuth, async (req, res, next) => {
+function sanitizeOrderForCustomer(order) {
+  if (!order || typeof order !== "object") return null;
+  const clone = { ...order };
+  delete clone.admin_notes;
+  delete clone.adminNotes;
+  delete clone.notes;
+  delete clone.internal_notes;
+  delete clone.internalNotes;
+  delete clone.email_error;
+  delete clone.emailError;
+  delete clone.metadata;
+  delete clone.completed_file_url;
+  delete clone.completedFileUrl;
+  delete clone.ip_hash;
+  delete clone.ip;
+  return clone;
+}
+
+function isOrderOwner(order, user) {
+  if (!order || !user) return false;
+  const userId = user.id;
+  const userEmail = String(user.email || "").trim().toLowerCase();
+  const orderUserId = order.user_id || order.userId;
+  const orderEmail = String(order.customer_email || order.customerEmail || order.email || "").trim().toLowerCase();
+
+  return Boolean(
+    (userId && orderUserId && String(userId) === String(orderUserId)) ||
+    (userEmail && orderEmail && userEmail === orderEmail)
+  );
+}
+
+router.get("/orders", requireAuth, async (req, res, next) => {
+  try {
+    const isAdmin = await userService.isAdmin(req.user);
+    const orders = await siteData.listOrders();
+
+    if (isAdmin) {
+      return res.json({ orders, data: orders });
+    }
+
+    // Ordinary customers can access only their own orders
+    const myOrders = orders.filter((order) => isOrderOwner(order, req.user));
+    const sanitized = myOrders.map(sanitizeOrderForCustomer);
+    res.json({ orders: sanitized, data: sanitized });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/debug/orders", requireAuth, requireAdmin, async (req, res, next) => {
   try {
     const orders = await siteData.listOrders();
     res.json({ orders, data: orders });
@@ -1041,13 +1116,9 @@ router.get("/admin/orders", requireAuth, requireAdmin, async (req, res, next) =>
 
 router.get("/orders/my-orders", requireAuth, async (req, res, next) => {
   try {
-    const orders = (await siteData.listOrders()).filter((order) =>
-      order.user_id === req.user.id ||
-      order.userId === req.user.id ||
-      order.customer_email === req.user.email ||
-      order.customerEmail === req.user.email
-    );
-    res.json({ orders });
+    const orders = (await siteData.listOrders()).filter((order) => isOrderOwner(order, req.user));
+    const sanitized = orders.map(sanitizeOrderForCustomer);
+    res.json({ orders: sanitized });
   } catch (error) {
     next(error);
   }
@@ -1056,13 +1127,14 @@ router.get("/orders/my-orders", requireAuth, async (req, res, next) => {
 router.post("/orders", optionalAuth, async (req, res, next) => {
   try {
     const orderNumber = req.body?.order_number || req.body?.orderNumber || `HT${Date.now()}`;
+    const { id: _ignoredId, role: _ignoredRole, is_admin: _ignoredAdmin, userId: _ignoredUserId, user_id: _ignoredBodyUserId, ...safeBody } = req.body || {};
     // order insert + customer upsert now happen in one DB transaction
     // (see createOrderWithCustomer) so a mid-write failure can't leave an
     // order committed with stale/missing customer stats.
     const order = await siteData.createOrderWithCustomer({
-      ...req.body,
+      ...safeBody,
       order_number: orderNumber,
-      user_id: req.user?.id || req.body?.user_id,
+      user_id: req.user?.id || null, // Never trust frontend-supplied user_id or roles
       status: req.body?.status || "pending",
     });
 
@@ -1078,23 +1150,33 @@ router.post("/orders", optionalAuth, async (req, res, next) => {
         console.error("Failed to create admin notification for new order:", error.message);
       });
 
-    res.status(201).json({ success: true, order });
+    res.status(201).json({ success: true, order: sanitizeOrderForCustomer(order) });
   } catch (error) {
     next(error);
   }
 });
 
-router.get("/orders/:id", optionalAuth, async (req, res, next) => {
+router.get("/orders/:id", requireAuth, async (req, res, next) => {
   try {
     const order = await siteData.getOrder(req.params.id);
     if (!order) return res.status(404).json({ error: "Order not found" });
-    res.json({ order });
+
+    const isAdmin = await userService.isAdmin(req.user);
+    if (isAdmin) {
+      return res.json({ order });
+    }
+
+    if (!isOrderOwner(order, req.user)) {
+      return res.status(403).json({ error: "Access denied. You do not have permission to view this order." });
+    }
+
+    res.json({ order: sanitizeOrderForCustomer(order) });
   } catch (error) {
     next(error);
   }
 });
 
-router.patch(["/orders/:id/status", "/orders/:id/notes"], requireAuth, async (req, res, next) => {
+router.patch(["/orders/:id/status", "/orders/:id/notes"], requireAuth, requireAdmin, async (req, res, next) => {
   try {
     const isStatusUpdate = req.path.endsWith("/status");
     const order = isStatusUpdate
@@ -1150,7 +1232,7 @@ router.patch("/orders/:id/payment-status", requireAuth, requireAdmin, async (req
   }
 });
 
-router.patch("/orders/:orderId/tracking/stage", requireAuth, async (req, res, next) => {
+router.patch("/orders/:orderId/tracking/stage", requireAuth, requireAdmin, async (req, res, next) => {
   try {
     const tracking = await siteData.saveTracking(req.params.orderId, { ...req.body, orderId: req.params.orderId });
     res.json({ success: true, tracking });
@@ -1159,7 +1241,7 @@ router.patch("/orders/:orderId/tracking/stage", requireAuth, async (req, res, ne
   }
 });
 
-router.patch("/orders/:orderId/tracking/translator", requireAuth, async (req, res, next) => {
+router.patch("/orders/:orderId/tracking/translator", requireAuth, requireAdmin, async (req, res, next) => {
   try {
     const tracking = await siteData.saveTracking(req.params.orderId, { translator: req.body?.translator, orderId: req.params.orderId });
     res.json({ success: true, tracking });
@@ -1182,23 +1264,32 @@ router.post("/orders/track", async (req, res, next) => {
     const orderNumber = String(req.body?.orderNumber || req.body?.order_number || "").trim().toLowerCase();
     const email = String(req.body?.email || "").trim().toLowerCase();
     const trackingNumber = String(req.body?.trackingNumber || req.body?.tracking_number || "").trim().toLowerCase();
+
+    const hasTrackingNumber = trackingNumber.length >= 4;
+    const hasOrderAndEmail = orderNumber.length >= 3 && email.length >= 5 && email.includes("@");
+
+    if (!hasTrackingNumber && !hasOrderAndEmail) {
+      return res.status(400).json({
+        success: false,
+        error: "Please provide a valid tracking number, or both order number and email address.",
+      });
+    }
+
     const orders = await siteData.listOrders();
     const order = orders.find((item) => {
-      if (trackingNumber) {
-        return String(item.tracking_number || "").toLowerCase() === trackingNumber;
+      if (hasTrackingNumber && String(item.tracking_number || "").toLowerCase() === trackingNumber) {
+        return true;
       }
-      return (
-        (!orderNumber ||
-          String(item.order_number || "").toLowerCase() === orderNumber ||
-          String(item.orderNumber || "").toLowerCase() === orderNumber) &&
-        (!email ||
-          String(item.customer_email || "").toLowerCase() === email ||
-          String(item.customerEmail || "").toLowerCase() === email ||
-          String(item.email || "").toLowerCase() === email)
-      );
+      if (hasOrderAndEmail) {
+        const itemOrderNum = String(item.order_number || item.orderNumber || item.id || "").toLowerCase();
+        const itemEmail = String(item.customer_email || item.customerEmail || item.email || "").toLowerCase();
+        return itemOrderNum === orderNumber && itemEmail === email;
+      }
+      return false;
     });
+
     if (!order) return res.status(404).json({ success: false, error: "Order not found" });
-    res.json({ success: true, order });
+    res.json({ success: true, order: sanitizeOrderForCustomer(order) });
   } catch (error) {
     next(error);
   }
@@ -1273,7 +1364,7 @@ router.get("/orders/:id/download-completed-file", requireAuth, async (req, res, 
   }
 });
 
-router.delete("/orders/:id", requireAuth, async (req, res, next) => {
+router.delete("/orders/:id", requireAuth, requireAdmin, async (req, res, next) => {
   try {
     await siteData.deleteOrder(req.params.id);
     res.json({ success: true });
@@ -1643,7 +1734,7 @@ router.post("/payment/webhook", async (req, res, next) => {
   }
 });
 
-router.get("/payment/:paymentId", async (req, res, next) => {
+router.get("/payment/:paymentId", requireAuth, requireAdmin, async (req, res, next) => {
   try {
     const payment = await siteData.getPayment(req.params.paymentId);
     res.json({ payment });
