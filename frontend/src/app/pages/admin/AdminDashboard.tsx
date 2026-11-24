@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { AdminLayout } from '@/app/components/admin/AdminLayout';
 import { useProducts } from '@/app/context/ProductContext';
 import { publicAnonKey } from '@/app/utils/backendInfo';
+import { buildHeaders } from '@/app/utils/buildHeaders';
 import { API_URL } from '@/app/utils/api';
 import { useAuth } from '@/app/context/AuthContext';
 import { Clock, AlertCircle, XCircle, DollarSign, Package, BarChart3, TrendingUp, ShoppingCart, Users, Database, ExternalLink } from 'lucide-react';
@@ -141,7 +142,7 @@ const getOrdersStats = (orders: Order[]) => {
 
 export function AdminDashboard() {
   const { products } = useProducts();
-  const { user } = useAuth();
+  const { user, accessToken } = useAuth();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(false); // Changed to false for instant load
   const [storageStatus, setStorageStatus] = useState<{ allReady: boolean } | null>(null);
@@ -200,11 +201,7 @@ export function AdminDashboard() {
         const response = await fetch(
           `${API_URL}/orders`,
           {
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${publicAnonKey}`,
-              apikey: publicAnonKey,
-            },
+            headers: buildHeaders(accessToken),
             signal: controller.signal
           }
         );

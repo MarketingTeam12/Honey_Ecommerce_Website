@@ -4,7 +4,7 @@ const axios = require("axios");
 const resend = require("../utils/resend");
 const { uploadFileFromRequest } = require("../services/s3Service");
 const siteData = require("../services/siteDataService");
-const { requireAuth } = require("../middleware/auth");
+const { requireAuth, requireAdmin } = require("../middleware/auth");
 const {
   MAX_UPLOAD_SIZE_BYTES,
   createDocumentFileFilter,
@@ -176,7 +176,7 @@ router.post('/send-document', upload.fields([
   }
 });
 
-router.post('/orders/:id/resend-email', requireAuth, async (req, res) => {
+router.post('/orders/:id/resend-email', requireAuth, requireAdmin, async (req, res) => {
   try {
     const order = await siteData.getOrder(req.params.id);
     if (!order) {

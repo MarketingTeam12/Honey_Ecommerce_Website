@@ -14,7 +14,8 @@ const requiredEnvVars = [
   { key: "MYSQL_USER", fallback: "DB_USER" },
   { key: "MYSQL_PASSWORD", fallback: "DB_PASSWORD" },
   { key: "MYSQL_DATABASE", fallback: "DB_NAME" },
-  { key: "JWT_SECRET" }
+  { key: "JWT_SECRET" },
+  { key: "RESEND_API_KEY" }
 ];
 
 const missingEnvVars = requiredEnvVars
@@ -43,6 +44,7 @@ const { initializeDatabase } = require("./config/database");
 const paymentRoutes = require("./routes/paymentRoutes");
 const testResendRoute = require("./routes/testResend");
 const authRoutes = require("./routes/authRoutes");
+const siteReviewRoutes = require("./routes/siteReviewRoutes");
 const appDataRoutes = require("./routes/appDataRoutes");
 const razorpayService = require("./services/razorpayService");
 const s3Routes = require("./routes/s3Routes");
@@ -302,7 +304,7 @@ app.use(
   express.static(path.join(__dirname, "invoices"))
 );
 
-app.use(["/make-server-a67f0635", "/api"], authRoutes, appDataRoutes);
+app.use(["/make-server-a67f0635", "/api"], authRoutes, siteReviewRoutes, appDataRoutes);
 app.use(["/make-server-a67f0635", "/api"], paymentRoutes);
 app.use(["/make-server-a67f0635", "/api"], documentRoute);
 

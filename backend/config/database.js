@@ -62,19 +62,28 @@ pool.query = async function retryingQuery(...args) {
 };
 
 async function ensureDatabaseExists() {
-  const rootConnection = await mysql.createConnection({
-    host: MYSQL_HOST,
-    port: Number(MYSQL_PORT),
-    user: MYSQL_USER,
-    password: MYSQL_PASSWORD,
-  });
-
+  let rootConnection;
   try {
+    rootConnection = await mysql.createConnection({
+      host: MYSQL_HOST,
+      port: Number(MYSQL_PORT),
+      user: MYSQL_USER,
+      password: MYSQL_PASSWORD,
+    });
+
     await rootConnection.query(
       `CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`
     );
+  } catch (error) {
+    console.warn("Skipping CREATE DATABASE ... continuing with existing database:", error.message);
   } finally {
-    await rootConnection.end();
+    if (rootConnection) {
+      try {
+        await rootConnection.end();
+      } catch (err) {
+        // ignore close error
+      }
+    }
   }
 }
 
@@ -412,6 +421,27 @@ async function initializeDatabase() {
       INDEX idx_reviews_product_id (product_id),
       INDEX idx_reviews_user_id (user_id),
       INDEX idx_reviews_status (status)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS site_reviews (
+      id VARCHAR(64) PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      email VARCHAR(255) NOT NULL,
+      rating TINYINT NOT NULL,
+      title VARCHAR(255) NULL,
+      comment TEXT NOT NULL,
+      is_verified TINYINT(1) DEFAULT 0,
+      order_id VARCHAR(64) NULL,
+      status VARCHAR(20) DEFAULT 'pending',
+      ip_hash VARCHAR(64) NULL,
+      moderated_at DATETIME NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      UNIQUE KEY uq_site_reviews_order_id (order_id),
+      INDEX idx_site_reviews_status_created (status, created_at),
+      INDEX idx_site_reviews_email (email)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
 

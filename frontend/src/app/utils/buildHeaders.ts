@@ -14,11 +14,18 @@ export function buildHeaders(accessToken?: string | null): Record<string, string
     'Content-Type': 'application/json',
   };
 
-  const isMockToken = accessToken?.startsWith('mock-token-');
-  const looksLikeJWT = accessToken && !isMockToken && accessToken.includes('.');
+  const storedToken =
+    typeof localStorage !== 'undefined'
+      ? localStorage.getItem('honey_access_token') || localStorage.getItem('token')
+      : null;
+
+  const rawToken = (accessToken && accessToken.trim()) || storedToken;
+
+  const isMockToken = rawToken?.startsWith('mock-token-');
+  const looksLikeJWT = rawToken && !isMockToken && rawToken.includes('.');
 
   if (looksLikeJWT) {
-    headers.Authorization = `Bearer ${accessToken}`;
+    headers.Authorization = `Bearer ${rawToken}`;
   } else if (isMockToken && demoToken?.includes('.')) {
     headers.Authorization = `Bearer ${demoToken}`;
   }

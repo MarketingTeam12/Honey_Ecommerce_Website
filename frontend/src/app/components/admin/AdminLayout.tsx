@@ -133,7 +133,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         { name: 'Add New Item', href: '/admin/items/new', permissionKey: 'add_new_item' },
         { name: 'Categories', href: '/admin/categories', permissionKey: 'categories' },
         { name: 'Coupons', href: '/admin/coupons', permissionKey: 'coupons' },
-        { name: 'Item Reviews', href: '/admin/item-reviews', permissionKey: 'item_reviews' }
+        { name: 'Item Reviews', href: '/admin/item-reviews', permissionKey: 'item_reviews' },
+        { name: 'Website Reviews', href: '/admin/site-reviews', permissionKey: 'item_reviews' }
       ]
     },
     {

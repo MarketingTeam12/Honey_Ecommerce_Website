@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { AdminLayout } from '@/app/components/admin/AdminLayout';
 import { Copy, ChevronRight, Eye, FileText, Truck, CreditCard, Paperclip, RefreshCw, Trash2, Database, AlertTriangle, Search, Calendar, Plus, X, Check, Edit3 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -148,7 +148,7 @@ const canSalesManagerSeeOrder = (
 
 export function OrdersPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, accessToken } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -218,11 +218,7 @@ export function OrdersPage() {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 6000);
         const response = await fetch(url, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${publicAnonKey}`,
-            'apikey': publicAnonKey
-          },
+          headers: buildHeaders(accessToken),
           signal: controller.signal
         });
         clearTimeout(timeoutId);
@@ -371,7 +367,7 @@ export function OrdersPage() {
             `${API_URL}/orders/${orderId}`,
             {
               method: 'DELETE',
-              headers: buildHeaders(publicAnonKey),
+              headers: buildHeaders(accessToken),
             }
           );
 
@@ -1202,11 +1198,7 @@ const syncUnsyncedOrders = async (ordersToSync: Order[]) => {
     ordersToSync.map(async (order) => {
       await fetch(`${API_URL}/payment/create-order`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${publicAnonKey}`,
-          'apikey': publicAnonKey,
-        },
+        headers: buildHeaders(accessToken),
         body: JSON.stringify({
           userId: order.user_id || 'guest',
           userEmail: order.customer_email || '',

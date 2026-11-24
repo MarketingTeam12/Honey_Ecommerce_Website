@@ -3,6 +3,7 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, Download, MessageCircle, Package, ShoppingBag, FileText, Loader2, Receipt, Calendar, CreditCard, Mail, User } from 'lucide-react';
 import { API_URL, API_BASE_URL } from '@/app/utils/api';
 import { useAuth } from '@/app/context/AuthContext';
+import { buildHeaders } from '@/app/utils/buildHeaders';
 import { toast } from 'sonner';
 import { generateInvoicePDF } from '@/app/utils/generateInvoicePDF';
 import { trackPurchase } from '@/app/utils/analytics';
@@ -37,7 +38,7 @@ interface Order {
 }
 
 export function OrderSuccessPage() {
-  const { user } = useAuth();
+  const { user, accessToken } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const orderId = searchParams.get('orderId');
@@ -97,9 +98,7 @@ export function OrderSuccessPage() {
       const response = await fetch(
         `${API_URL}/orders/${orderId}`,
         {
-          headers: {
-            'Content-Type': 'application/json'
-          }
+          headers: buildHeaders(accessToken),
         }
       );
 
