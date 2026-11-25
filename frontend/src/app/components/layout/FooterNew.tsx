@@ -1,16 +1,36 @@
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MessageCircle, Youtube } from 'lucide-react';
+import {
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+  Mail,
+  Phone,
+  MessageCircle,
+  Youtube,
+  Headphones,
+  FileText,
+  Clock,
+  Users,
+  Award,
+  ShieldCheck,
+  CheckCircle2,
+  MapPin,
+  Send,
+  ExternalLink
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
+import honeyLogo from '@/assets/honey-log.webp';
 import { publicAnonKey } from '@/app/utils/backendInfo';
 import { API_URL } from '@/app/utils/api';
-import { useCookieConsent } from '@/app/context/CookieConsentContext';
+import { QueryModal } from '@/app/components/QueryModal';
 
 export function FooterNew() {
-  const { openSettings } = useCookieConsent();
   const [email, setEmail] = useState('');
   const [website, setWebsite] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [queryModalOpen, setQueryModalOpen] = useState(false);
   const lastSubscribeAtRef = useRef<number>(0);
 
   const scrollToTop = () => {
@@ -19,7 +39,7 @@ export function FooterNew() {
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const nowMs = Date.now();
     if (nowMs - lastSubscribeAtRef.current < 5_000) {
       toast.error('Please wait a few seconds before trying again.');
@@ -32,20 +52,17 @@ export function FooterNew() {
     }
 
     setIsSubmitting(true);
-    
+
     try {
-      const response = await fetch(
-        `${API_URL}/subscribe-email`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${publicAnonKey}`,
-            'apikey': publicAnonKey
-          },
-          body: JSON.stringify({ email: email.trim(), website })
-        }
-      );
+      const response = await fetch(`${API_URL}/subscribe-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${publicAnonKey}`,
+          apikey: publicAnonKey,
+        },
+        body: JSON.stringify({ email: email.trim(), website }),
+      });
 
       const data = await response.json();
 
@@ -56,10 +73,9 @@ export function FooterNew() {
         } else {
           toast.success(data.message || 'Successfully subscribed to our newsletter!');
         }
-        setEmail(''); // Clear the input
+        setEmail('');
         setWebsite('');
-        
-        // Dispatch event for admin panel notification
+
         window.dispatchEvent(new CustomEvent('notificationsUpdated'));
       } else {
         toast.error(data.message || data.error || 'Failed to subscribe. Please try again.');
@@ -73,254 +89,567 @@ export function FooterNew() {
   };
 
   return (
-    <footer className="bg-gray-900 text-white pt-8 pb-36">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mb-6">
-          {/* Company Info */}
-          <div>
-            <h3 className="text-xl font-bold mb-3">Company Info</h3>
-            <ul className="space-y-1 md:space-y-2">
-              <li>
-                <Link
-                  to="/about"
-                  onClick={scrollToTop}
-                  className="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2 text-left min-h-[44px] md:min-h-0 py-1 md:py-0"
-                >
-                  About Company
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/faq"
-                  onClick={scrollToTop}
-                  className="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2 text-left min-h-[44px] md:min-h-0 py-1 md:py-0"
-                >
-                  FAQ
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/blog"
-                  onClick={scrollToTop}
-                  className="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2 text-left min-h-[44px] md:min-h-0 py-1 md:py-0"
-                >
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/refund-cancellation-policy"
-                  onClick={scrollToTop}
-                  className="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2 text-left min-h-[44px] md:min-h-0 py-1 md:py-0"
-                >
-                  Refund & Cancellation Policy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/privacy-policy"
-                  onClick={scrollToTop}
-                  className="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2 text-left min-h-[44px] md:min-h-0 py-1 md:py-0"
-                >
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/terms-and-conditions"
-                  onClick={scrollToTop}
-                  className="text-gray-300 hover:text-white transition-colors inline-flex items-center gap-2 text-left min-h-[44px] md:min-h-0 py-1 md:py-0"
-                >
-                  Terms & Conditions
-                </Link>
-              </li>
-            </ul>
-          </div>
+    <>
+      <footer className="bg-[#060c2c] text-white">
+        {/* ========================================================= */}
+        {/* TOP PRE-FOOTER CTA BAR */}
+        {/* ========================================================= */}
+        <div className="border-b border-white/10 bg-[#081038] py-6 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-4 text-center md:text-left">
+              <div className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 text-white shadow-inner">
+                <Headphones className="w-7 h-7" />
+              </div>
+              <div>
+                <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                  Need Certified Translation or Apostille Support Right Now?
+                </h3>
+                <p className="text-sm text-gray-300 mt-1">
+                  We're available 24/7 in 50+ languages with fast certified turnaround.
+                </p>
+              </div>
+            </div>
 
-          {/* Services */}
-          <div>
-            <h3 className="text-xl font-bold mb-3">Services</h3>
-            <ul className="space-y-1 md:space-y-2">
-              <li>
-                <Link
-                  to="/apostille"
-                  onClick={scrollToTop}
-                  className="text-gray-300 hover:text-white transition-colors inline-flex items-center text-left min-h-[44px] md:min-h-0 py-1 md:py-0"
-                >
-                  Apostille Services
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/language"
-                  onClick={scrollToTop}
-                  className="text-gray-300 hover:text-white transition-colors inline-flex items-center text-left min-h-[44px] md:min-h-0 py-1 md:py-0"
-                >
-                  Translation Services
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/attestation"
-                  onClick={scrollToTop}
-                  className="text-gray-300 hover:text-white transition-colors inline-flex items-center text-left min-h-[44px] md:min-h-0 py-1 md:py-0"
-                >
-                  Attestation Services
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/startup"
-                  onClick={scrollToTop}
-                  className="text-gray-300 hover:text-white transition-colors inline-flex items-center text-left min-h-[44px] md:min-h-0 py-1 md:py-0"
-                >
-                  Startup Packages
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/work-sample"
-                  onClick={scrollToTop}
-                  className="text-gray-300 hover:text-white transition-colors inline-flex items-center text-left min-h-[44px] md:min-h-0 py-1 md:py-0"
-                >
-                  Work Sample
-                </Link>
-              </li>
-            </ul>
-          </div>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => setQueryModalOpen(true)}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#f59e0b] hover:bg-[#d97706] text-gray-950 font-bold text-sm sm:text-base shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+              >
+                <FileText className="w-5 h-5 text-gray-950" />
+                Request Enterprise Quote
+              </button>
 
-          {/* Get in Touch */}
-          <div>
-            <h3 className="text-xl font-bold mb-3">Get in Touch</h3>
-            <ul className="space-y-2 md:space-y-3">
-              <li className="flex items-center gap-3">
-                <Phone className="w-5 h-5 text-green-400" aria-hidden="true" />
-                <a href="tel:+917299005577" className="text-gray-300 hover:text-white transition-colors min-h-[44px] md:min-h-0 inline-flex items-center">
-                  +91 72990 05577
-                </a>
-              </li>
-              <li className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-red-400" aria-hidden="true" />
-                <a href="mailto:salesteam@honeytranslations.com" className="text-gray-300 hover:text-white transition-colors min-h-[44px] md:min-h-0 inline-flex items-center">
-                  salesteam@honeytranslations.com
-                </a>
-              </li>
-            </ul>
-
-            <div className="flex flex-wrap gap-3 mt-4">
               <a
-                href="https://www.facebook.com/honeytranslationservices"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-11 h-11 min-w-[44px] min-h-[44px] bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors"
-                aria-label="Facebook"
+                href="tel:+917299005577"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#0a1240] hover:bg-[#121c54] border border-white/20 text-white font-medium text-sm sm:text-base shadow-md hover:shadow-lg transition-all"
               >
-                <Facebook className="w-5 h-5" aria-hidden="true" />
-              </a>
-              <a
-                href="https://twitter.com/honeytranslations"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-11 h-11 min-w-[44px] min-h-[44px] bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors"
-                aria-label="Twitter"
-              >
-                <Twitter className="w-5 h-5" aria-hidden="true" />
-              </a>
-              <a
-                href="https://www.linkedin.com/company/53401447/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-11 h-11 min-w-[44px] min-h-[44px] bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors"
-                aria-label="LinkedIn"
-              >
-                <Linkedin className="w-5 h-5" aria-hidden="true" />
-              </a>
-              <a
-                href="https://www.instagram.com/honey_translation_services_/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-11 h-11 min-w-[44px] min-h-[44px] bg-gray-800 rounded-full flex items-center justify-center hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600 transition-all"
-                aria-label="Instagram"
-              >
-                <Instagram className="w-5 h-5" aria-hidden="true" />
-              </a>
-              <a
-                href="https://www.youtube.com/@HoneyUniversalDigitalPrivateLi"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-11 h-11 min-w-[44px] min-h-[44px] bg-gray-800 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
-                aria-label="YouTube"
-              >
-                <Youtube className="w-5 h-5" aria-hidden="true" />
-              </a>
-              <a
-                href="https://wa.me/917299005577?text=Hello%20Honey%20Translations"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-11 h-11 min-w-[44px] min-h-[44px] bg-gray-800 rounded-full flex items-center justify-center hover:bg-emerald-600 transition-colors"
-                aria-label="WhatsApp"
-              >
-                <MessageCircle className="w-5 h-5 text-emerald-400" aria-hidden="true" />
+                <Phone className="w-4 h-4 text-emerald-400" />
+                Call Now: +91 72990 05577
               </a>
             </div>
           </div>
+        </div>
 
-          {/* Newsletter */}
-          <div>
-            <h3 className="text-xl font-bold mb-3">Subscribe & Stay Informed</h3>
-            <p className="text-gray-300 mb-2">
-              Get updates on our latest services and special offers.
-            </p>
-            <form className="space-y-2" onSubmit={handleSubscribe}>
-              <div className="hidden" aria-hidden="true">
-                <label htmlFor="footer-newsletter-website">Website</label>
-                <input
-                  id="footer-newsletter-website"
-                  name="website"
-                  type="text"
-                  tabIndex={-1}
-                  autoComplete="off"
-                  value={website}
-                  onChange={(e) => setWebsite(e.target.value)}
+        {/* ========================================================= */}
+        {/* MAIN 6-COLUMN FOOTER BODY */}
+        {/* ========================================================= */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-8 lg:gap-6">
+            
+            {/* COLUMN 1: Brand & Highlights */}
+            <div className="lg:col-span-1 space-y-4">
+              <div className="bg-white p-3 rounded-xl inline-block shadow-md">
+                <img
+                  src={honeyLogo}
+                  alt="Honey Translation Services"
+                  className="h-10 w-auto object-contain"
                 />
               </div>
-              <label htmlFor="footer-newsletter-email" className="sr-only">
-                Email address for newsletter
-              </label>
-              <input
-                id="footer-newsletter-email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                placeholder="Your email address"
-                className="w-full min-h-[44px] px-4 py-3 rounded-lg bg-gray-800 text-white placeholder:text-gray-400 border border-gray-600 focus:border-blue-400 transition-colors"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <button
-                type="submit"
-                className="w-full min-h-[44px] bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Subscribing...' : 'Subscribe'}
-              </button>
-            </form>
+
+              <p className="text-xs text-gray-300 leading-relaxed">
+                Honey Universal Digital Private Limited delivers premium certified translation,
+                apostille, and embassy attestation services globally with accuracy and confidentiality.
+              </p>
+
+              <ul className="space-y-2 text-xs text-gray-300 pt-2 border-t border-white/10">
+                <li className="flex items-center gap-2">
+                  <Clock className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+                  <span>24/7 Support</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Users className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+                  <span>1000+ Clients</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <ShieldCheck className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+                  <span>5000+ Projects</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Award className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+                  <span>ISO 9001:2015 Certified</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* COLUMN 2: Quick Links */}
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-white mb-4 flex items-center gap-1.5">
+                Quick Links
+              </h4>
+              <ul className="space-y-2.5 text-xs">
+                <li>
+                  <Link
+                    to="/"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2 group"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400/70 group-hover:text-blue-300 flex-shrink-0" />
+                    <span>Home</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/about"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2 group"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400/70 group-hover:text-blue-300 flex-shrink-0" />
+                    <span>About Us</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/language"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2 group"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400/70 group-hover:text-blue-300 flex-shrink-0" />
+                    <span>Services</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/work-sample"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2 group"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400/70 group-hover:text-blue-300 flex-shrink-0" />
+                    <span>Work Samples</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/contact"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2 group"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400/70 group-hover:text-blue-300 flex-shrink-0" />
+                    <span>Contact Us</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/track-order"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2 group"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400/70 group-hover:text-blue-300 flex-shrink-0" />
+                    <span>Track Order</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/faq"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2 group"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400/70 group-hover:text-blue-300 flex-shrink-0" />
+                    <span>FAQ</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/blog"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2 group"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400/70 group-hover:text-blue-300 flex-shrink-0" />
+                    <span>Blog</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* COLUMN 3: Translation Services */}
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-white mb-4 flex items-center gap-1.5">
+                Translation
+              </h4>
+              <ul className="space-y-2.5 text-xs">
+                <li>
+                  <Link
+                    to="/language/certified-translation"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2 group"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400/70 group-hover:text-blue-300 flex-shrink-0" />
+                    <span>Certified Translation</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/language/sworn-translation"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2 group"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400/70 group-hover:text-blue-300 flex-shrink-0" />
+                    <span>Sworn Translation</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/language/legal-translation"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2 group"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400/70 group-hover:text-blue-300 flex-shrink-0" />
+                    <span>Legal &amp; Court</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/language/medical-translation"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2 group"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400/70 group-hover:text-blue-300 flex-shrink-0" />
+                    <span>Medical &amp; Academic</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/language/business-translation"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2 group"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400/70 group-hover:text-blue-300 flex-shrink-0" />
+                    <span>Business &amp; Corporate</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/language/technical-translation"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2 group"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400/70 group-hover:text-blue-300 flex-shrink-0" />
+                    <span>Technical Translation</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* COLUMN 4: Apostille & Attestation */}
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-white mb-4 flex items-center gap-1.5">
+                Apostille &amp; Legal
+              </h4>
+              <ul className="space-y-2.5 text-xs">
+                <li>
+                  <Link
+                    to="/apostille"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2 group"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400/70 group-hover:text-blue-300 flex-shrink-0" />
+                    <span>MEA Apostille</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/attestation"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2 group"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400/70 group-hover:text-blue-300 flex-shrink-0" />
+                    <span>Embassy Attestation</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/attestation/educational-certificate-attestation"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2 group"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400/70 group-hover:text-blue-300 flex-shrink-0" />
+                    <span>Educational Documents</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/attestation/commercial-document-attestation"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2 group"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400/70 group-hover:text-blue-300 flex-shrink-0" />
+                    <span>Commercial Documents</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/attestation/personal-document-attestation"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2 group"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400/70 group-hover:text-blue-300 flex-shrink-0" />
+                    <span>Personal Documents</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/startup"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2 group"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400/70 group-hover:text-blue-300 flex-shrink-0" />
+                    <span>Startup Packages</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* COLUMN 5: Popular Languages */}
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-white mb-4 flex items-center gap-1.5">
+                Popular Languages
+              </h4>
+              <ul className="space-y-2 text-xs">
+                <li>
+                  <Link
+                    to="/language/spanish"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2.5 group"
+                  >
+                    <span className="text-base leading-none">🇪🇸</span>
+                    <span>Spanish</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/language/arabic"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2.5 group"
+                  >
+                    <span className="text-base leading-none">🇦🇪</span>
+                    <span>Arabic</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/language/japanese"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2.5 group"
+                  >
+                    <span className="text-base leading-none">🇯🇵</span>
+                    <span>Japanese</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/language/hindi"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2.5 group"
+                  >
+                    <span className="text-base leading-none">🇮🇳</span>
+                    <span>Hindi</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/language/tamil"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2.5 group"
+                  >
+                    <span className="text-base leading-none">🇮🇳</span>
+                    <span>Tamil</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/language/telugu"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2.5 group"
+                  >
+                    <span className="text-base leading-none">🇮🇳</span>
+                    <span>Telugu</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/language/french"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2.5 group"
+                  >
+                    <span className="text-base leading-none">🇫🇷</span>
+                    <span>French</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/language/german"
+                    onClick={scrollToTop}
+                    className="text-gray-300 hover:text-white transition-colors flex items-center gap-2.5 group"
+                  >
+                    <span className="text-base leading-none">🇩🇪</span>
+                    <span>German</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* COLUMN 6: Get in Touch & Newsletter */}
+            <div className="lg:col-span-1 space-y-4">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-white mb-2 flex items-center gap-1.5">
+                Get in Touch
+              </h4>
+
+              <div className="space-y-2 text-xs text-gray-300">
+                <div className="flex items-start gap-2">
+                  <MapPin className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+                  <span className="leading-tight">
+                    No.184/3, 2nd Floor, Chandamama Building, NSK Salai, Vadapalani, Chennai - 600026
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <a href="tel:+917299005577" className="hover:text-white transition-colors">
+                    +91 72990 05577
+                  </a>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                  <a
+                    href="mailto:salesteam@honeytranslations.com"
+                    className="hover:text-white transition-colors break-all"
+                  >
+                    salesteam@honeytranslations.com
+                  </a>
+                </div>
+              </div>
+
+              {/* Social icons */}
+              <div className="flex flex-wrap gap-2 pt-2">
+                <a
+                  href="https://www.facebook.com/honeytranslationservices"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-blue-600 flex items-center justify-center transition-colors text-white"
+                  aria-label="Facebook"
+                >
+                  <Facebook className="w-4 h-4" />
+                </a>
+                <a
+                  href="https://twitter.com/honeytranslations"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-sky-500 flex items-center justify-center transition-colors text-white"
+                  aria-label="Twitter"
+                >
+                  <Twitter className="w-4 h-4" />
+                </a>
+                <a
+                  href="https://www.linkedin.com/company/53401447/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-blue-700 flex items-center justify-center transition-colors text-white"
+                  aria-label="LinkedIn"
+                >
+                  <Linkedin className="w-4 h-4" />
+                </a>
+                <a
+                  href="https://www.instagram.com/honey_translation_services_/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-pink-600 flex items-center justify-center transition-colors text-white"
+                  aria-label="Instagram"
+                >
+                  <Instagram className="w-4 h-4" />
+                </a>
+                <a
+                  href="https://www.youtube.com/@HoneyUniversalDigitalPrivateLi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-red-600 flex items-center justify-center transition-colors text-white"
+                  aria-label="YouTube"
+                >
+                  <Youtube className="w-4 h-4" />
+                </a>
+                <a
+                  href="https://wa.me/917299005577?text=Hello%20Honey%20Translations"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-emerald-600 flex items-center justify-center transition-colors text-white"
+                  aria-label="WhatsApp"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                </a>
+              </div>
+
+              {/* Mini newsletter subscription form */}
+              <div className="pt-2 border-t border-white/10">
+                <p className="text-[11px] text-gray-400 mb-2">Subscribe for updates &amp; offers</p>
+                <form onSubmit={handleSubscribe} className="space-y-1.5">
+                  <div className="hidden" aria-hidden="true">
+                    <input
+                      name="website"
+                      type="text"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={website}
+                      onChange={(e) => setWebsite(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="email"
+                      placeholder="Your email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full text-xs px-2.5 py-1.5 rounded bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-blue-400"
+                    />
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-semibold rounded flex items-center justify-center transition-colors"
+                      title="Subscribe"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+            </div>
+
           </div>
         </div>
 
-        <div className="border-t border-gray-800 pt-4 text-center flex flex-col items-center justify-center gap-2">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <p className="text-gray-300">
+        {/* ========================================================= */}
+        {/* BOTTOM COPYRIGHT & LEGAL BAR */}
+        {/* ========================================================= */}
+        <div className="border-t border-white/10 bg-[#04081c] py-4 px-4 sm:px-6 lg:px-8 text-xs text-gray-400">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
+            <div>
               &copy; {new Date().getFullYear()} Honey Universal Digital Private Limited. All rights reserved.
-            </p>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-4 text-gray-400">
+              <Link to="/privacy-policy" onClick={scrollToTop} className="hover:text-white transition-colors">
+                Privacy Policy
+              </Link>
+              <span>•</span>
+              <Link to="/terms-and-conditions" onClick={scrollToTop} className="hover:text-white transition-colors">
+                Terms &amp; Conditions
+              </Link>
+              <span>•</span>
+              <Link to="/refund-cancellation-policy" onClick={scrollToTop} className="hover:text-white transition-colors">
+                Refund Policy
+              </Link>
+              <span>•</span>
+              <span>ISO 9001:2015</span>
+              <span>•</span>
+              <span>GSTIN: 33AAACH1234F1Z5</span>
+            </div>
           </div>
-          <p className="text-xs text-gray-400">
-            Honey Universal Digital Private Limited &bull; 184/3, 2nd floor, Arcot Rd, opposite to Hotel Aadithya, near Viveks, Vadapalani, Chennai, Tamil Nadu 600026, India &bull; ISO 9001:2015 Certified &bull; GSTIN: 33AAACH1234F1Z5 &bull; Global Acceptance (USCIS, IRCC, MEA, Embassies &amp; Courts)
-          </p>
         </div>
-      </div>
-    </footer>
+      </footer>
+
+      {/* Query Modal */}
+      <QueryModal isOpen={queryModalOpen} onClose={() => setQueryModalOpen(false)} />
+    </>
   );
 }
-
