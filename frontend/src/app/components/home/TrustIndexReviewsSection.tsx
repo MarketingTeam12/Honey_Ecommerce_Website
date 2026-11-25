@@ -84,20 +84,6 @@ export function TrustIndexReviewsSection() {
   return (
     <section className="py-2 md:py-3 bg-white">
       <div className="max-w-7xl mx-auto px-6">
-        {!hasConsented ? (
-          <div className="rounded-xl border border-gray-200 bg-gray-50 p-6 text-center">
-            <p className="text-sm text-gray-700 mb-3">
-              External customer review widgets are hidden until optional cookies are accepted.
-            </p>
-            <button
-              type="button"
-              onClick={openSettings}
-              className="min-h-[44px] rounded-lg bg-[#1a1f5c] px-4 py-2 text-xs font-semibold text-white hover:bg-[#252b70] transition-colors"
-            >
-              Cookie settings
-            </button>
-          </div>
-        ) : (
         <div className="trustindex-home-widget-wrap">
           <div className="trustindex-home-widget" ref={mountRef} />
           <button
@@ -108,7 +94,6 @@ export function TrustIndexReviewsSection() {
             Write Review
           </button>
         </div>
-        )}
       </div>
       <style>{`
         .trustindex-home-widget-wrap {

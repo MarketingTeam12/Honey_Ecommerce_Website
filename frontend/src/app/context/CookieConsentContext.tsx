@@ -28,8 +28,8 @@ interface CookieConsentContextValue {
 const CookieConsentContext = createContext<CookieConsentContextValue | undefined>(undefined);
 
 export function CookieConsentProvider({ children }: { children: ReactNode }) {
-  const [consent, setConsent] = useState<CookieConsentStatus>(() => readStoredConsent());
-  const [isBannerOpen, setIsBannerOpen] = useState<boolean>(() => readStoredConsent() === null);
+  const [consent, setConsent] = useState<CookieConsentStatus>('accepted');
+  const [isBannerOpen, setIsBannerOpen] = useState<boolean>(false);
 
   const persist = (value: 'accepted' | 'rejected') => {
     setConsent(value);

@@ -319,13 +319,6 @@ export function FooterNew() {
             <p className="text-gray-300">
               &copy; {new Date().getFullYear()} Honey Universal Digital Private Limited. All rights reserved.
             </p>
-            <button
-              type="button"
-              onClick={openSettings}
-              className="min-h-[44px] px-2 text-sm text-gray-300 underline hover:text-white transition-colors"
-            >
-              Cookie settings
-            </button>
           </div>
           <p className="text-xs text-gray-400">
             Honey Universal Digital Private Limited &bull; 184/3, 2nd floor, Arcot Rd, opposite to Hotel Aadithya, near Viveks, Vadapalani, Chennai, Tamil Nadu 600026, India &bull; ISO 9001:2015 Certified &bull; GSTIN: 33AAACH1234F1Z5 &bull; Global Acceptance (USCIS, IRCC, MEA, Embassies &amp; Courts)

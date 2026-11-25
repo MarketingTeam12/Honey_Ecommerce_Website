@@ -124,17 +124,24 @@ export function PickYourLanguage() {
         product => product.title.toLowerCase() !== blockedHomeProductName
       );
 
-  const desktopSlidesToShow = Math.min(3, products.length || 1);
-  const tabletSlidesToShow = Math.min(2, products.length || 1);
+  // Ensure enough items for continuous infinite sliding in react-slick
+  const displayProducts = products.length > 0
+    ? products.length <= 3
+      ? [...products, ...products, ...products].map((p, idx) => ({ ...p, uniqueKey: `${p.id}-${idx}` }))
+      : [...products, ...products].map((p, idx) => ({ ...p, uniqueKey: `${p.id}-${idx}` }))
+    : [];
+
+  const desktopSlidesToShow = Math.min(3, Math.max(1, products.length));
+  const tabletSlidesToShow = Math.min(2, Math.max(1, products.length));
   const sliderSettings = {
     arrows: false,
     dots: false,
-    infinite: products.length > desktopSlidesToShow,
+    infinite: displayProducts.length > desktopSlidesToShow,
     speed: 650,
     slidesToShow: desktopSlidesToShow,
     slidesToScroll: 1,
     autoplay: isPlaying,
-    autoplaySpeed: 2200,
+    autoplaySpeed: 2500,
     pauseOnHover: true,
     pauseOnFocus: true,
     initialSlide: 0,
@@ -194,8 +201,8 @@ export function PickYourLanguage() {
           </button>
 
           <Slider ref={sliderRef} {...sliderSettings} className="max-w-6xl mx-auto">
-            {products.map((product) => (
-              <div key={product.id} className="px-3 h-full">
+            {displayProducts.map((product) => (
+              <div key={product.uniqueKey} className="px-3 h-full">
                 <motion.div
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.99 }}
