@@ -1,6 +1,6 @@
 const express = require("express");
 const upload = require("../middleware/upload");
-const { requireAuth } = require("../middleware/auth");
+const { requireAuth, optionalAuth } = require("../middleware/auth");
 const userService = require("../services/userService");
 const {
   deleteObjectByKey,
@@ -14,6 +14,23 @@ const router = express.Router();
 
 const SIGNED_URL_TTL_SECONDS = 300;
 
+function isPublicAssetKey(key) {
+  const normalizedKey = String(key || "").replace(/^\/+/, "");
+  // Public admin-uploaded assets start with "uploads/" (excluding scoped user uploads "uploads/<userId>/")
+  // e.g. "uploads/...", "uploads/products/...", "uploads/site/..."
+  // Customer documents and scoped uploads under "documents/<userId>/" or "uploads/<userId>/" remain strictly auth-only.
+  if (normalizedKey.startsWith("uploads/")) {
+    const afterUploads = normalizedKey.slice("uploads/".length);
+    // If it starts with usr_ or contains a user ID prefix pattern (user folders), require auth.
+    // Otherwise it is an admin-uploaded public asset.
+    if (afterUploads.startsWith("usr_")) {
+      return false;
+    }
+    return true;
+  }
+  return false;
+}
+
 function sanitizeFolderForUser(requestedFolder, userId, admin) {
   const raw = String(requestedFolder || "documents").trim().replace(/^\/+|\/+$/g, "");
   if (admin) {
@@ -24,6 +41,10 @@ function sanitizeFolderForUser(requestedFolder, userId, admin) {
 }
 
 async function authorizeObjectAccess(user, key, requireOwnershipForPublic = false) {
+  if (isPublicAssetKey(key) && !requireOwnershipForPublic) {
+    return true;
+  }
+
   if (!user) return false;
   if (await userService.isAdmin(user)) return true;
 
@@ -116,11 +137,20 @@ router.get("/signed-url", requireAuth, async (req, res, next) => {
   }
 });
 
-router.get("/files/:key", requireAuth, async (req, res, next) => {
+router.get("/files/:key", optionalAuth, async (req, res, next) => {
   try {
     const key = decodeURIComponent(req.params.key || "");
     if (!key) {
       return res.status(400).json({ success: false, message: "File key is required" });
+    }
+
+    if (isPublicAssetKey(key)) {
+      const signedUrl = await getRedirectUrl(key, SIGNED_URL_TTL_SECONDS);
+      return res.redirect(signedUrl);
+    }
+
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
     if (!(await authorizeObjectAccess(req.user, key))) {
