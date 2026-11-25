@@ -213,10 +213,10 @@ export function HeaderNew() {
 
         {/* Main Navigation Bar */}
         <div className="bg-white border-b border-gray-100 w-full">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2.5">
-          <div className="flex items-center justify-between gap-2 sm:gap-4">
+        <div className="max-w-[1440px] mx-auto px-2 sm:px-4 lg:px-6 py-2">
+          <div className="flex items-center justify-between gap-1.5 lg:gap-3">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3 flex-shrink-0 min-w-0">
+            <Link to="/" className="flex items-center gap-2 flex-shrink-0 min-w-0">
               <img 
                 src={honeyLogo} 
                 alt="Honey Translation Services" 
@@ -224,18 +224,18 @@ export function HeaderNew() {
                 height={131}
                 loading="eager"
                 decoding="async"
-                className="h-12 sm:h-16 w-auto object-contain"
+                className="h-10 sm:h-12 lg:h-14 xl:h-16 w-auto object-contain"
               />
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-1.5 xl:gap-3 flex-grow justify-center">
+            <nav className="hidden lg:flex items-center gap-1 xl:gap-2 flex-shrink min-w-0 justify-center">
               <Link
                 to="/"
-                className={`transition-all font-bold text-sm xl:text-base whitespace-nowrap ${
+                className={`transition-all font-bold text-xs xl:text-sm 2xl:text-base whitespace-nowrap ${
                   isHome
-                    ? 'bg-[#1a1f5c] text-white px-4 xl:px-6 py-2 rounded-full shadow-sm'
-                    : 'text-gray-700 hover:text-[#1a1f5c] hover:bg-gray-100 px-3 xl:px-4 py-2 rounded-full'
+                    ? 'bg-[#1a1f5c] text-white px-3 xl:px-5 py-1.5 xl:py-2 rounded-full shadow-sm'
+                    : 'text-gray-700 hover:text-[#1a1f5c] hover:bg-gray-100 px-2 xl:px-3 py-1.5 xl:py-2 rounded-full'
                 }`}
               >
                 Home
@@ -249,13 +249,13 @@ export function HeaderNew() {
               >
                 <DropdownMenu open={translationOpen} onOpenChange={setTranslationOpen}>
                   <DropdownMenuTrigger
-                    className={`flex items-center gap-1 transition-all font-bold text-sm xl:text-base whitespace-nowrap outline-none ${
+                    className={`flex items-center gap-1 transition-all font-bold text-xs xl:text-sm 2xl:text-base whitespace-nowrap outline-none ${
                       isTranslation
-                        ? 'bg-[#1a1f5c] text-white px-4 xl:px-5 py-2 rounded-full shadow-sm'
-                        : 'text-gray-700 hover:text-[#1a1f5c] hover:bg-gray-100 px-3 xl:px-4 py-2 rounded-full'
+                        ? 'bg-[#1a1f5c] text-white px-3 xl:px-4 py-1.5 xl:py-2 rounded-full shadow-sm'
+                        : 'text-gray-700 hover:text-[#1a1f5c] hover:bg-gray-100 px-2 xl:px-3 py-1.5 xl:py-2 rounded-full'
                     }`}
                   >
-                    Translation Services <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${translationOpen ? 'rotate-180' : ''}`} />
+                    Translation Services <ChevronDown className={`w-3.5 h-3.5 xl:w-4 xl:h-4 transition-transform duration-200 ${translationOpen ? 'rotate-180' : ''}`} />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-64" align="start">
                     <DropdownMenuItem asChild>
@@ -285,10 +285,10 @@ export function HeaderNew() {
 
               <Link
                 to="/all-apostille-products"
-                className={`transition-all font-bold text-sm xl:text-base whitespace-nowrap ${
+                className={`transition-all font-bold text-xs xl:text-sm 2xl:text-base whitespace-nowrap ${
                   isApostille
-                    ? 'bg-[#1a1f5c] text-white px-4 xl:px-5 py-2 rounded-full shadow-sm'
-                    : 'text-gray-700 hover:text-[#1a1f5c] hover:bg-gray-100 px-3 xl:px-4 py-2 rounded-full'
+                    ? 'bg-[#1a1f5c] text-white px-3 xl:px-4 py-1.5 xl:py-2 rounded-full shadow-sm'
+                    : 'text-gray-700 hover:text-[#1a1f5c] hover:bg-gray-100 px-2 xl:px-3 py-1.5 xl:py-2 rounded-full'
                 }`}
               >
                 Apostille Services
@@ -302,13 +302,13 @@ export function HeaderNew() {
               >
                 <DropdownMenu open={attestationOpen} onOpenChange={setAttestationOpen}>
                   <DropdownMenuTrigger
-                    className={`flex items-center gap-1 transition-all font-bold text-sm xl:text-base whitespace-nowrap outline-none ${
+                    className={`flex items-center gap-1 transition-all font-bold text-xs xl:text-sm 2xl:text-base whitespace-nowrap outline-none ${
                       isAttestation
-                        ? 'bg-[#1a1f5c] text-white px-4 xl:px-5 py-2 rounded-full shadow-sm'
-                        : 'text-gray-700 hover:text-[#1a1f5c] hover:bg-gray-100 px-3 xl:px-4 py-2 rounded-full'
+                        ? 'bg-[#1a1f5c] text-white px-3 xl:px-4 py-1.5 xl:py-2 rounded-full shadow-sm'
+                        : 'text-gray-700 hover:text-[#1a1f5c] hover:bg-gray-100 px-2 xl:px-3 py-1.5 xl:py-2 rounded-full'
                     }`}
                   >
-                    Attestation Services <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${attestationOpen ? 'rotate-180' : ''}`} />
+                    Attestation Services <ChevronDown className={`w-3.5 h-3.5 xl:w-4 xl:h-4 transition-transform duration-200 ${attestationOpen ? 'rotate-180' : ''}`} />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start">
                     <DropdownMenuItem asChild>
@@ -344,13 +344,13 @@ export function HeaderNew() {
               >
                 <DropdownMenu open={startupOpen} onOpenChange={setStartupOpen}>
                   <DropdownMenuTrigger
-                    className={`flex items-center gap-1 transition-all font-bold text-sm xl:text-base whitespace-nowrap outline-none ${
+                    className={`flex items-center gap-1 transition-all font-bold text-xs xl:text-sm 2xl:text-base whitespace-nowrap outline-none ${
                       isStartup
-                        ? 'bg-[#1a1f5c] text-white px-4 xl:px-5 py-2 rounded-full shadow-sm'
-                        : 'text-gray-700 hover:text-[#1a1f5c] hover:bg-gray-100 px-3 xl:px-4 py-2 rounded-full'
+                        ? 'bg-[#1a1f5c] text-white px-3 xl:px-4 py-1.5 xl:py-2 rounded-full shadow-sm'
+                        : 'text-gray-700 hover:text-[#1a1f5c] hover:bg-gray-100 px-2 xl:px-3 py-1.5 xl:py-2 rounded-full'
                     }`}
                   >
-                    Startup Packages <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${startupOpen ? 'rotate-180' : ''}`} />
+                    Startup Packages <ChevronDown className={`w-3.5 h-3.5 xl:w-4 xl:h-4 transition-transform duration-200 ${startupOpen ? 'rotate-180' : ''}`} />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start">
                     <DropdownMenuItem asChild>
@@ -378,13 +378,13 @@ export function HeaderNew() {
               >
                 <DropdownMenu open={moreOpen} onOpenChange={setMoreOpen}>
                   <DropdownMenuTrigger
-                    className={`flex items-center gap-1 transition-all font-bold text-sm xl:text-base whitespace-nowrap outline-none ${
+                    className={`flex items-center gap-1 transition-all font-bold text-xs xl:text-sm 2xl:text-base whitespace-nowrap outline-none ${
                       isMore
-                        ? 'bg-[#1a1f5c] text-white px-4 xl:px-5 py-2 rounded-full shadow-sm'
-                        : 'text-gray-700 hover:text-[#1a1f5c] hover:bg-gray-100 px-3 xl:px-4 py-2 rounded-full'
+                        ? 'bg-[#1a1f5c] text-white px-3 xl:px-4 py-1.5 xl:py-2 rounded-full shadow-sm'
+                        : 'text-gray-700 hover:text-[#1a1f5c] hover:bg-gray-100 px-2 xl:px-3 py-1.5 xl:py-2 rounded-full'
                     }`}
                   >
-                    More <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${moreOpen ? 'rotate-180' : ''}`} />
+                    More <ChevronDown className={`w-3.5 h-3.5 xl:w-4 xl:h-4 transition-transform duration-200 ${moreOpen ? 'rotate-180' : ''}`} />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start">
                     <DropdownMenuItem asChild>
@@ -423,10 +423,10 @@ export function HeaderNew() {
             </nav>
 
             {/* Right Side Actions */}
-            <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
+            <div className="flex items-center gap-1 sm:gap-2 xl:gap-3 flex-shrink-0">
               <Link
                 to="/all-language-products"
-                className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1a1f5c] text-white font-semibold text-sm hover:bg-[#252b70] transition-colors"
+                className="hidden xl:inline-flex items-center gap-1.5 px-3.5 py-1.5 xl:py-2 rounded-full bg-[#1a1f5c] text-white font-semibold text-xs xl:text-sm hover:bg-[#252b70] transition-colors whitespace-nowrap"
               >
                 <ShoppingCart className="w-4 h-4" />
                 Order Now
@@ -435,11 +435,11 @@ export function HeaderNew() {
               {/* Wishlist */}
               <Link
                 to="/wishlist"
-                className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2.5 hover:bg-gray-100 rounded-full transition-colors relative"
+                className="min-h-[40px] min-w-[40px] inline-flex items-center justify-center p-2 hover:bg-gray-100 rounded-full transition-colors relative flex-shrink-0"
                 aria-label="Wishlist"
               >
                 <Heart className="w-5 h-5 text-gray-700" aria-hidden="true" />
-                  <span className="absolute top-0.5 right-0.5 bg-red-600 text-white text-[10px] w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center">
+                <span className="absolute top-0.5 right-0.5 bg-red-600 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
                   {getWishlistCount()}
                 </span>
               </Link>
@@ -447,11 +447,11 @@ export function HeaderNew() {
               {/* Cart - Always visible across all screen sizes and routes */}
               <Link
                 to="/cart"
-                className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2 sm:p-2.5 hover:bg-gray-100 rounded-full transition-colors relative flex-shrink-0"
+                className="min-h-[40px] min-w-[40px] inline-flex items-center justify-center p-2 hover:bg-gray-100 rounded-full transition-colors relative flex-shrink-0"
                 aria-label="Cart"
               >
                 <ShoppingCart className="w-5 h-5 text-gray-700" aria-hidden="true" />
-                <span className="absolute top-0.5 right-0.5 bg-blue-600 text-white text-[10px] w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center font-bold">
+                <span className="absolute top-0.5 right-0.5 bg-blue-600 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
                   {getCartCount()}
                 </span>
               </Link>
@@ -460,22 +460,22 @@ export function HeaderNew() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="flex items-center justify-center gap-2 min-h-[44px] min-w-[44px] p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="flex items-center justify-center gap-1.5 min-h-[40px] p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
                     aria-label="Select Currency"
                   >
                     <img 
                       src={currency.flag} 
                       alt={currency.code} 
-                      width={24}
-                      height={24}
+                      width={20}
+                      height={20}
                       loading="eager"
                       decoding="async"
-                      className="w-6 h-6 rounded-full object-cover border border-gray-200"
+                      className="w-5 h-5 rounded-full object-cover border border-gray-200"
                     />
-                    <span className="text-sm font-medium text-gray-700 hidden sm:inline">
+                    <span className="text-xs sm:text-sm font-medium text-gray-700">
                       {currency.code}
                     </span>
-                    <ChevronDown className="w-4 h-4 text-gray-500" />
+                    <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
