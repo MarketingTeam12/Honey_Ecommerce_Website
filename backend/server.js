@@ -233,6 +233,11 @@ app.use(
     noSniff: true,
     referrerPolicy: { policy: "strict-origin-when-cross-origin" },
     crossOriginResourcePolicy: { policy: "cross-origin" },
+    // Helmet's default COOP "same-origin" severs window.opener for the Razorpay
+    // bank/OTP popup (test-mode Success/Failure page), so it never reports back
+    // and stays stuck. "same-origin-allow-popups" keeps isolation for this page
+    // while letting popups it opens talk back to Checkout (Razorpay's guidance).
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
   })
 );
 
