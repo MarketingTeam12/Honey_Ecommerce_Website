@@ -9,7 +9,7 @@ import { useCart } from '@/app/context/CartContext';
 import { useAuth } from '@/app/context/AuthContext';
 import { useCurrency } from '@/app/context/CurrencyContext';
 import { publicAnonKey } from '@/app/utils/backendInfo';
-import { API_URL, API_BASE_URL } from '@/app/utils/api';
+import { API_URL, API_BASE_URL, toApiUrl } from '@/app/utils/api';
 
 // Was reading VITE_BACKEND_URL (never set) with a localhost:3000 fallback —
 // broke invoice generation and the create-order fallback on any deployment
@@ -287,7 +287,7 @@ export function NewPaymentPage() {
   }, []);
 
   const generateTemplateInvoice = async (orderPayload: Record<string, any>) => {
-    const response = await fetch(`${LOCAL_BACKEND_BASE}/api/generate-invoice`, {
+    const response = await fetch(toApiUrl('/generate-invoice'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -319,7 +319,7 @@ export function NewPaymentPage() {
     amount: number,
     orderNumber: string,
   ): Promise<RazorpayOrderResponse> => {
-    const localResponse = await fetch(`${LOCAL_BACKEND_BASE}/create-order`, {
+    const localResponse = await fetch(toApiUrl('/create-order'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -408,7 +408,7 @@ export function NewPaymentPage() {
       console.warn('Remote payment verification unavailable, trying local backend fallback:', remoteError);
     }
 
-    const localVerifyResponse = await fetch(`${LOCAL_BACKEND_BASE}/api/verify-payment`, {
+    const localVerifyResponse = await fetch(toApiUrl('/verify-payment'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
