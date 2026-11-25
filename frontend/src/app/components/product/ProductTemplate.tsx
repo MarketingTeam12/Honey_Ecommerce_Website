@@ -8,7 +8,6 @@ import { useAuthGate } from '@/app/context/AuthGateContext';
 import { useProductConfig } from '@/app/hooks/useProductConfig';
 import { PDFDocument } from 'pdf-lib';
 import { ProductReviews } from '@/app/components/product/ProductReviews';
-import { GoogleReviewsSection } from '@/app/components/home/GoogleReviewsSection';
 import { Badge } from '@/app/components/ui/badge';
 import { Button } from '@/app/components/ui/button';
 import { Label } from '@/app/components/ui/label';
@@ -1920,9 +1919,7 @@ export function ProductTemplate({ data, productKey }: ProductTemplateProps) {
 
         {/* Ratings & Reviews Section */}
         <ProductReviews productId={productId} productName={data.title} />
-        <div className="mt-8">
-          <GoogleReviewsSection compact />
-        </div>
+
       </div>
     </div>
   );
