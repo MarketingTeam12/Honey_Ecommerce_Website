@@ -38,6 +38,10 @@ interface Category {
 export function HeaderNew() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [queryModalOpen, setQueryModalOpen] = useState(false);
+  const [translationOpen, setTranslationOpen] = useState(false);
+  const [attestationOpen, setAttestationOpen] = useState(false);
+  const [startupOpen, setStartupOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const { currency, currencies, setCurrency } = useCurrency();
   const { getCartCount } = useCart();
   const { getWishlistCount } = useWishlist();
@@ -102,9 +106,18 @@ export function HeaderNew() {
     '/all-startup-products'
   ].includes(location.pathname);
 
+  // Active navigation states based on current route
+  const pathname = location.pathname;
+  const isHome = pathname === '/';
+  const isTranslation = pathname.startsWith('/all-translation-products') || pathname.startsWith('/all-language-products') || (pathname.startsWith('/product/') && Boolean(languageCategory?.products.some(p => pathname.includes(p.id))));
+  const isApostille = pathname.startsWith('/all-apostille-products') || pathname.startsWith('/apostille');
+  const isAttestation = pathname.startsWith('/all-attestation-products') || (pathname.startsWith('/product/') && Boolean(attestationCategory?.products.some(p => pathname.includes(p.id))));
+  const isStartup = pathname.startsWith('/all-startup-products') || startupProducts.some(p => p.url === pathname);
+  const isMore = ['/about', '/services', '/work-sample', '/contact-us', '/track-order', '/faq', '/blog', '/terms-and-conditions', '/privacy-policy', '/refund-cancellation-policy'].includes(pathname);
+
   return (
     <>
-      <header className="sticky top-0 z-50 w-full shadow-md">
+      <header className="sticky top-0 z-50 w-full bg-white shadow-md">
         {/* Top Bar */}
         <div className="bg-[#1a1f5c] text-white px-3 sm:px-6 py-2 w-full">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 sm:gap-4">
@@ -216,148 +229,197 @@ export function HeaderNew() {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-3 xl:gap-5 flex-grow justify-center">
+            <nav className="hidden lg:flex items-center gap-1.5 xl:gap-3 flex-grow justify-center">
               <Link
                 to="/"
-                className="bg-[#1a1f5c] text-white px-4 xl:px-6 py-2 rounded-full hover:bg-[#252b70] transition-colors font-bold text-sm xl:text-base whitespace-nowrap"
+                className={`transition-all font-bold text-sm xl:text-base whitespace-nowrap ${
+                  isHome
+                    ? 'bg-[#1a1f5c] text-white px-4 xl:px-6 py-2 rounded-full shadow-sm'
+                    : 'text-gray-700 hover:text-[#1a1f5c] hover:bg-gray-100 px-3 xl:px-4 py-2 rounded-full'
+                }`}
               >
                 Home
               </Link>
 
               {/* Translation Services Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  className="flex items-center gap-1 text-gray-700 hover:text-[#1a1f5c] transition-colors font-bold text-sm xl:text-base whitespace-nowrap"
-                >
-                  Translation Services <ChevronDown className="w-4 h-4" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-64">
-                  <DropdownMenuItem asChild>
-                    <Link to="/all-translation-products" className="font-semibold text-blue-600">
-                      View All Translation Services
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  {categoriesLoading ? (
-                    <DropdownMenuItem disabled>
-                      <span className="text-gray-500">Loading...</span>
+              <div
+                className="relative"
+                onMouseEnter={() => setTranslationOpen(true)}
+                onMouseLeave={() => setTranslationOpen(false)}
+              >
+                <DropdownMenu open={translationOpen} onOpenChange={setTranslationOpen}>
+                  <DropdownMenuTrigger
+                    className={`flex items-center gap-1 transition-all font-bold text-sm xl:text-base whitespace-nowrap outline-none ${
+                      isTranslation
+                        ? 'bg-[#1a1f5c] text-white px-4 xl:px-5 py-2 rounded-full shadow-sm'
+                        : 'text-gray-700 hover:text-[#1a1f5c] hover:bg-gray-100 px-3 xl:px-4 py-2 rounded-full'
+                    }`}
+                  >
+                    Translation Services <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${translationOpen ? 'rotate-180' : ''}`} />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-64" align="start">
+                    <DropdownMenuItem asChild>
+                      <Link to="/all-translation-products" className="font-semibold text-blue-600">
+                        View All Translation Services
+                      </Link>
                     </DropdownMenuItem>
-                  ) : languageCategory && languageCategory.products.length > 0 ? (
-                    languageCategory.products.map(product => (
-                      <DropdownMenuItem key={product.id} asChild>
-                        <Link to={`/product/${product.id}`}>{product.name}</Link>
+                    <DropdownMenuSeparator />
+                    {categoriesLoading ? (
+                      <DropdownMenuItem disabled>
+                        <span className="text-gray-500">Loading...</span>
                       </DropdownMenuItem>
-                    ))
-                  ) : (
-                    <DropdownMenuItem disabled>
-                      <span className="text-gray-500 text-xs">No products - Please initialize products via Admin Panel</span>
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    ) : languageCategory && languageCategory.products.length > 0 ? (
+                      languageCategory.products.map(product => (
+                        <DropdownMenuItem key={product.id} asChild>
+                          <Link to={`/product/${product.id}`}>{product.name}</Link>
+                        </DropdownMenuItem>
+                      ))
+                    ) : (
+                      <DropdownMenuItem disabled>
+                        <span className="text-gray-500 text-xs">No products - Please initialize products via Admin Panel</span>
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
 
               <Link
                 to="/all-apostille-products"
-                className="text-gray-700 hover:text-[#1a1f5c] transition-colors font-bold text-sm xl:text-base whitespace-nowrap"
+                className={`transition-all font-bold text-sm xl:text-base whitespace-nowrap ${
+                  isApostille
+                    ? 'bg-[#1a1f5c] text-white px-4 xl:px-5 py-2 rounded-full shadow-sm'
+                    : 'text-gray-700 hover:text-[#1a1f5c] hover:bg-gray-100 px-3 xl:px-4 py-2 rounded-full'
+                }`}
               >
                 Apostille Services
               </Link>
+
               {/* Attestation Services Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  className="flex items-center gap-1 text-gray-700 hover:text-[#1a1f5c] transition-colors font-bold text-sm xl:text-base whitespace-nowrap"
-                >
-                  Attestation Services <ChevronDown className="w-4 h-4" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem asChild>
-                    <Link to="/all-attestation-products" className="font-semibold text-blue-600">
-                      View All Attestation Services
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  {categoriesLoading ? (
-                    <DropdownMenuItem disabled>
-                      <span className="text-gray-500">Loading...</span>
+              <div
+                className="relative"
+                onMouseEnter={() => setAttestationOpen(true)}
+                onMouseLeave={() => setAttestationOpen(false)}
+              >
+                <DropdownMenu open={attestationOpen} onOpenChange={setAttestationOpen}>
+                  <DropdownMenuTrigger
+                    className={`flex items-center gap-1 transition-all font-bold text-sm xl:text-base whitespace-nowrap outline-none ${
+                      isAttestation
+                        ? 'bg-[#1a1f5c] text-white px-4 xl:px-5 py-2 rounded-full shadow-sm'
+                        : 'text-gray-700 hover:text-[#1a1f5c] hover:bg-gray-100 px-3 xl:px-4 py-2 rounded-full'
+                    }`}
+                  >
+                    Attestation Services <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${attestationOpen ? 'rotate-180' : ''}`} />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start">
+                    <DropdownMenuItem asChild>
+                      <Link to="/all-attestation-products" className="font-semibold text-blue-600">
+                        View All Attestation Services
+                      </Link>
                     </DropdownMenuItem>
-                  ) : attestationCategory && attestationCategory.products.length > 0 ? (
-                    attestationCategory.products.map(product => (
-                      <DropdownMenuItem key={product.id} asChild>
-                        <Link to={`/product/${product.id}`}>{product.name}</Link>
+                    <DropdownMenuSeparator />
+                    {categoriesLoading ? (
+                      <DropdownMenuItem disabled>
+                        <span className="text-gray-500">Loading...</span>
                       </DropdownMenuItem>
-                    ))
-                  ) : (
-                    <DropdownMenuItem disabled>
-                      <span className="text-gray-500">No products available</span>
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    ) : attestationCategory && attestationCategory.products.length > 0 ? (
+                      attestationCategory.products.map(product => (
+                        <DropdownMenuItem key={product.id} asChild>
+                          <Link to={`/product/${product.id}`}>{product.name}</Link>
+                        </DropdownMenuItem>
+                      ))
+                    ) : (
+                      <DropdownMenuItem disabled>
+                        <span className="text-gray-500">No products available</span>
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
 
               {/* Startup Packages Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  className="flex items-center gap-1 text-gray-700 hover:text-[#1a1f5c] transition-colors font-bold text-sm xl:text-base whitespace-nowrap"
-                >
-                  Startup Packages <ChevronDown className="w-4 h-4" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem asChild>
-                    <Link to="/all-startup-products" className="font-semibold text-blue-600">
-                      View All Startup Packages
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  {startupProducts.map(product => {
-                    return (
-                      <DropdownMenuItem key={product.id} asChild>
-                        <Link to={product.url}>{product.name}</Link>
-                      </DropdownMenuItem>
-                    );
-                  })}
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div
+                className="relative"
+                onMouseEnter={() => setStartupOpen(true)}
+                onMouseLeave={() => setStartupOpen(false)}
+              >
+                <DropdownMenu open={startupOpen} onOpenChange={setStartupOpen}>
+                  <DropdownMenuTrigger
+                    className={`flex items-center gap-1 transition-all font-bold text-sm xl:text-base whitespace-nowrap outline-none ${
+                      isStartup
+                        ? 'bg-[#1a1f5c] text-white px-4 xl:px-5 py-2 rounded-full shadow-sm'
+                        : 'text-gray-700 hover:text-[#1a1f5c] hover:bg-gray-100 px-3 xl:px-4 py-2 rounded-full'
+                    }`}
+                  >
+                    Startup Packages <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${startupOpen ? 'rotate-180' : ''}`} />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start">
+                    <DropdownMenuItem asChild>
+                      <Link to="/all-startup-products" className="font-semibold text-blue-600">
+                        View All Startup Packages
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {startupProducts.map(product => {
+                      return (
+                        <DropdownMenuItem key={product.id} asChild>
+                          <Link to={product.url}>{product.name}</Link>
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
 
               {/* More Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  className="flex items-center gap-1 text-gray-700 hover:text-[#1a1f5c] transition-colors font-bold text-sm xl:text-base whitespace-nowrap"
-                >
-                  More <ChevronDown className="w-4 h-4" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem asChild>
-                    <Link to="/about">About Us</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/services">Services</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/work-sample">Work Samples</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/contact-us">Contact Us</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/track-order">Track Order</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/faq">FAQ</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/blog">Blog</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/terms-and-conditions">Terms & Conditions</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/privacy-policy">Privacy Policy</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/refund-cancellation-policy">Refund & Cancellation Policy</Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div
+                className="relative"
+                onMouseEnter={() => setMoreOpen(true)}
+                onMouseLeave={() => setMoreOpen(false)}
+              >
+                <DropdownMenu open={moreOpen} onOpenChange={setMoreOpen}>
+                  <DropdownMenuTrigger
+                    className={`flex items-center gap-1 transition-all font-bold text-sm xl:text-base whitespace-nowrap outline-none ${
+                      isMore
+                        ? 'bg-[#1a1f5c] text-white px-4 xl:px-5 py-2 rounded-full shadow-sm'
+                        : 'text-gray-700 hover:text-[#1a1f5c] hover:bg-gray-100 px-3 xl:px-4 py-2 rounded-full'
+                    }`}
+                  >
+                    More <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${moreOpen ? 'rotate-180' : ''}`} />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start">
+                    <DropdownMenuItem asChild>
+                      <Link to="/about">About Us</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/services">Services</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/work-sample">Work Samples</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/contact-us">Contact Us</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/track-order">Track Order</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/faq">FAQ</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/blog">Blog</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/terms-and-conditions">Terms & Conditions</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/privacy-policy">Privacy Policy</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/refund-cancellation-policy">Refund & Cancellation Policy</Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </nav>
 
             {/* Right Side Actions */}
@@ -544,42 +606,52 @@ export function HeaderNew() {
               
               <Link
                 to="/"
-                className="flex items-center justify-center min-h-[44px] px-4 py-2.5 bg-[#1a1f5c] text-white rounded-lg text-center"
+                className={`flex items-center min-h-[44px] px-4 py-2.5 rounded-lg transition-colors font-medium ${
+                  isHome ? 'bg-[#1a1f5c] text-white' : 'text-gray-800 hover:bg-gray-100'
+                }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Home
               </Link>
               <Link
                 to="/all-language-products"
-                className="flex items-center justify-center min-h-[44px] px-4 py-2.5 bg-[#1a1f5c] text-white rounded-lg text-center font-medium hover:bg-[#252b70] transition-colors"
+                className="flex items-center justify-center min-h-[44px] px-4 py-2.5 bg-blue-600 text-white rounded-lg text-center font-medium hover:bg-blue-700 transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Order Now
               </Link>
               <Link
                 to="/all-translation-products"
-                className="flex items-center min-h-[44px] px-4 py-2.5 hover:bg-gray-100 rounded-lg"
+                className={`flex items-center min-h-[44px] px-4 py-2.5 rounded-lg transition-colors font-medium ${
+                  isTranslation ? 'bg-[#1a1f5c] text-white' : 'text-gray-800 hover:bg-gray-100'
+                }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Translation Services
               </Link>
               <Link
                 to="/all-apostille-products"
-                className="flex items-center min-h-[44px] px-4 py-2.5 hover:bg-gray-100 rounded-lg"
+                className={`flex items-center min-h-[44px] px-4 py-2.5 rounded-lg transition-colors font-medium ${
+                  isApostille ? 'bg-[#1a1f5c] text-white' : 'text-gray-800 hover:bg-gray-100'
+                }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Apostille Services
               </Link>
               <Link
                 to="/all-attestation-products"
-                className="flex items-center min-h-[44px] px-4 py-2.5 hover:bg-gray-100 rounded-lg"
+                className={`flex items-center min-h-[44px] px-4 py-2.5 rounded-lg transition-colors font-medium ${
+                  isAttestation ? 'bg-[#1a1f5c] text-white' : 'text-gray-800 hover:bg-gray-100'
+                }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Attestation Services
               </Link>
               <Link
                 to="/all-startup-products"
-                className="flex items-center min-h-[44px] px-4 py-2.5 hover:bg-gray-100 rounded-lg"
+                className={`flex items-center min-h-[44px] px-4 py-2.5 rounded-lg transition-colors font-medium ${
+                  isStartup ? 'bg-[#1a1f5c] text-white' : 'text-gray-800 hover:bg-gray-100'
+                }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Startup Packages

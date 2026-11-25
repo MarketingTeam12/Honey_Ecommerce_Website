@@ -165,7 +165,7 @@ export function PickYourLanguage() {
   return (
     <section className="py-12 bg-white" aria-roledescription="carousel" aria-label="Pick Your Language">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
-        <div className="flex flex-wrap items-center justify-center sm:justify-between gap-4 mb-8">
+        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 mb-8">
           <motion.h2
             className="text-4xl lg:text-5xl font-bold text-center text-gray-900"
             initial={{ opacity: 0, y: -20 }}
@@ -174,11 +174,6 @@ export function PickYourLanguage() {
           >
             Pick Your Language
           </motion.h2>
-          <CarouselPauseButton
-            isPaused={isPaused}
-            onToggle={togglePlayback}
-            carouselName="language cards carousel"
-          />
         </div>
 
         <div className="relative">

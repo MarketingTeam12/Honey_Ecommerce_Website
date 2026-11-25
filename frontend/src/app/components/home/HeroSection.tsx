@@ -221,12 +221,6 @@ export function HeroSection() {
                   ))}
                 </div>
               </div>
-              <CarouselPauseButton
-                isPaused={isPaused}
-                onToggle={togglePlayback}
-                carouselName="country flags ticker"
-                compact
-              />
             </div>
 
           </motion.div>

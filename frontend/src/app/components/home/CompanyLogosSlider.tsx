@@ -126,15 +126,10 @@ export function CompanyLogosSlider() {
   return (
     <section className="py-8 md:py-10 bg-gray-50 overflow-hidden" aria-roledescription="carousel" aria-label="Trusted by Leading Companies">
       <div className="max-w-full mx-auto px-6">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-center sm:justify-between gap-4 mb-6">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-center gap-4 mb-6">
           <h3 className="text-center text-2xl font-semibold text-gray-800">
             Trusted by Leading Companies
           </h3>
-          <CarouselPauseButton
-            isPaused={isPaused}
-            onToggle={togglePlayback}
-            carouselName="company logos slider"
-          />
         </div>
         
         {/* Continuous scrolling container */}

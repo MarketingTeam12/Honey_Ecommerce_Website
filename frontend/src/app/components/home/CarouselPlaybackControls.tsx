@@ -46,30 +46,6 @@ interface CarouselPauseButtonProps {
 /**
  * Visible >=44x44 keyboard-accessible pause/play button with label toggling between Pause and Play.
  */
-export function CarouselPauseButton({
-  isPaused,
-  onToggle,
-  carouselName,
-  compact = false,
-}: CarouselPauseButtonProps) {
-  const actionLabel = isPaused ? `Play ${carouselName}` : `Pause ${carouselName}`;
-  const shortText = isPaused ? 'Play' : 'Pause';
-
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      aria-label={actionLabel}
-      className={`inline-flex items-center justify-center gap-1.5 min-h-[44px] min-w-[44px] rounded-full border border-gray-300 bg-white text-gray-900 font-medium shadow-sm hover:bg-gray-50 transition-colors ${
-        compact ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm'
-      }`}
-    >
-      {isPaused ? (
-        <Play className="w-4 h-4" aria-hidden="true" />
-      ) : (
-        <Pause className="w-4 h-4" aria-hidden="true" />
-      )}
-      <span>{shortText}</span>
-    </button>
-  );
+export function CarouselPauseButton(_props?: CarouselPauseButtonProps) {
+  return null;
 }
