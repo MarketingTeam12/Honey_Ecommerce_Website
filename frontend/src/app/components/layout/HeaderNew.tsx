@@ -120,7 +120,7 @@ export function HeaderNew() {
       <header className="sticky top-0 z-50 w-full bg-white shadow-md">
         {/* Top Bar */}
         <div className="bg-[#1a1f5c] text-white px-3 sm:px-6 py-2 w-full">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 sm:gap-4">
+        <div className="max-w-[1720px] mx-auto flex flex-wrap items-center justify-between gap-2 sm:gap-4">
           <div className="order-2 sm:order-1 flex items-center gap-3 sm:gap-5 text-[12px] sm:text-[14px] flex-wrap">
             <a href="mailto:salesteam@honeytranslations.com" className="hover:text-gray-300 transition-colors">
               salesteam@honeytranslations.com
@@ -213,7 +213,7 @@ export function HeaderNew() {
 
         {/* Main Navigation Bar */}
         <div className="bg-white border-b border-gray-100 w-full">
-        <div className="max-w-[1440px] mx-auto px-2 sm:px-4 lg:px-6 py-2">
+        <div className="max-w-[1720px] mx-auto px-2 sm:px-4 lg:px-6 py-2">
           <div className="flex items-center justify-between gap-1.5 lg:gap-3">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 flex-shrink-0 min-w-0">

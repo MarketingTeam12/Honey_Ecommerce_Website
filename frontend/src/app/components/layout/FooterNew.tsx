@@ -95,7 +95,7 @@ export function FooterNew() {
         {/* TOP PRE-FOOTER CTA BAR */}
         {/* ========================================================= */}
         <div className="border-b border-white/10 bg-[#081038] py-6 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="max-w-[1720px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-4 text-center md:text-left">
               <div className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 text-white shadow-inner">
                 <Headphones className="w-7 h-7" />
@@ -134,8 +134,8 @@ export function FooterNew() {
         {/* ========================================================= */}
         {/* MAIN 6-COLUMN FOOTER BODY */}
         {/* ========================================================= */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-8 lg:gap-6">
+        <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-8 lg:gap-8 xl:gap-10">
             
             {/* COLUMN 1: Brand & Highlights */}
             <div className="lg:col-span-1 space-y-4">
@@ -622,7 +622,7 @@ export function FooterNew() {
         {/* BOTTOM COPYRIGHT & LEGAL BAR */}
         {/* ========================================================= */}
         <div className="border-t border-white/10 bg-[#04081c] py-4 px-4 sm:px-6 lg:px-8 text-xs text-gray-400">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
+          <div className="max-w-[1720px] mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
             <div>
               &copy; {new Date().getFullYear()} Honey Universal Digital Private Limited. All rights reserved.
             </div>
