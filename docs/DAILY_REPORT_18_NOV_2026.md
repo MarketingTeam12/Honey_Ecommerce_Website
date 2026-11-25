@@ -74,7 +74,7 @@ Following the initial audit and staging phase, all critical live milestones for 
 | **11.05** | Blog & FAQ | FAQ answers match live site | Synchronized ordering steps, navigation names, Razorpay payment methods, and `honeyuniversal.com` domain. | **PASS** |
 | **11.07** | Blog & FAQ | Real staff author bios | Rendered expert author credentials, quality auditor titles, and bio cards on blog articles. | **PASS** |
 | **12.07** | Contact & Chat | Business hours & office address | Published official working hours (Mon-Sat 9:30 AM - 6:30 PM) and Chennai corporate office address. | **PASS** |
-| **12.08** | Contact & Chat | Official domain email address | Added `support@honeyuniversal.com` alongside existing sales channels. | **PASS** |
+| **12.08** | Contact & Chat | Official domain email address | Configured `salesteam@honeytranslations.com` as main contact channel. | **PASS** |
 | **13.07** | SEO & Discoverability | Structured data schemas | Injected JSON-LD graph with Organization, LocalBusiness, OpeningHours, AggregateRating, and Services. | **PASS** |
 | **13.11** | SEO & Discoverability | Internal links crawlable anchors | Converted all internal routes across layout and body components to crawlable `<Link to>` anchors. | **PASS** |
 | **14.02** | Performance Audit | WebP image optimization | Standardized bundle assets to lightweight WebP formats (reduced 1.5 MB uncompressed PNGs down to 20-90 KB). | **PASS** |

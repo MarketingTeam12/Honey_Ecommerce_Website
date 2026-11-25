@@ -389,14 +389,9 @@ export function ContactPage() {
                   </div>
                   <div>
                     <h4 className="font-bold mb-2">Email</h4>
-                    <div className="space-y-1">
-                      <a href="mailto:support@honeyuniversal.com" className="block text-blue-100 hover:text-white transition-colors">
-                        support@honeyuniversal.com
-                      </a>
-                      <a href="mailto:salesteam@honeytranslations.com" className="block text-blue-100 hover:text-white transition-colors text-sm">
-                        salesteam@honeytranslations.com
-                      </a>
-                    </div>
+                    <a href="mailto:salesteam@honeytranslations.com" className="block text-blue-100 hover:text-white transition-colors">
+                      salesteam@honeytranslations.com
+                    </a>
                   </div>
                 </div>
 

@@ -34,7 +34,7 @@ export function PrivacyPolicyPage() {
               <p><strong>Brand / Platform:</strong> Honey Universal Services (<a href="https://honeyuniversal.com" className="text-blue-600 underline">honeyuniversal.com</a>)</p>
               <p><strong>Registered &amp; Corporate Office:</strong> 184/3, 2nd floor, Arcot Rd, opposite to Hotel Aadithya, near Viveks, Vadapalani, Chennai, Tamil Nadu 600026, India</p>
               <p><strong>Quality Certifications:</strong> ISO 9001:2015 certified – Quality Management System for language translation services (Certificate No. 25EQQO18, Assurance Quality Certification LLC, EGAC accredited, valid until 18/11/2028)</p>
-              <p><strong>Contact Email:</strong> <a href="mailto:support@honeyuniversal.com" className="text-blue-600 underline">support@honeyuniversal.com</a></p>
+              <p><strong>Contact Email:</strong> <a href="mailto:salesteam@honeytranslations.com" className="text-blue-600 underline">salesteam@honeytranslations.com</a></p>
             </div>
           </section>
 
@@ -100,7 +100,7 @@ export function PrivacyPolicyPage() {
                 <Trash2 className="w-5 h-5 text-blue-700 flex-shrink-0 mt-0.5" />
                 <div>
                   <h4 className="font-bold text-blue-950">Automated Permanent Purge &amp; Right to Immediate Deletion</h4>
-                  <p className="text-gray-700 text-sm mt-1">Upon expiration of the 30-day window, uploaded source files are automatically purged from our servers. Clients may also request an <em>immediate manual purge</em> immediately upon order delivery by contacting <a href="mailto:support@honeyuniversal.com" className="text-blue-700 font-medium underline">support@honeyuniversal.com</a>.</p>
+                  <p className="text-gray-700 text-sm mt-1">Upon expiration of the 30-day window, uploaded source files are automatically purged from our servers. Clients may also request an <em>immediate manual purge</em> immediately upon order delivery by contacting <a href="mailto:salesteam@honeytranslations.com" className="text-blue-700 font-medium underline">salesteam@honeytranslations.com</a>.</p>
                 </div>
               </div>
             </div>
@@ -194,7 +194,7 @@ export function PrivacyPolicyPage() {
                 </div>
                 <div>
                   <p className="text-gray-600">Email Address:</p>
-                  <p><a href="mailto:grievance@honeyuniversal.com" className="text-blue-600 font-bold underline">grievance@honeyuniversal.com</a> / <a href="mailto:support@honeyuniversal.com" className="text-blue-600 underline">support@honeyuniversal.com</a></p>
+                  <p><a href="mailto:salesteam@honeytranslations.com" className="text-blue-600 font-bold underline">salesteam@honeytranslations.com</a></p>
                   <p className="text-gray-600 mt-2">Office Address:</p>
                   <p className="text-gray-900">184/3, 2nd floor, Arcot Rd, opposite to Hotel Aadithya, near Viveks, Vadapalani, Chennai, Tamil Nadu 600026, India</p>
                 </div>

@@ -201,14 +201,9 @@ export function FooterNew() {
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-red-400" aria-hidden="true" />
-                <div className="flex flex-col">
-                  <a href="mailto:support@honeyuniversal.com" className="text-gray-300 hover:text-white transition-colors min-h-[44px] md:min-h-0 inline-flex items-center">
-                    support@honeyuniversal.com
-                  </a>
-                  <a href="mailto:salesteam@honeytranslations.com" className="text-gray-400 hover:text-white transition-colors text-xs inline-flex items-center">
-                    salesteam@honeytranslations.com
-                  </a>
-                </div>
+                <a href="mailto:salesteam@honeytranslations.com" className="text-gray-300 hover:text-white transition-colors min-h-[44px] md:min-h-0 inline-flex items-center">
+                  salesteam@honeytranslations.com
+                </a>
               </li>
             </ul>
 

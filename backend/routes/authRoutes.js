@@ -97,7 +97,7 @@ router.post("/auth/signup", async (req, res, next) => {
     if (user && user.email && process.env.RESEND_API_KEY) {
       resend.emails
         .send({
-          from: process.env.RESEND_FROM_EMAIL || "Honey Universal <support@honeyuniversal.com>",
+          from: process.env.RESEND_FROM_EMAIL || "Honey Universal <salesteam@honeytranslations.com>",
           to: [user.email],
           subject: "Welcome to Honey Universal Services",
           html: `
@@ -108,7 +108,7 @@ router.post("/auth/signup", async (req, res, next) => {
               <p style="margin: 20px 0;">
                 <a href="https://honeyuniversal.com/login" style="background-color: #1a1f5c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Log in to Your Account</a>
               </p>
-              <p>For any queries, please reach out to us at <a href="mailto:support@honeyuniversal.com">support@honeyuniversal.com</a>.</p>
+              <p>For any queries, please reach out to us at <a href="mailto:salesteam@honeytranslations.com">salesteam@honeytranslations.com</a>.</p>
               <br/>
               <p style="color: #666; font-size: 13px;">Honey Universal Digital Private Limited<br/>Chennai, Tamil Nadu, India</p>
             </div>

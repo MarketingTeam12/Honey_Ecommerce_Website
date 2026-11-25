@@ -109,8 +109,8 @@ export function HeaderNew() {
         <div className="bg-[#1a1f5c] text-white px-3 sm:px-6 py-2 w-full">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 sm:gap-4">
           <div className="order-2 sm:order-1 flex items-center gap-3 sm:gap-5 text-[12px] sm:text-[14px] flex-wrap">
-            <a href="mailto:support@honeyuniversal.com" className="hover:text-gray-300 transition-colors">
-              support@honeyuniversal.com
+            <a href="mailto:salesteam@honeytranslations.com" className="hover:text-gray-300 transition-colors">
+              salesteam@honeytranslations.com
             </a>
             <div className="flex items-center gap-3">
               <a href="tel:+917299005577" className="hover:text-gray-300 transition-colors">

@@ -51,7 +51,7 @@ export function RefundCancellationPolicyPage() {
           For any clarification or assistance, please contact:
         </p>
         <p className="text-gray-700 text-sm sm:text-base break-words">
-          📧 <a href="mailto:support@honeyuniversal.com" className="text-blue-600 hover:underline">support@honeyuniversal.com</a> / <a href="mailto:accounts@honeyuniversal.com" className="text-blue-600 hover:underline">accounts@honeyuniversal.com</a>
+          📧 <a href="mailto:salesteam@honeytranslations.com" className="text-blue-600 hover:underline">salesteam@honeytranslations.com</a>
         </p>
         <p className="text-gray-700 text-sm sm:text-base mt-2">
           📍 Honey Universal Digital Private Limited, 184/3, 2nd floor, Arcot Rd, opposite to Hotel Aadithya, near Viveks, Vadapalani, Chennai, Tamil Nadu 600026, India.<br />

@@ -1238,7 +1238,7 @@ router.patch(["/orders/:id/status", "/orders/:id/notes"], requireAuth, requireAd
       if (recipientEmail && process.env.RESEND_API_KEY) {
         resend.emails
           .send({
-            from: process.env.RESEND_FROM_EMAIL || "Honey Universal <support@honeyuniversal.com>",
+            from: process.env.RESEND_FROM_EMAIL || "Honey Universal <salesteam@honeytranslations.com>",
             to: [recipientEmail],
             subject: `Order #${orderNum} Status Update: ${String(newStatus || '').toUpperCase()}`,
             html: `
@@ -1249,7 +1249,7 @@ router.patch(["/orders/:id/status", "/orders/:id/notes"], requireAuth, requireAd
                 ${trackingNumber ? `<p><strong>Tracking Number:</strong> ${trackingNumber}</p>` : ''}
                 <p>You can track your live order progress anytime at: <a href="https://honeyuniversal.com/track-order" style="color: #2563eb;">Track Your Order</a>.</p>
                 <br/>
-                <p style="color: #666; font-size: 13px;">Honey Universal Digital Private Limited<br/>Support: support@honeyuniversal.com | +91 72990 05577</p>
+                <p style="color: #666; font-size: 13px;">Honey Universal Digital Private Limited<br/>Support: salesteam@honeytranslations.com | +91 72990 05577</p>
               </div>
             `,
           })

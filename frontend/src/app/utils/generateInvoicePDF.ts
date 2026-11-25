@@ -93,7 +93,7 @@ export async function generateInvoicePDF(order: Order): Promise<void> {
     doc.text('184/3, 2nd floor, Arcot Rd, opposite to Hotel Aadithya, near Viveks, Vadapalani, Chennai, Tamil Nadu 600026, India', pageWidth / 2, yPosition, { align: 'center' });
 
     yPosition += 5;
-    doc.text('Email: support@honeyuniversal.com | Phone: +91 72990 05577 | Web: https://honeyuniversal.com', pageWidth / 2, yPosition, { align: 'center' });
+    doc.text('Email: salesteam@honeytranslations.com | Phone: +91 72990 05577 | Web: https://honeyuniversal.com', pageWidth / 2, yPosition, { align: 'center' });
     
     // Header line
     yPosition += 8;
@@ -381,7 +381,7 @@ export async function generateInvoicePDF(order: Order): Promise<void> {
     // Contact info
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.text('For queries, please contact support@honeyuniversal.com | +91 72990 05577', pageWidth / 2, yPosition, { align: 'center' });
+    doc.text('For queries, please contact salesteam@honeytranslations.com | +91 72990 05577', pageWidth / 2, yPosition, { align: 'center' });
     yPosition += 8;
 
     // Computer generated notice
