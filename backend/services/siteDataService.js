@@ -1077,13 +1077,28 @@ async function saveNotification(data, existingId) {
   return normalizeNotification(rows[0] || null);
 }
 
+async function getNotification(id) {
+  const [rows] = await pool.query("SELECT * FROM notifications WHERE id = :id LIMIT 1", { id });
+  return normalizeNotification(rows[0] || null);
+}
+
 async function markNotificationRead(id) {
   await pool.query("UPDATE notifications SET is_read = 1, read_at = NOW(), updated_at = NOW() WHERE id = :id", { id });
   const [rows] = await pool.query("SELECT * FROM notifications WHERE id = :id LIMIT 1", { id });
   return normalizeNotification(rows[0] || null);
 }
 
-async function markAllNotificationsRead() {
+async function markAllNotificationsRead(userCondition = null) {
+  if (userCondition && (userCondition.userId || userCondition.customerEmail)) {
+    await pool.query(
+      "UPDATE notifications SET is_read = 1, read_at = NOW(), updated_at = NOW() WHERE is_read = 0 AND (user_id = :userId OR customer_email = :customerEmail)",
+      {
+        userId: userCondition.userId || null,
+        customerEmail: userCondition.customerEmail || null,
+      }
+    );
+    return;
+  }
   await pool.query("UPDATE notifications SET is_read = 1, read_at = NOW(), updated_at = NOW() WHERE is_read = 0");
 }
 
@@ -1499,6 +1514,7 @@ module.exports = {
   saveWorkSample,
   deleteWorkSample,
   listNotifications,
+  getNotification,
   saveNotification,
   markNotificationRead,
   markAllNotificationsRead,

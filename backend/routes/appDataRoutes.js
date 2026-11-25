@@ -797,12 +797,25 @@ router.delete("/admin/customer-queries/:id", requireAuth, requireAdmin, async (r
   }
 });
 
-router.get(["/notifications", "/notifications/customer"], optionalAuth, async (req, res, next) => {
+router.get("/notifications/customer", requireAuth, async (req, res, next) => {
   try {
-    let notifications = await siteData.listNotifications();
-    if (req.user && req.path.endsWith("/customer")) {
-      notifications = notifications.filter((item) => item.userId === req.user.id || item.customerEmail === req.user.email);
-    }
+    const notifications = await siteData.listNotifications();
+    const callerId = String(req.user?.id || "");
+    const callerEmail = String(req.user?.email || "").trim().toLowerCase();
+    const userNotifications = notifications.filter(
+      (item) =>
+        (item.userId && String(item.userId) === callerId) ||
+        (item.customerEmail && String(item.customerEmail).trim().toLowerCase() === callerEmail)
+    );
+    res.json({ notifications: userNotifications });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/notifications", requireAuth, requireAdmin, async (req, res, next) => {
+  try {
+    const notifications = await siteData.listNotifications();
     res.json({ notifications });
   } catch (error) {
     next(error);
@@ -818,15 +831,45 @@ router.post("/notifications/create", requireAuth, async (req, res, next) => {
   }
 });
 
-router.patch(["/notifications/:id/read", "/notifications/mark-all-read"], optionalAuth, async (req, res, next) => {
+router.patch("/notifications/mark-all-read", requireAuth, async (req, res, next) => {
   try {
-    if (req.params.id) {
-      const notification = await siteData.markNotificationRead(req.params.id);
-      return res.json({ success: true, notification });
+    const isAdmin = await userService.isAdmin(req.user);
+    if (isAdmin) {
+      await siteData.markAllNotificationsRead();
+    } else {
+      await siteData.markAllNotificationsRead({
+        userId: req.user.id,
+        customerEmail: req.user.email,
+      });
+    }
+    return res.json({ success: true });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.patch("/notifications/:id/read", requireAuth, async (req, res, next) => {
+  try {
+    const existing = await siteData.getNotification(req.params.id);
+    if (!existing) {
+      return res.status(404).json({ success: false, message: "Notification not found" });
     }
 
-    await siteData.markAllNotificationsRead();
-    return res.json({ success: true });
+    const isAdmin = await userService.isAdmin(req.user);
+    if (!isAdmin) {
+      const callerId = String(req.user?.id || "");
+      const callerEmail = String(req.user?.email || "").trim().toLowerCase();
+      const notifUserId = existing.userId ? String(existing.userId) : "";
+      const notifEmail = existing.customerEmail ? String(existing.customerEmail).trim().toLowerCase() : "";
+
+      const isOwner = (notifUserId && notifUserId === callerId) || (notifEmail && notifEmail === callerEmail);
+      if (!isOwner) {
+        return res.status(403).json({ success: false, message: "Forbidden" });
+      }
+    }
+
+    const notification = await siteData.markNotificationRead(req.params.id);
+    return res.json({ success: true, notification });
   } catch (error) {
     return next(error);
   }
