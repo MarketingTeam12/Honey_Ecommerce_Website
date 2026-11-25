@@ -4,12 +4,7 @@ import { Bell, Package, CheckCircle, Truck, Gift, AlertCircle } from 'lucide-rea
 import { useAuth } from '@/app/context/AuthContext';
 import { projectId, publicAnonKey } from '@/app/utils/backendInfo';
 import { buildHeaders } from '@/app/utils/buildHeaders';
-import { API_BASE_URL } from '@/app/utils/api';
-
-// Was reading VITE_BACKEND_URL (never set) with a localhost:3000 fallback —
-// broke the customer notification bell on any deployment other than local
-// dev. API_BASE_URL is the same VITE_API_BASE_URL every other API call uses.
-const LOCAL_BACKEND_BASE = API_BASE_URL;
+import { toApiUrl } from '@/app/utils/api';
 
 interface Notification {
   id: string;
@@ -115,7 +110,7 @@ export function CustomerNotificationBell() {
     
     try {
       const response = await fetch(
-        `${LOCAL_BACKEND_BASE}/make-server-a67f0635/notifications/customer`,
+        toApiUrl('/notifications/customer'),
         {
           headers: buildHeaders(accessToken)
         }
@@ -144,7 +139,7 @@ export function CustomerNotificationBell() {
     
     try {
       await fetch(
-        `${LOCAL_BACKEND_BASE}/make-server-a67f0635/notifications/create`,
+        toApiUrl('/notifications/create'),
         {
           method: 'POST',
           headers: buildHeaders(accessToken),
@@ -169,7 +164,7 @@ export function CustomerNotificationBell() {
       // Update backend
       if (accessToken) {
         await fetch(
-          `${LOCAL_BACKEND_BASE}/make-server-a67f0635/notifications/${notificationId}/read`,
+          toApiUrl(`/notifications/${notificationId}/read`),
           {
             method: 'PATCH',
             headers: buildHeaders(accessToken)
@@ -190,7 +185,7 @@ export function CustomerNotificationBell() {
       // Update backend
       if (accessToken) {
         await fetch(
-          `${LOCAL_BACKEND_BASE}/make-server-a67f0635/notifications/mark-all-read`,
+          toApiUrl('/notifications/mark-all-read'),
           {
             method: 'PATCH',
             headers: buildHeaders(accessToken)
