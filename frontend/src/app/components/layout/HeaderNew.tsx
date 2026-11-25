@@ -444,19 +444,17 @@ export function HeaderNew() {
                 </span>
               </Link>
 
-              {/* Cart - Hidden on View All Services pages */}
-              {!isViewAllServicesPage && (
-                <Link
-                  to="/cart"
-                  className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2.5 hover:bg-gray-100 rounded-full transition-colors relative"
-                  aria-label="Cart"
-                >
-                  <ShoppingCart className="w-5 h-5 text-gray-700" aria-hidden="true" />
-                  <span className="absolute top-0.5 right-0.5 bg-blue-600 text-white text-[10px] w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center">
-                    {getCartCount()}
-                  </span>
-                </Link>
-              )}
+              {/* Cart - Always visible across all screen sizes and routes */}
+              <Link
+                to="/cart"
+                className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2 sm:p-2.5 hover:bg-gray-100 rounded-full transition-colors relative flex-shrink-0"
+                aria-label="Cart"
+              >
+                <ShoppingCart className="w-5 h-5 text-gray-700" aria-hidden="true" />
+                <span className="absolute top-0.5 right-0.5 bg-blue-600 text-white text-[10px] w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center font-bold">
+                  {getCartCount()}
+                </span>
+              </Link>
 
               {/* Currency Selector Dropdown */}
               <DropdownMenu>
@@ -603,6 +601,25 @@ export function HeaderNew() {
                   Sign In
                 </Link>
               )}
+              
+              <div className="grid grid-cols-2 gap-2 pt-1 pb-1">
+                <Link
+                  to="/cart"
+                  className="flex items-center justify-center gap-2 min-h-[44px] px-4 py-2.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg font-medium hover:bg-blue-100 transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  Cart ({getCartCount()})
+                </Link>
+                <Link
+                  to="/wishlist"
+                  className="flex items-center justify-center gap-2 min-h-[44px] px-4 py-2.5 bg-red-50 text-red-700 border border-red-200 rounded-lg font-medium hover:bg-red-100 transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Heart className="w-4 h-4" />
+                  Wishlist ({getWishlistCount()})
+                </Link>
+              </div>
               
               <Link
                 to="/"
