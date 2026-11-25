@@ -43,6 +43,7 @@ type RazorpayFailurePayload = {
 
 type RazorpayCheckoutInstance = {
   open: () => void;
+  close?: () => void;
   on: (
     event: 'payment.failed',
     handler: (response: RazorpayFailurePayload) => void,
@@ -774,9 +775,37 @@ export function NewPaymentPage() {
             clearCart();
             paymentInFlightRef.current = false;
             setProcessing(false);
-            navigate(`/my-orders?payment=success&orderId=${orderId}&orderNumber=${orderNumber}`);
+            if (typeof razorpay?.close === 'function') {
+              try {
+                razorpay.close();
+              } catch {
+                // Ignore modal close errors
+              }
+            }
+            document.querySelectorAll('.razorpay-container, iframe[name^="razorpay"], .razorpay-checkout-frame').forEach((el) => {
+              try {
+                el.remove();
+              } catch {
+                // Ignore DOM removal errors
+              }
+            });
+            window.location.href = `/my-orders?payment=success&orderId=${encodeURIComponent(orderId)}&orderNumber=${encodeURIComponent(orderNumber)}`;
           } catch (verifyError) {
             console.error('Payment verification request failed:', verifyError);
+            if (typeof razorpay?.close === 'function') {
+              try {
+                razorpay.close();
+              } catch {
+                // Ignore modal close errors
+              }
+            }
+            document.querySelectorAll('.razorpay-container, iframe[name^="razorpay"], .razorpay-checkout-frame').forEach((el) => {
+              try {
+                el.remove();
+              } catch {
+                // Ignore DOM removal errors
+              }
+            });
             const message =
               verifyError instanceof Error
                 ? verifyError.message
@@ -791,6 +820,20 @@ export function NewPaymentPage() {
         },
         modal: {
           ondismiss: () => {
+            if (typeof razorpay?.close === 'function') {
+              try {
+                razorpay.close();
+              } catch {
+                // Ignore modal close errors
+              }
+            }
+            document.querySelectorAll('.razorpay-container, iframe[name^="razorpay"], .razorpay-checkout-frame').forEach((el) => {
+              try {
+                el.remove();
+              } catch {
+                // Ignore DOM removal errors
+              }
+            });
             setError('Payment was cancelled before completion. Your cart items are saved — click below to retry.');
             paymentInFlightRef.current = false;
             setProcessing(false);
@@ -810,10 +853,25 @@ export function NewPaymentPage() {
 
       razorpay.on('payment.failed', (failureResponse) => {
         console.error('Razorpay payment failed:', failureResponse);
+        if (typeof razorpay?.close === 'function') {
+          try {
+            razorpay.close();
+          } catch {
+            // Ignore modal close errors
+          }
+        }
+        document.querySelectorAll('.razorpay-container, iframe[name^="razorpay"], .razorpay-checkout-frame').forEach((el) => {
+          try {
+            el.remove();
+          } catch {
+            // Ignore DOM removal errors
+          }
+        });
         setError(buildRazorpayFailureMessage(failureResponse));
         paymentInFlightRef.current = false;
         setProcessing(false);
         setPaymentStep('ready');
+        navigate(`/checkout/payment?payment=failed&orderId=${encodeURIComponent(orderId)}&orderNumber=${encodeURIComponent(orderNumber)}`, { replace: true });
       });
 
       razorpay.open();

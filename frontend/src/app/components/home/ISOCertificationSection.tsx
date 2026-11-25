@@ -1,12 +1,24 @@
+import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Award, CheckCircle, Download, ExternalLink, ShieldCheck, FileCheck } from 'lucide-react';
+import iso9001Certificate from '@/assets/iso-9001-certificate.png';
 
 export function ISOCertificationSection() {
+  const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
+  const [isHovering, setIsHovering] = useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setImagePosition({ x, y });
+  };
+
   return (
     <section className="py-12 md:py-14 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
-          {/* Left: Official Certificate Presentation Card */}
+          {/* Left: Official Certificate Presentation Card with Real Certificate Image */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -16,7 +28,7 @@ export function ISOCertificationSection() {
           >
             <div>
               {/* Card Header */}
-              <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
+              <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl bg-blue-50 text-[#0a1247] flex items-center justify-center font-bold">
                     <ShieldCheck className="w-7 h-7 text-blue-700" />
@@ -32,41 +44,26 @@ export function ISOCertificationSection() {
                 </span>
               </div>
 
-              {/* Certificate Inner Display */}
-              <div className="bg-gradient-to-br from-slate-50 to-blue-50/50 rounded-xl p-6 border border-blue-100/80 mb-6 space-y-4">
-                <div className="text-center pb-3 border-b border-gray-200/60">
-                  <span className="text-xs uppercase tracking-wider text-blue-600 font-bold">Certified Organization</span>
-                  <h4 className="text-xl sm:text-2xl font-extrabold text-[#0a1247] mt-1">
-                    Honey Universal Digital Private Limited
-                  </h4>
-                  <p className="text-xs text-gray-600 mt-1">
-                    184/3, 2nd floor, Arcot Rd, opposite to Hotel Aadithya, near Viveks, Vadapalani, Chennai, Tamil Nadu 600026, India
-                  </p>
-                </div>
-
-                <div className="space-y-2 text-sm text-gray-700">
-                  <div className="flex items-start justify-between py-1 border-b border-gray-100">
-                    <span className="text-gray-500 font-medium">Standard</span>
-                    <span className="font-bold text-gray-900 text-right">ISO 9001:2015 (QMS)</span>
-                  </div>
-                  <div className="flex items-start justify-between py-1 border-b border-gray-100">
-                    <span className="text-gray-500 font-medium">Scope</span>
-                    <span className="font-medium text-gray-900 text-right text-xs sm:text-sm max-w-[260px]">
-                      Language translation services (all Indian &amp; 50+ foreign languages)
-                    </span>
-                  </div>
-                  <div className="flex items-start justify-between py-1 border-b border-gray-100">
-                    <span className="text-gray-500 font-medium">Certificate No.</span>
-                    <span className="font-mono font-bold text-blue-700">25EQQO18</span>
-                  </div>
-                  <div className="flex items-start justify-between py-1 border-b border-gray-100">
-                    <span className="text-gray-500 font-medium">Accreditation</span>
-                    <span className="font-medium text-gray-900 text-right">EGAC Accredited</span>
-                  </div>
-                  <div className="flex items-start justify-between py-1">
-                    <span className="text-gray-500 font-medium">Validity</span>
-                    <span className="font-bold text-green-700 text-right">Valid until 18/11/2028</span>
-                  </div>
+              {/* Certificate Image Preview with Zoom */}
+              <div
+                className="relative overflow-hidden rounded-xl border-2 border-amber-400/40 bg-white p-2 shadow-inner cursor-zoom-in mb-4"
+                onMouseMove={handleMouseMove}
+                onMouseEnter={() => setIsHovering(true)}
+                onMouseLeave={() => setIsHovering(false)}
+              >
+                <div className="relative overflow-hidden rounded-lg flex items-center justify-center bg-gray-50 max-h-[460px]">
+                  <img
+                    src={iso9001Certificate}
+                    alt="ISO 9001:2015 Certificate of Registration - Honey Universal Digital Private Limited"
+                    width={800}
+                    height={1130}
+                    loading="lazy"
+                    decoding="async"
+                    className={`w-full max-w-[380px] h-auto object-contain transition-transform duration-300 ${isHovering ? 'scale-150' : 'scale-100'}`}
+                    style={isHovering ? {
+                      transformOrigin: `${imagePosition.x}% ${imagePosition.y}%`
+                    } : {}}
+                  />
                 </div>
               </div>
             </div>
