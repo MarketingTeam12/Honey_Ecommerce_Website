@@ -211,10 +211,12 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
       {/* Sidebar */}
+      {/* shrink-0: without it, wide pages (e.g. the Orders table) squeeze the sidebar,
+          wrapping labels like "User Management" and squashing their icons. */}
       <aside
         className={`${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        } fixed lg:static inset-y-0 left-0 z-40 w-64 bg-[#1a1f2e] text-white transition-transform duration-300 flex flex-col h-screen`}
+          sidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0 w-64 lg:w-16'
+        } fixed lg:static inset-y-0 left-0 z-40 shrink-0 bg-[#1a1f2e] text-white transition-all duration-300 flex flex-col h-screen`}
       >
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-gray-700">
@@ -235,6 +237,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             <button
               onClick={() => setSidebarOpen(true)}
               className="p-1 hover:bg-gray-700 rounded mx-auto"
+              aria-label="Expand sidebar"
+              title="Expand sidebar"
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -258,6 +262,15 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                     ? salesExpanded
                     : false;
             const toggleExpanded = () => {
+              // Sub-menus can't be shown in the collapsed rail, so open the sidebar
+              // and expand the group instead of toggling something invisible.
+              if (!sidebarOpen) {
+                setSidebarOpen(true);
+                if (item.expandedKey === 'items') setItemsExpanded(true);
+                if (item.expandedKey === 'userManagement') setUserManagementExpanded(true);
+                if (item.expandedKey === 'sales') setSalesExpanded(true);
+                return;
+              }
               if (item.expandedKey === 'items') setItemsExpanded(!itemsExpanded);
               if (item.expandedKey === 'userManagement') setUserManagementExpanded(!userManagementExpanded);
               if (item.expandedKey === 'sales') setSalesExpanded(!salesExpanded);
@@ -267,18 +280,22 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               return (
                 <div key={item.name}>
                   <button
+                    type="button"
                     onClick={toggleExpanded}
-                    className={`w-full flex items-center justify-between px-4 py-3 text-sm hover:bg-gray-700 transition-colors ${
-                      isItemActive ? 'bg-gray-700' : ''
-                    }`}
+                    title={sidebarOpen ? undefined : item.name}
+                    aria-label={item.name}
+                    aria-expanded={sidebarOpen ? isExpanded : undefined}
+                    className={`w-full flex items-center py-3 text-sm font-normal text-left hover:bg-gray-700 transition-colors ${
+                      sidebarOpen ? 'justify-between px-4' : 'justify-center px-0'
+                    } ${isItemActive ? 'bg-gray-700' : ''}`}
                   >
-                    <div className="flex items-center gap-3">
-                      <item.icon className="w-5 h-5" />
-                      {sidebarOpen && <span>{item.name}</span>}
+                    <div className="flex items-center gap-3 min-w-0">
+                      <item.icon className="w-5 h-5 shrink-0" />
+                      {sidebarOpen && <span className="truncate whitespace-nowrap">{item.name}</span>}
                     </div>
                     {sidebarOpen && (
                       <ChevronDown
-                        className={`w-4 h-4 transition-transform ${
+                        className={`w-4 h-4 shrink-0 transition-transform ${
                           isExpanded ? 'rotate-180' : ''
                         }`}
                       />
@@ -290,7 +307,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                         <Link
                           key={child.name}
                           to={child.href}
-                          className={`block px-12 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors ${
+                          className={`block pl-12 pr-4 py-2 text-sm text-gray-300 truncate whitespace-nowrap hover:text-white hover:bg-gray-700 transition-colors ${
                             location.pathname === child.href || location.pathname.startsWith(`${child.href}/`)
                               ? 'bg-gray-700 text-white'
                               : ''
@@ -310,12 +327,19 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               <Link
                 key={item.name}
                 to={item.href}
-                className={`flex items-center gap-3 px-4 py-3 text-sm hover:bg-red-600 transition-colors ${
-                  location.pathname === item.href ? 'bg-gray-700 text-white' : ''
+                title={sidebarOpen ? undefined : item.name}
+                aria-label={item.name}
+                className={`flex items-center gap-3 py-3 text-sm hover:bg-gray-700 transition-colors ${
+                  sidebarOpen ? 'px-4' : 'justify-center px-0'
+                } ${
+                  location.pathname === item.href ||
+                  (item.href !== '/admin' && location.pathname.startsWith(`${item.href}/`))
+                    ? 'bg-gray-700 text-white'
+                    : ''
                 }`}
               >
-                <item.icon className="w-5 h-5" />
-                {sidebarOpen && <span>{item.name}</span>}
+                <item.icon className="w-5 h-5 shrink-0" />
+                {sidebarOpen && <span className="truncate whitespace-nowrap">{item.name}</span>}
               </Link>
             );
           })}
@@ -332,7 +356,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex-1 flex flex-col min-h-0 min-w-0">
         {/* Top Header */}
         <header className="min-h-16 bg-white border-b border-gray-200 flex items-center justify-between px-3 sm:px-6 py-2 gap-2">
           <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">

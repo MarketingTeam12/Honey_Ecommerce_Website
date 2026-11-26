@@ -218,6 +218,22 @@ export function NewPaymentPage() {
   const [invoicePath, setInvoicePath] = useState<string | null>(null);
   const autoPayTriggeredRef = useRef(false);
   const paymentInFlightRef = useRef(false);
+  // Set once a failure has been handled so Razorpay's modal-close (ondismiss) that
+  // follows razorpay.close() doesn't overwrite a "failed" redirect with "cancelled".
+  const paymentOutcomeHandledRef = useRef(false);
+
+  // Send the customer back to the review page, which shows a "Payment failed" popup.
+  // The cart is untouched so they can retry straight away.
+  const redirectToReviewWithPaymentError = (status: 'failed' | 'cancelled', message: string) => {
+    paymentOutcomeHandledRef.current = true;
+    paymentInFlightRef.current = false;
+    setProcessing(false);
+    setPaymentStep('ready');
+    navigate(
+      `/checkout/review?payment=${status}&message=${encodeURIComponent(message)}`,
+      { replace: true },
+    );
+  };
 
   const subtotal = getCartTotal();
   const discount = getDiscountAmount();
@@ -436,6 +452,7 @@ export function NewPaymentPage() {
     }
 
     paymentInFlightRef.current = true;
+    paymentOutcomeHandledRef.current = false;
     setProcessing(true);
     setError('');
     setPaymentStep('creating');
@@ -810,16 +827,17 @@ export function NewPaymentPage() {
               verifyError instanceof Error
                 ? verifyError.message
                 : 'Payment verification failed on the server.';
-            setError(
+            redirectToReviewWithPaymentError(
+              'failed',
               `${message} Your cart has been preserved — please retry or contact support with Payment ID ${razorpayResponse.razorpay_payment_id || 'N/A'}.`,
             );
-            paymentInFlightRef.current = false;
-            setProcessing(false);
-            setPaymentStep('ready');
           }
         },
         modal: {
           ondismiss: () => {
+            if (paymentOutcomeHandledRef.current) {
+              return;
+            }
             if (typeof razorpay?.close === 'function') {
               try {
                 razorpay.close();
@@ -834,10 +852,10 @@ export function NewPaymentPage() {
                 // Ignore DOM removal errors
               }
             });
-            setError('Payment was cancelled before completion. Your cart items are saved — click below to retry.');
-            paymentInFlightRef.current = false;
-            setProcessing(false);
-            setPaymentStep('ready');
+            redirectToReviewWithPaymentError(
+              'cancelled',
+              'Payment was cancelled before completion. Your cart items are saved — you can retry the payment.',
+            );
           },
         },
         theme: {
@@ -853,6 +871,8 @@ export function NewPaymentPage() {
 
       razorpay.on('payment.failed', (failureResponse) => {
         console.error('Razorpay payment failed:', failureResponse);
+        // Mark handled before close() so the ondismiss it triggers is ignored.
+        paymentOutcomeHandledRef.current = true;
         if (typeof razorpay?.close === 'function') {
           try {
             razorpay.close();
@@ -867,11 +887,7 @@ export function NewPaymentPage() {
             // Ignore DOM removal errors
           }
         });
-        setError(buildRazorpayFailureMessage(failureResponse));
-        paymentInFlightRef.current = false;
-        setProcessing(false);
-        setPaymentStep('ready');
-        navigate(`/checkout/payment?payment=failed&orderId=${encodeURIComponent(orderId)}&orderNumber=${encodeURIComponent(orderNumber)}`, { replace: true });
+        redirectToReviewWithPaymentError('failed', buildRazorpayFailureMessage(failureResponse));
       });
 
       razorpay.open();
@@ -887,10 +903,7 @@ export function NewPaymentPage() {
           'Unable to reach the payment server right now. Please try again in a moment.';
       }
 
-      setError(message);
-      paymentInFlightRef.current = false;
-      setProcessing(false);
-      setPaymentStep('ready');
+      redirectToReviewWithPaymentError('failed', message);
     }
   };
 

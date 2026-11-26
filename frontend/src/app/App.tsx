@@ -118,6 +118,7 @@ import ScrollToTop from "@/app/components/ScrollToTop";
 import PublicLayout from "@/app/components/layout/PublicLayout";
 import { PublicPageSkeleton, InitialRouteSkeleton } from "@/app/components/layout/PageSkeleton";
 import { SeoManager } from "@/app/components/SeoManager";
+import { CartPriceSync } from "@/app/components/CartPriceSync";
 
 function App() {
   const [appReady, setAppReady] = useState(false);
@@ -207,6 +208,7 @@ function App() {
             <CartProvider>
               <WishlistProvider>
                 <ProductProvider>
+                  <CartPriceSync />
                   <SeoManager />
                   <SalesIQWidget />
                   <CookieConsentBanner />

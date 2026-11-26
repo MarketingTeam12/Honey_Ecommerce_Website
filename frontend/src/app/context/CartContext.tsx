@@ -27,6 +27,8 @@ interface CartContextType {
   addToCart: (item: CartItem) => void;
   removeFromCart: (id: string) => void;
   updatePageCount: (id: string, pageCount: number) => void;
+  /** Re-price cart items from the current catalog. Returns the items whose price changed. */
+  updateItemPrices: (prices: Record<string, number>) => CartItem[];
   clearCart: () => void;
   getCartTotal: () => number;
   getCartCount: () => number;
@@ -200,6 +202,28 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (updatedItem) syncItemToBackend(updatedItem);
   };
 
+  // Prices are captured when an item is added, so an admin price change would
+  // otherwise never reach existing carts. `prices` maps cart item id -> current
+  // catalog unit price (see CartPriceSync).
+  const updateItemPrices = (prices: Record<string, number>): CartItem[] => {
+    const changed: CartItem[] = [];
+    const next = cartItems.map((item) => {
+      const price = prices[item.id];
+      if (!Number.isFinite(price) || price <= 0 || price === item.basePrice) {
+        return item;
+      }
+      const updated = { ...item, basePrice: price, totalPrice: price * (item.pageCount || 1) };
+      changed.push(updated);
+      return updated;
+    });
+
+    if (changed.length > 0) {
+      setCartItems(next);
+      changed.forEach(syncItemToBackend);
+    }
+    return changed;
+  };
+
   const clearCart = () => {
     setCartItems([]);
     setAppliedCoupon(null);
@@ -256,6 +280,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     addToCart,
     removeFromCart,
     updatePageCount,
+    updateItemPrices,
     clearCart,
     getCartTotal,
     getCartCount,

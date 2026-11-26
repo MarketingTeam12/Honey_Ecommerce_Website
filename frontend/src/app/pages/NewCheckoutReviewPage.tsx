@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Edit2, FileText, Tag, ChevronRight, X, Percent, DollarSign, Calendar, Users, Info } from 'lucide-react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Edit2, FileText, Tag, ChevronRight, X, Percent, DollarSign, Calendar, Users, Info, XCircle } from 'lucide-react';
 import { useCurrency } from '@/app/context/CurrencyContext';
 import { useCart } from '@/app/context/CartContext';
 import { toast } from 'sonner';
@@ -40,7 +40,31 @@ export function NewCheckoutReviewPage() {
     removeCoupon
   } = useCart();
   const navigate = useNavigate();
-  
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Set by the payment page when Razorpay fails / is cancelled: /checkout/review?payment=failed&message=...
+  const [paymentFailure, setPaymentFailure] = useState<{ status: 'failed' | 'cancelled'; message: string } | null>(null);
+
+  useEffect(() => {
+    const status = searchParams.get('payment');
+    if (status !== 'failed' && status !== 'cancelled') return;
+
+    setPaymentFailure({
+      status,
+      message:
+        searchParams.get('message') ||
+        (status === 'failed'
+          ? 'Your payment could not be completed. Your cart items are saved — please try again.'
+          : 'Payment was cancelled before completion. Your cart items are saved — you can retry the payment.'),
+    });
+
+    // Clear the params so a page refresh doesn't show the popup again.
+    const next = new URLSearchParams(searchParams);
+    next.delete('payment');
+    next.delete('message');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
+
   const [notes, setNotes] = useState('');
   const [billingAddress, setBillingAddress] = useState<BillingAddress | null>(null);
   const [shippingMethod, setShippingMethod] = useState<'email' | 'physical'>('email');
@@ -939,6 +963,49 @@ export function NewCheckoutReviewPage() {
               <p className="text-sm text-gray-600 text-center">
                 💡 Tip: Coupons are automatically validated based on your cart total and eligibility
               </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payment failed / cancelled popup */}
+      {paymentFailure && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4"
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="payment-failure-title"
+          onClick={() => setPaymentFailure(null)}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-md w-full shadow-2xl p-6 text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
+              <XCircle className="w-9 h-9 text-red-600" />
+            </div>
+            <h2 id="payment-failure-title" className="text-2xl font-bold text-gray-900 mb-2">
+              {paymentFailure.status === 'failed' ? 'Payment Failed' : 'Payment Cancelled'}
+            </h2>
+            <p className="text-gray-600 mb-6 whitespace-pre-line break-words">{paymentFailure.message}</p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                onClick={() => setPaymentFailure(null)}
+                className="flex-1 px-4 py-3 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setPaymentFailure(null);
+                  handleMakePayment();
+                }}
+                className="flex-1 px-4 py-3 rounded-lg bg-[#1a1f5c] text-white font-medium hover:bg-[#13174a] transition-colors"
+              >
+                Try Again
+              </button>
             </div>
           </div>
         </div>
