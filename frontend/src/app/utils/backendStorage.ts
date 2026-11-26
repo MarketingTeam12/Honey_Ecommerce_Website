@@ -40,6 +40,9 @@ function dataUrlToFile(dataUrl: string): File {
 export async function uploadImage(file: File | string): Promise<string> {
   const fileToUpload = typeof file === 'string' ? dataUrlToFile(file) : file;
   const formData = new FormData();
+  // Product images must live under the public "uploads/" prefix; without a folder the
+  // backend defaults to the private "documents/" prefix, which storefront visitors can't load.
+  formData.append('folder', 'uploads/products');
   formData.append('file', fileToUpload);
 
   const response = await fetch(`${API_URL}/api/s3/upload`, {
@@ -53,7 +56,12 @@ export async function uploadImage(file: File | string): Promise<string> {
     throw new Error(result.error || result.message || 'Upload failed');
   }
 
-  return result.key || result.signedUrlEndpoint;
+  if (!result.key) {
+    throw new Error('Upload succeeded but no file key was returned');
+  }
+
+  // Return a browser-loadable URL (redirects to a short-lived signed S3 URL), not the bare key.
+  return `/api/s3/files/${encodeURIComponent(result.key)}`;
 }
 
 export async function deleteProductImage(imageUrl: string): Promise<boolean> {

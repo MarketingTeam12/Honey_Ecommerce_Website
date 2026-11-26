@@ -454,7 +454,12 @@ export function AddEditItemPage() {
       console.log('ðŸ“¤ Uploading images to Backend Storage...');
       toast.info('Uploading images...');
       
-      const existingImageUrls = imagePreviews.filter((preview) => /^https?:\/\//i.test(preview));
+      // Keep every already-saved image (absolute or relative like /api/s3/files/...);
+      // only blob: previews belong to pending uploads, which are uploaded below.
+      const pendingPreviewUrls = new Set(pendingImages.map((item) => item.previewUrl));
+      const existingImageUrls = imagePreviews.filter(
+        (preview) => preview && !pendingPreviewUrls.has(preview) && !preview.startsWith('blob:'),
+      );
       const uploadedImageUrls = await uploadImages(pendingImages.map((item) => item.file));
       const finalImageUrls = [...existingImageUrls, ...uploadedImageUrls];
       
