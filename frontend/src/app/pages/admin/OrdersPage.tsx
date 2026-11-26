@@ -794,27 +794,27 @@ export function OrdersPage() {
 
     if (order.assigned_to) {
       return (
-        <div className="w-full max-w-[14rem] rounded-xl border border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 px-3 py-2 shadow-sm">
-          <div className="flex items-start justify-between gap-3">
+        <div className="w-full max-w-[10.5rem] rounded-lg border border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 px-2.5 py-1.5 shadow-sm">
+          <div className="flex items-start justify-between gap-1.5">
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-green-700">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-green-700">
                 Sales manager
               </p>
-              <p className="mt-1 truncate text-sm font-semibold text-green-900">
+              <p className="truncate text-xs font-semibold text-green-900" title={getAssigneeLabel(order.assigned_to)}>
                 {getAssigneeLabel(order.assigned_to)}
               </p>
             </div>
-            <div className="flex shrink-0 items-center gap-1">
+            <div className="flex shrink-0 items-center gap-0.5">
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   openAssignEditor(order);
                 }}
-                className="rounded-md p-1.5 text-green-700 transition-colors hover:bg-green-100"
+                className="rounded p-1 text-green-700 transition-colors hover:bg-green-100"
                 title="Edit assignment"
               >
-                <Edit3 className="h-3.5 w-3.5" />
+                <Edit3 className="h-3 w-3" />
               </button>
               <button
                 type="button"
@@ -822,15 +822,15 @@ export function OrdersPage() {
                   e.stopPropagation();
                   clearAssignedManager(order.id);
                 }}
-                className="rounded-md p-1.5 text-red-600 transition-colors hover:bg-red-50"
+                className="rounded p-1 text-red-600 transition-colors hover:bg-red-50"
                 title="Remove assignment"
               >
-                <Trash2 className="h-3.5 w-3.5" />
+                <Trash2 className="h-3 w-3" />
               </button>
             </div>
           </div>
-          <div className="mt-2 flex items-center gap-1 text-xs font-medium text-green-700">
-            <Check className="h-3.5 w-3.5" />
+          <div className="mt-1 flex items-center gap-1 text-[11px] font-medium text-green-700">
+            <Check className="h-3 w-3" />
             <span>Saved</span>
           </div>
         </div>
@@ -841,11 +841,11 @@ export function OrdersPage() {
       <button
         type="button"
         onClick={() => openAssignEditor(order)}
-        className="inline-flex w-full max-w-[14rem] items-center gap-2 rounded-lg border border-dashed border-gray-300 px-3 py-2 text-sm text-gray-500 transition-colors hover:border-blue-300 hover:text-blue-600"
+        className="inline-flex items-center gap-1 rounded-md border border-dashed border-gray-300 px-2.5 py-1.5 text-xs text-gray-500 transition-colors hover:border-blue-300 hover:text-blue-600 whitespace-nowrap"
         title="Assign sales manager"
       >
-        <Plus className="h-4 w-4" />
-        <span>Assign sales manager</span>
+        <Plus className="h-3.5 w-3.5" />
+        <span>Assign manager</span>
       </button>
     );
   };
@@ -987,10 +987,10 @@ export function OrdersPage() {
 
         {/* Orders Table */}
         <div className="w-full max-w-full min-w-0 overflow-x-auto">
-          <table className="w-full min-w-[1100px] divide-y divide-gray-200">
+          <table className="w-full divide-y divide-gray-200">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-4 py-3 text-left w-10">
+                <th className="w-9 px-2 py-3 text-left">
                   <input 
                     type="checkbox" 
                     className="rounded border-gray-300"
@@ -998,34 +998,34 @@ export function OrdersPage() {
                     onChange={toggleSelectAll}
                   />
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap">
+                <th className="px-2.5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
                   Sales Order#
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap min-w-[170px]">
+                <th className="px-2.5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
                   Customer Name
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap">
+                <th className="px-2.5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
                   Order Status
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap">
+                <th className="w-14 px-1 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
                   Payment
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap">
+                <th className="w-14 px-1 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
                   Shipped
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap">
+                <th className="w-14 px-1 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
                   Refund
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap">
+                <th className="px-2.5 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
                   Amount
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap">
+                <th className="px-2.5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
                   Date
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap min-w-[170px]">
+                <th className="px-2.5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
                   Assign
                 </th>
-                <th className="px-4 py-3 pr-6 text-center text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap min-w-[96px]">
+                <th className="w-20 px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
                   Actions
                 </th>
               </tr>
@@ -1037,7 +1037,7 @@ export function OrdersPage() {
                   className={`hover:bg-gray-50 cursor-pointer transition-colors ${selectedOrders.has(order.id) ? 'bg-blue-50' : ''}`}
                   onClick={() => navigate(`/admin/sales/orders/${order.id}`)}
                 >
-                  <td className="px-4 py-3">
+                  <td className="w-9 px-2 py-3">
                     <input 
                       type="checkbox" 
                       className="rounded border-gray-300"
@@ -1046,9 +1046,9 @@ export function OrdersPage() {
                       onClick={(e) => e.stopPropagation()}
                     />
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      <span className="text-blue-600 font-medium hover:text-blue-800">
+                  <td className="px-2.5 py-3 whitespace-nowrap">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-blue-600 font-medium hover:text-blue-800 text-sm">
                         {order.order_number}
                       </span>
                       <button
@@ -1069,34 +1069,40 @@ export function OrdersPage() {
                       )}
                     </div>
                   </td>
-                  <td className="px-4 py-3">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">
+                  <td className="px-2.5 py-3">
+                    <div className="max-w-[140px] xl:max-w-[180px]">
+                      <div className="text-sm font-medium text-gray-900 truncate" title={order.customer_name || 'N/A'}>
                         {order.customer_name || 'N/A'}
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-500 truncate" title={order.customer_email || ''}>
                         {order.customer_email || ''}
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
+                  <td className="px-2.5 py-3 whitespace-nowrap">
                     {getStatusBadge(order.status)}
                   </td>
-                  <td className="px-4 py-3 text-center whitespace-nowrap">
-                    {getPaymentDots(order.payment_status)}
+                  <td className="w-14 px-1 py-3 text-center whitespace-nowrap">
+                    <div className="flex justify-center">
+                      {getPaymentDots(order.payment_status)}
+                    </div>
                   </td>
-                  <td className="px-4 py-3 text-center whitespace-nowrap">
-                    {getShippedDots(order.status)}
+                  <td className="w-14 px-1 py-3 text-center whitespace-nowrap">
+                    <div className="flex justify-center">
+                      {getShippedDots(order.status)}
+                    </div>
                   </td>
-                  <td className="px-4 py-3 text-center whitespace-nowrap">
-                    {getRefundDots()}
+                  <td className="w-14 px-1 py-3 text-center whitespace-nowrap">
+                    <div className="flex justify-center">
+                      {getRefundDots()}
+                    </div>
                   </td>
-                  <td className="px-4 py-3 text-right whitespace-nowrap">
+                  <td className="px-2.5 py-3 text-right whitespace-nowrap">
                     <span className="text-sm font-medium text-gray-900">
                       {order.currency && order.currency !== 'INR' ? '$' : '₹'}{parseFloat(order.total_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </span>
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
+                  <td className="px-2.5 py-3 whitespace-nowrap">
                     <span className="text-sm text-gray-600">
                       {new Date(order.created_at).toLocaleDateString('en-IN', {
                         day: '2-digit',
@@ -1105,11 +1111,11 @@ export function OrdersPage() {
                       })}
                     </span>
                   </td>
-                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                  <td className="px-2.5 py-3 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                     {renderAssignmentField(order)}
                   </td>
-                  <td className="px-4 py-3 pr-6 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex items-center justify-center gap-2">
+                  <td className="w-20 px-3 py-3 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center justify-center gap-1.5">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
