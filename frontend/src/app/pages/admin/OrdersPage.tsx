@@ -1467,18 +1467,27 @@ function mergeSalesManagerNames(baseNames: string[], ...extraNames: string[]): s
   return Array.from(merged.values()).sort((a, b) => a.localeCompare(b));
 }
 
+// `base` is the backend record (source of truth); `overlay` is a localStorage copy.
+// Local copies are written at checkout with status/payment_status "pending" and are
+// never updated after payment, so they must not override backend fields — otherwise a
+// paid order placed from this browser (e.g. by the admin) reads as unpaid and is hidden.
+// The overlay only fills gaps and supplies local-only fields like assigned_to.
 function mergeOrderRecords(base: Order, overlay: Order): Order {
+  const definedBaseFields = Object.fromEntries(
+    Object.entries(base).filter(([, value]) => value !== undefined && value !== null && value !== ''),
+  ) as Partial<Order>;
+
   return {
-    ...base,
     ...overlay,
-    shipping_address: overlay.shipping_address ?? base.shipping_address,
+    ...definedBaseFields,
+    shipping_address: base.shipping_address ?? overlay.shipping_address,
     shipping_details: {
-      ...(base.shipping_details || {}),
       ...(overlay.shipping_details || {}),
+      ...(base.shipping_details || {}),
     },
-    items: overlay.items?.length ? overlay.items : base.items,
+    items: base.items?.length ? base.items : overlay.items,
     assigned_to: overlay.assigned_to ?? base.assigned_to,
-  };
+  } as Order;
 }
 
 // Function to remove an order from localStorage
