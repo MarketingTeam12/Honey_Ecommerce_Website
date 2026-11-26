@@ -46,24 +46,38 @@ export function NewCheckoutReviewPage() {
   const [paymentFailure, setPaymentFailure] = useState<{ status: 'failed' | 'cancelled'; message: string } | null>(null);
 
   useEffect(() => {
-    const status = searchParams.get('payment');
-    if (status !== 'failed' && status !== 'cancelled') return;
+    // Read from searchParams or window.location as fallback
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = searchParams.get('payment') || urlParams.get('payment');
+    const msg = searchParams.get('message') || urlParams.get('message');
 
-    setPaymentFailure({
-      status,
-      message:
-        searchParams.get('message') ||
+    if (status === 'failed' || status === 'cancelled') {
+      const finalMsg =
+        msg ||
         (status === 'failed'
           ? 'Your payment could not be completed. Your cart items are saved — please try again.'
-          : 'Payment was cancelled before completion. Your cart items are saved — you can retry the payment.'),
-    });
+          : 'Payment was cancelled before completion. Your cart items are saved — you can retry the payment.');
 
-    // Clear the params so a page refresh doesn't show the popup again.
-    const next = new URLSearchParams(searchParams);
-    next.delete('payment');
-    next.delete('message');
-    setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams]);
+      setPaymentFailure({
+        status,
+        message: finalMsg,
+      });
+
+      // Show toast as well so user definitely sees immediate notification
+      if (status === 'failed') {
+        toast.error('Payment Failed: ' + finalMsg, { duration: 6000 });
+      } else {
+        toast.info(finalMsg, { duration: 5000 });
+      }
+
+      // Clean up the URL search params without triggering re-render loop
+      const next = new URLSearchParams(window.location.search);
+      next.delete('payment');
+      next.delete('message');
+      const cleanUrl = window.location.pathname + (next.toString() ? `?${next.toString()}` : '');
+      window.history.replaceState({}, '', cleanUrl);
+    }
+  }, []);
 
   const [notes, setNotes] = useState('');
   const [billingAddress, setBillingAddress] = useState<BillingAddress | null>(null);

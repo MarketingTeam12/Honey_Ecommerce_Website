@@ -462,7 +462,7 @@ export function NewPaymentPage() {
       paymentInFlightRef.current = false;
       setProcessing(false);
       setPaymentStep('ready');
-      setError('Razorpay checkout is not available right now. Please refresh and try again.');
+      redirectToReviewWithPaymentError('failed', 'Razorpay checkout is not available right now. Please try again.');
       return;
     }
 
