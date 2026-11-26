@@ -356,7 +356,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-0 min-w-0">
+      <div className="flex-1 flex flex-col min-h-0 min-w-0 overflow-hidden">
         {/* Top Header */}
         <header className="min-h-16 bg-white border-b border-gray-200 flex items-center justify-between px-3 sm:px-6 py-2 gap-2">
           <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
@@ -521,7 +521,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 bg-gray-50 overflow-y-auto min-h-0">
+        <main className="flex-1 bg-gray-50 overflow-y-auto overflow-x-hidden min-h-0 min-w-0 w-full max-w-full">
           {children}
         </main>
       </div>

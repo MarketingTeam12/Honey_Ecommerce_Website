@@ -865,25 +865,25 @@ export function OrdersPage() {
 
   return (
     <AdminLayout>
-      <div className="bg-white min-h-screen">
+      <div className="bg-white min-h-screen w-full max-w-full min-w-0 flex flex-col">
         {/* Header */}
-        <div className="border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center justify-between">
+        <div className="border-b border-gray-200 px-4 sm:px-6 py-4">
+          <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-semibold text-gray-900">All Sales Orders</h1>
-              <button className="text-gray-500 hover:text-gray-700">
+              <button className="text-gray-500 hover:text-gray-700" aria-label="Breadcrumb chevron">
                 <ChevronRight className="w-5 h-5" />
               </button>
             </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="relative">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <div className="relative flex-1 sm:flex-initial">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search orders..."
-                  className="w-64 px-3 py-1.5 pl-9 border border-blue-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full sm:w-60 px-3 py-1.5 pl-9 border border-blue-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div className="relative">
@@ -892,7 +892,7 @@ export function OrdersPage() {
                   type="date"
                   value={fromDate}
                   onChange={(e) => setFromDate(e.target.value)}
-                  className="w-40 px-3 py-1.5 pl-9 border border-blue-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  className="w-36 sm:w-40 px-3 py-1.5 pl-9 border border-blue-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                   aria-label="From Date"
                 />
               </div>
@@ -902,7 +902,7 @@ export function OrdersPage() {
                   type="date"
                   value={toDate}
                   onChange={(e) => setToDate(e.target.value)}
-                  className="w-40 px-3 py-1.5 pl-9 border border-blue-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  className="w-36 sm:w-40 px-3 py-1.5 pl-9 border border-blue-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                   aria-label="To Date"
                 />
               </div>
@@ -986,11 +986,11 @@ export function OrdersPage() {
         )}
 
         {/* Orders Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className="w-full max-w-full min-w-0 overflow-x-auto">
+          <table className="w-full min-w-[1100px] divide-y divide-gray-200">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-4 py-3 text-left">
+                <th className="px-4 py-3 text-left w-10">
                   <input 
                     type="checkbox" 
                     className="rounded border-gray-300"
@@ -998,34 +998,34 @@ export function OrdersPage() {
                     onChange={toggleSelectAll}
                   />
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap">
                   Sales Order#
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap min-w-[170px]">
                   Customer Name
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap">
                   Order Status
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap">
                   Payment
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap">
                   Shipped
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap">
                   Refund
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-600 uppercase tracking-wider">
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap">
                   Amount
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap">
                   Date
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap min-w-[170px]">
                   Assign
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
+                <th className="px-4 py-3 pr-6 text-center text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap min-w-[96px]">
                   Actions
                 </th>
               </tr>
@@ -1046,7 +1046,7 @@ export function OrdersPage() {
                       onClick={(e) => e.stopPropagation()}
                     />
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <span className="text-blue-600 font-medium hover:text-blue-800">
                         {order.order_number}
@@ -1079,24 +1079,24 @@ export function OrdersPage() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     {getStatusBadge(order.status)}
                   </td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-4 py-3 text-center whitespace-nowrap">
                     {getPaymentDots(order.payment_status)}
                   </td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-4 py-3 text-center whitespace-nowrap">
                     {getShippedDots(order.status)}
                   </td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-4 py-3 text-center whitespace-nowrap">
                     {getRefundDots()}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-4 py-3 text-right whitespace-nowrap">
                     <span className="text-sm font-medium text-gray-900">
-                      {order.currency && order.currency !== 'INR' ? '$' : '\u20B9'}{parseFloat(order.total_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                      {order.currency && order.currency !== 'INR' ? '$' : '₹'}{parseFloat(order.total_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     <span className="text-sm text-gray-600">
                       {new Date(order.created_at).toLocaleDateString('en-IN', {
                         day: '2-digit',
@@ -1108,7 +1108,7 @@ export function OrdersPage() {
                   <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                     {renderAssignmentField(order)}
                   </td>
-                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                  <td className="px-4 py-3 pr-6 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-center gap-2">
                       <button
                         onClick={(e) => {
@@ -1155,7 +1155,7 @@ export function OrdersPage() {
 
         {/* Pagination */}
         {filteredOrders.length > 0 && (
-          <div className="border-t border-gray-200 px-6 py-4 flex items-center justify-between">
+          <div className="border-t border-gray-200 px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="text-sm text-gray-600">
               Showing {filteredOrders.length} of {orders.length} orders
               {selectedOrders.size > 0 && (

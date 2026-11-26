@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { scheduleAfterLoad } from '@/app/utils/deferredLoad';
 import { useCookieConsent } from '@/app/context/CookieConsentContext';
 
@@ -23,12 +24,18 @@ function showSalesIQWidget() {
   window.$zoho?.salesiq?.floatbutton?.visible?.('show');
 }
 
+function hideSalesIQWidget() {
+  window.$zoho?.salesiq?.floatbutton?.visible?.('hide');
+}
+
 export function SalesIQWidget() {
   const { hasConsented } = useCookieConsent();
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith('/admin');
 
   useEffect(() => {
-    if (!hasConsented) {
-      window.$zoho?.salesiq?.floatbutton?.visible?.('hide');
+    if (isAdmin || !hasConsented) {
+      hideSalesIQWidget();
       return;
     }
 
@@ -42,7 +49,9 @@ export function SalesIQWidget() {
       const existingReady = window.$zoho.salesiq.ready;
       window.$zoho.salesiq.ready = () => {
         existingReady?.();
-        showSalesIQWidget();
+        if (!isAdmin) {
+          showSalesIQWidget();
+        }
       };
 
       const existingScript = document.getElementById(SALESIQ_SCRIPT_ID) as HTMLScriptElement | null;
@@ -52,13 +61,23 @@ export function SalesIQWidget() {
         script.id = SALESIQ_SCRIPT_ID;
         script.src = SALESIQ_WIDGET_SRC;
         script.defer = true;
-        script.onload = showSalesIQWidget;
+        script.onload = () => {
+          if (!isAdmin) {
+            showSalesIQWidget();
+          }
+        };
         document.body.appendChild(script);
       } else if (!existingScript.src.includes('salesiq.zohopublic.in/widget')) {
         existingScript.src = SALESIQ_WIDGET_SRC;
       }
 
-      retry = window.setInterval(showSalesIQWidget, 1500);
+      retry = window.setInterval(() => {
+        if (!isAdmin) {
+          showSalesIQWidget();
+        } else {
+          hideSalesIQWidget();
+        }
+      }, 1500);
       stopRetry = window.setTimeout(() => {
         if (retry !== undefined) window.clearInterval(retry);
       }, 15000);
@@ -69,7 +88,7 @@ export function SalesIQWidget() {
       if (retry !== undefined) window.clearInterval(retry);
       if (stopRetry !== undefined) window.clearTimeout(stopRetry);
     };
-  }, [hasConsented]);
+  }, [hasConsented, isAdmin]);
 
   return null;
 }
