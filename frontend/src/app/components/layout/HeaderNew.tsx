@@ -249,7 +249,11 @@ export function HeaderNew() {
               >
                 <DropdownMenu open={translationOpen} onOpenChange={setTranslationOpen}>
                   <DropdownMenuTrigger
-                    className={`flex items-center gap-1 transition-all font-bold text-xs xl:text-sm 2xl:text-base whitespace-nowrap outline-none ${
+                    onClick={() => {
+                      setTranslationOpen(false);
+                      navigate('/all-translation-products');
+                    }}
+                    className={`flex items-center gap-1 transition-all font-bold text-xs xl:text-sm 2xl:text-base whitespace-nowrap outline-none cursor-pointer ${
                       isTranslation
                         ? 'bg-[#1a1f5c] text-white px-3 xl:px-4 py-1.5 xl:py-2 rounded-full shadow-sm'
                         : 'text-gray-700 hover:text-[#1a1f5c] hover:bg-gray-100 px-2 xl:px-3 py-1.5 xl:py-2 rounded-full'
@@ -302,7 +306,11 @@ export function HeaderNew() {
               >
                 <DropdownMenu open={attestationOpen} onOpenChange={setAttestationOpen}>
                   <DropdownMenuTrigger
-                    className={`flex items-center gap-1 transition-all font-bold text-xs xl:text-sm 2xl:text-base whitespace-nowrap outline-none ${
+                    onClick={() => {
+                      setAttestationOpen(false);
+                      navigate('/all-attestation-products');
+                    }}
+                    className={`flex items-center gap-1 transition-all font-bold text-xs xl:text-sm 2xl:text-base whitespace-nowrap outline-none cursor-pointer ${
                       isAttestation
                         ? 'bg-[#1a1f5c] text-white px-3 xl:px-4 py-1.5 xl:py-2 rounded-full shadow-sm'
                         : 'text-gray-700 hover:text-[#1a1f5c] hover:bg-gray-100 px-2 xl:px-3 py-1.5 xl:py-2 rounded-full'
@@ -344,7 +352,11 @@ export function HeaderNew() {
               >
                 <DropdownMenu open={startupOpen} onOpenChange={setStartupOpen}>
                   <DropdownMenuTrigger
-                    className={`flex items-center gap-1 transition-all font-bold text-xs xl:text-sm 2xl:text-base whitespace-nowrap outline-none ${
+                    onClick={() => {
+                      setStartupOpen(false);
+                      navigate('/all-startup-products');
+                    }}
+                    className={`flex items-center gap-1 transition-all font-bold text-xs xl:text-sm 2xl:text-base whitespace-nowrap outline-none cursor-pointer ${
                       isStartup
                         ? 'bg-[#1a1f5c] text-white px-3 xl:px-4 py-1.5 xl:py-2 rounded-full shadow-sm'
                         : 'text-gray-700 hover:text-[#1a1f5c] hover:bg-gray-100 px-2 xl:px-3 py-1.5 xl:py-2 rounded-full'
