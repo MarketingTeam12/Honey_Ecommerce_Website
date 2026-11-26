@@ -223,16 +223,14 @@ export function NewPaymentPage() {
   const paymentOutcomeHandledRef = useRef(false);
 
   // Send the customer back to the review page, which shows a "Payment failed" popup.
-  // The cart is untouched so they can retry straight away.
+  // Using window.location.href ensures a complete fresh page reload so that all
+  // Razorpay scripts, lingering checkout iframes/backdrops, and states are cleanly reset.
   const redirectToReviewWithPaymentError = (status: 'failed' | 'cancelled', message: string) => {
     paymentOutcomeHandledRef.current = true;
     paymentInFlightRef.current = false;
     setProcessing(false);
     setPaymentStep('ready');
-    navigate(
-      `/checkout/review?payment=${status}&message=${encodeURIComponent(message)}`,
-      { replace: true },
-    );
+    window.location.href = `/checkout/review?payment=${status}&message=${encodeURIComponent(message)}`;
   };
 
   const subtotal = getCartTotal();
