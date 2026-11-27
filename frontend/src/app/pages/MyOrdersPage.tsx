@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import { Badge } from '@/app/components/ui/badge';
+import { OrderCancellationSection } from '@/app/components/orders/OrderCancellationSection';
 import { publicAnonKey } from '@/app/utils/backendInfo';
 import { API_URL } from '@/app/utils/api';
 import { useAuth } from '@/app/context/AuthContext';
@@ -810,6 +811,13 @@ export function MyOrdersPage() {
                     })}
                   </div>
                 </div>
+
+                {/* Cancellation request / refund status */}
+                <OrderCancellationSection
+                  orderId={order.id}
+                  orderNumber={order.order_number}
+                  onChanged={() => void fetchOrders(true)}
+                />
 
                 {/* Actions */}
                 <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex flex-wrap gap-3">
