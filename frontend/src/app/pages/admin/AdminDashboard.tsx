@@ -387,92 +387,92 @@ export function AdminDashboard() {
         )}
 
         {/* Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {/* Pending Orders */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 sm:p-6 min-w-0 hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between mb-4">
               <div className="p-3 bg-orange-100 rounded-lg">
                 <Clock className="w-6 h-6 text-orange-600" />
               </div>
             </div>
             <h3 className="text-sm font-medium text-gray-600 mb-1">PENDING ORDERS</h3>
-            <p className="text-3xl font-bold text-gray-900 mb-1">{stats.pendingOrders}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 break-words">{stats.pendingOrders}</p>
             <p className="text-xs text-gray-500">To Be Confirmed</p>
           </div>
 
           {/* Return Requests */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 sm:p-6 min-w-0 hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between mb-4">
               <div className="p-3 bg-yellow-100 rounded-lg">
                 <AlertCircle className="w-6 h-6 text-yellow-600" />
               </div>
             </div>
             <h3 className="text-sm font-medium text-gray-600 mb-1">RETURN REQUESTS</h3>
-            <p className="text-3xl font-bold text-gray-900 mb-1">{stats.returnRequests}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 break-words">{stats.returnRequests}</p>
             <p className="text-xs text-gray-500">To Be Reviewed</p>
           </div>
 
           {/* Cancel Requests */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 sm:p-6 min-w-0 hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between mb-4">
               <div className="p-3 bg-red-100 rounded-lg">
                 <XCircle className="w-6 h-6 text-red-600" />
               </div>
             </div>
             <h3 className="text-sm font-medium text-gray-600 mb-1">PENDING CANCEL REQUEST</h3>
-            <p className="text-3xl font-bold text-gray-900 mb-1">{stats.pendingCancelRequests}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 break-words">{stats.pendingCancelRequests}</p>
             <p className="text-xs text-gray-500">To Be Processed</p>
           </div>
 
           {/* Payments to Receive */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 sm:p-6 min-w-0 hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between mb-4">
               <div className="p-3 bg-green-100 rounded-lg">
                 <DollarSign className="w-6 h-6 text-green-600" />
               </div>
             </div>
             <h3 className="text-sm font-medium text-gray-600 mb-1">YET TO RECEIVE PAYMENTS</h3>
-            <p className="text-2xl font-bold text-gray-900 mb-1 break-words">{stats.yetToReceivePayments.toFixed(2)}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 break-words">₹{stats.yetToReceivePayments.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             <p className="text-xs text-gray-500">To Be Received</p>
           </div>
 
         </div>
 
         {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {/* Sales Summary */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
               <h3 className="text-lg font-semibold text-gray-900">Sales Summary</h3>
-              <select className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <select className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option>This Month</option>
                 <option>Last Month</option>
                 <option>This Year</option>
               </select>
             </div>
-            <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+            <div className="flex items-center justify-center h-48 sm:h-64 bg-gray-50 rounded-lg">
               <div className="text-center">
-                <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <p className="text-6xl font-bold text-gray-900">{stats.salesSummary}</p>
+                <BarChart3 className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mx-auto mb-3 sm:mb-4" />
+                <p className="text-4xl sm:text-5xl xl:text-6xl font-bold text-gray-900">{stats.salesSummary}</p>
                 <p className="text-sm text-gray-500 mt-2">Total Sales</p>
               </div>
             </div>
           </div>
 
           {/* Shipping Overview */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
               <h3 className="text-lg font-semibold text-gray-900">Shipping Overview</h3>
-              <select className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <select className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option>This Month</option>
                 <option>Last Month</option>
                 <option>This Year</option>
               </select>
             </div>
-            <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+            <div className="flex items-center justify-center h-48 sm:h-64 bg-gray-50 rounded-lg">
               <div className="text-center">
-                <TrendingUp className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <p className="text-6xl font-bold text-gray-900">{stats.shippingOrders}</p>
+                <TrendingUp className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mx-auto mb-3 sm:mb-4" />
+                <p className="text-4xl sm:text-5xl xl:text-6xl font-bold text-gray-900">{stats.shippingOrders}</p>
                 <p className="text-sm text-gray-500 mt-2">Orders Being Shipped</p>
               </div>
             </div>
@@ -480,31 +480,31 @@ export function AdminDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <Link
             to="/admin/items/new"
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all group"
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl shadow-lg p-5 sm:p-6 hover:shadow-xl transition-all group"
           >
-            <Package className="w-12 h-12 mb-4 group-hover:scale-110 transition-transform" />
-            <h3 className="text-xl font-bold mb-2">Add New Product</h3>
+            <Package className="w-10 h-10 sm:w-12 sm:h-12 mb-3 sm:mb-4 group-hover:scale-110 transition-transform" />
+            <h3 className="text-lg sm:text-xl font-bold mb-2">Add New Product</h3>
             <p className="text-blue-100">Create a new product listing</p>
           </Link>
 
           <Link
             to="/admin/orders"
-            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all group"
+            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl shadow-lg p-5 sm:p-6 hover:shadow-xl transition-all group"
           >
-            <ShoppingCart className="w-12 h-12 mb-4 group-hover:scale-110 transition-transform" />
-            <h3 className="text-xl font-bold mb-2">Manage Orders</h3>
+            <ShoppingCart className="w-10 h-10 sm:w-12 sm:h-12 mb-3 sm:mb-4 group-hover:scale-110 transition-transform" />
+            <h3 className="text-lg sm:text-xl font-bold mb-2">Manage Orders</h3>
             <p className="text-purple-100">View and process orders</p>
           </Link>
 
           <Link
             to="/admin/customers"
-            className="bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all group"
+            className="bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-xl shadow-lg p-5 sm:p-6 hover:shadow-xl transition-all group"
           >
-            <Users className="w-12 h-12 mb-4 group-hover:scale-110 transition-transform" />
-            <h3 className="text-xl font-bold mb-2">View Customers</h3>
+            <Users className="w-10 h-10 sm:w-12 sm:h-12 mb-3 sm:mb-4 group-hover:scale-110 transition-transform" />
+            <h3 className="text-lg sm:text-xl font-bold mb-2">View Customers</h3>
             <p className="text-green-100">Manage customer database</p>
           </Link>
         </div>

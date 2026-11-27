@@ -519,7 +519,7 @@ export function AddEditItemPage() {
 
   return (
     <AdminLayout>
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <button
@@ -530,7 +530,7 @@ export function AddEditItemPage() {
             <ArrowLeft className="w-6 h-6" />
           </button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
               {isEdit ? 'Edit Item' : 'Add New Item'}
             </h1>
             <p className="text-gray-600 mt-1">
@@ -641,7 +641,7 @@ export function AddEditItemPage() {
               <div className="space-y-6">
                 {/* Source Language Section */}
                 <div className="border-b pb-6">
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex flex-wrap items-center justify-between gap-4 mb-3">
                     <h3 className="font-medium text-gray-900">Source Language</h3>
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input

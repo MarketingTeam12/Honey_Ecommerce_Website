@@ -349,8 +349,8 @@ export default function CouponsPage() {
 
   return (
     <AdminLayout>
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="p-4 sm:p-6 lg:p-8">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Coupon Management</h1>
             <p className="text-gray-600 mt-1">Create and manage discount coupons</p>
@@ -701,7 +701,7 @@ export default function CouponsPage() {
         </div>
 
         {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mt-6">
           <div className="bg-white rounded-lg shadow p-4">
             <div className="text-sm text-gray-600">Total Coupons</div>
             <div className="text-2xl font-bold text-gray-900">{coupons.length}</div>

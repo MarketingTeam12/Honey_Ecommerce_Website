@@ -203,15 +203,15 @@ export function ItemReviewsPage() {
 
   return (
     <AdminLayout>
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Item Reviews</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Item Reviews</h1>
           <p className="text-gray-600 mt-1">Manage customer feedback and ratings for your services</p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h3 className="text-sm font-medium text-gray-600 mb-1">Total Reviews</h3>
             <p className="text-3xl font-bold text-gray-900">{stats.total}</p>

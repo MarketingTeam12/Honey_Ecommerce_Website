@@ -975,7 +975,7 @@ export function OrderDetailPage() {
           </div>
         </div>
 
-        <div className="p-6 max-w-7xl mx-auto">
+        <div className="p-4 sm:p-6 max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
@@ -1028,7 +1028,7 @@ export function OrderDetailPage() {
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Shipment & Payment</h2>
                 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <h3 className="text-sm font-medium text-gray-600 mb-2">
                       {order.shipping_method === 'physical' ? 'Tracking Information' : 'Delivery Information'}
@@ -1168,7 +1168,7 @@ export function OrderDetailPage() {
                       </div>
                       
                       {/* Item Details Grid */}
-                      <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                         <div>
                           <p className="text-xs text-gray-500">Page Count</p>
                           <p className="font-medium text-gray-900">{item.pageCount}</p>
@@ -1337,7 +1337,7 @@ export function OrderDetailPage() {
 
               {/* Customer Notes Section */}
               <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
                   <div className="flex items-center gap-2">
                     <FileText className="w-5 h-5 text-gray-600" />
                     <h2 className="text-lg font-semibold text-gray-900">Additional Notes</h2>

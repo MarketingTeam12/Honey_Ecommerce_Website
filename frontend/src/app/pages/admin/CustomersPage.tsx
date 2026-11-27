@@ -410,7 +410,7 @@ function CustomersPage() {
       <div className="bg-white min-h-screen">
         {/* Header */}
         <div className="border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
             <div>
               <h1 className="text-2xl font-semibold text-gray-900">Accounts</h1>
               <p className="text-sm text-gray-500 mt-1">

@@ -447,18 +447,18 @@ export function ReportsPage() {
 
   return (
     <AdminLayout>
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Reports & Analytics</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Reports & Analytics</h1>
             <p className="text-gray-600 mt-1">Real-time sales insights and customer analytics</p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto">
             <select
               value={dateRange}
               onChange={(e) => setDateRange(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="today">Today</option>
               <option value="this-week">This Week</option>
@@ -469,7 +469,7 @@ export function ReportsPage() {
             </select>
             <button 
               onClick={handleExportReport}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-colors"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center justify-center gap-2 whitespace-nowrap transition-colors"
             >
               <Download className="w-5 h-5" />
               Export Report
@@ -478,13 +478,13 @@ export function ReportsPage() {
         </div>
 
         {/* Sales Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-5 sm:p-6 text-white min-w-0">
             <div className="flex items-center justify-between mb-4">
               <DollarSign className="w-8 h-8 opacity-80" />
             </div>
             <h3 className="text-sm font-medium opacity-90 mb-1">TOTAL REVENUE</h3>
-            <p className="text-3xl font-bold">₹{Math.round(salesData.totalRevenue).toLocaleString('en-IN')}</p>
+            <p className="text-2xl lg:text-xl xl:text-3xl font-bold break-words">₹{Math.round(salesData.totalRevenue).toLocaleString('en-IN')}</p>
             {dateRange === 'this-month' && (
               <p className="text-sm opacity-80 mt-2">
                 {parseFloat(revenueGrowth) >= 0 ? '+' : ''}{revenueGrowth}% from last month
@@ -492,12 +492,12 @@ export function ReportsPage() {
             )}
           </div>
 
-          <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
+          <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-5 sm:p-6 text-white min-w-0">
             <div className="flex items-center justify-between mb-4">
               <Package className="w-8 h-8 opacity-80" />
             </div>
             <h3 className="text-sm font-medium opacity-90 mb-1">TOTAL ORDERS</h3>
-            <p className="text-3xl font-bold">{salesData.totalOrders}</p>
+            <p className="text-2xl lg:text-xl xl:text-3xl font-bold break-words">{salesData.totalOrders}</p>
             {dateRange === 'this-month' && (
               <p className="text-sm opacity-80 mt-2">
                 {parseFloat(ordersGrowth) >= 0 ? '+' : ''}{ordersGrowth}% from last month
@@ -505,12 +505,12 @@ export function ReportsPage() {
             )}
           </div>
 
-          <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+          <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-5 sm:p-6 text-white min-w-0">
             <div className="flex items-center justify-between mb-4">
               <TrendingUp className="w-8 h-8 opacity-80" />
             </div>
             <h3 className="text-sm font-medium opacity-90 mb-1">AVG ORDER VALUE</h3>
-            <p className="text-3xl font-bold">₹{Math.round(salesData.averageOrderValue).toLocaleString('en-IN')}</p>
+            <p className="text-2xl lg:text-xl xl:text-3xl font-bold break-words">₹{Math.round(salesData.averageOrderValue).toLocaleString('en-IN')}</p>
             {dateRange === 'this-month' && (
               <p className="text-sm opacity-80 mt-2">
                 {parseFloat(aovGrowth) >= 0 ? '+' : ''}{aovGrowth}% from last month
@@ -520,46 +520,46 @@ export function ReportsPage() {
         </div>
 
         {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 sm:p-6 min-w-0">
             <div className="flex items-center gap-3 mb-3">
               <div className="p-3 bg-orange-100 rounded-lg">
                 <Award className="w-6 h-6 text-orange-600" />
               </div>
               <h3 className="font-semibold text-gray-900">Top Selling Product</h3>
             </div>
-            <p className="text-2xl font-bold text-gray-900">{salesData.topSellingProduct}</p>
+            <p className="text-xl xl:text-2xl font-bold text-gray-900 break-words">{salesData.topSellingProduct}</p>
             <p className="text-sm text-gray-500 mt-1">
               {salesData.topSellingProductCount} {salesData.topSellingProductCount === 1 ? 'order' : 'orders'} this period
             </p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 sm:p-6 min-w-0">
             <div className="flex items-center gap-3 mb-3">
               <div className="p-3 bg-blue-100 rounded-lg">
                 <Users className="w-6 h-6 text-blue-600" />
               </div>
               <h3 className="font-semibold text-gray-900">Total Customers</h3>
             </div>
-            <p className="text-2xl font-bold text-gray-900">{salesData.totalCustomers}</p>
+            <p className="text-lg sm:text-2xl font-bold text-gray-900 break-words">{salesData.totalCustomers}</p>
             <p className="text-sm text-gray-500 mt-1">Unique customers</p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 sm:p-6 min-w-0">
             <div className="flex items-center gap-3 mb-3">
               <div className="p-3 bg-green-100 rounded-lg">
                 <Users className="w-6 h-6 text-green-600" />
               </div>
               <h3 className="font-semibold text-gray-900">Repeat Customers</h3>
             </div>
-            <p className="text-2xl font-bold text-gray-900">{salesData.repeatCustomerRate.toFixed(1)}%</p>
+            <p className="text-lg sm:text-2xl font-bold text-gray-900 break-words">{salesData.repeatCustomerRate.toFixed(1)}%</p>
             <p className="text-sm text-gray-500 mt-1">Customer retention rate</p>
           </div>
         </div>
 
         {/* Top Buyers */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
-          <div className="p-6 border-b border-gray-200">
+          <div className="p-4 sm:p-6 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-yellow-100 rounded-lg">
@@ -575,20 +575,20 @@ export function ReportsPage() {
 
           {topBuyers.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full min-w-[640px]">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Orders</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Spent</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Order Value</th>
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Orders</th>
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Spent</th>
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Order Value</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {topBuyers.map((buyer, index) => (
                     <tr key={buyer.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           {index === 0 && <span className="text-2xl">🥇</span>}
                           {index === 1 && <span className="text-2xl">🥈</span>}
@@ -596,25 +596,25 @@ export function ReportsPage() {
                           <span className="font-semibold text-gray-900">#{index + 1}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold">
                             {buyer.name[0].toUpperCase()}
                           </div>
                           <div>
                             <p className="font-medium text-gray-900">{buyer.name}</p>
-                            <p className="text-sm text-gray-500">{buyer.email}</p>
+                            <p className="text-sm text-gray-500 truncate max-w-[220px]" title={buyer.email}>{buyer.email}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                         <span className="font-semibold text-gray-900">{buyer.totalOrders}</span>
                         <span className="text-gray-500 text-sm ml-1">{buyer.totalOrders === 1 ? 'order' : 'orders'}</span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                         <span className="font-bold text-green-600">₹{Math.round(buyer.totalSpent).toLocaleString('en-IN')}</span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                         <span className="font-semibold text-gray-900">₹{Math.round(buyer.averageOrderValue).toLocaleString('en-IN')}</span>
                       </td>
                     </tr>
@@ -632,7 +632,7 @@ export function ReportsPage() {
         </div>
 
         {/* Sales Trend Chart */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-100 rounded-lg">
@@ -645,26 +645,26 @@ export function ReportsPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
-              <DollarSign className="w-10 h-10 text-blue-600 mx-auto mb-3" />
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-6">
+            <div className="text-center p-4 sm:p-6 min-w-0 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
+              <DollarSign className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600 mx-auto mb-3" />
               <p className="text-sm text-gray-600 mb-1">Revenue</p>
-              <p className="text-2xl font-bold text-gray-900">₹{Math.round(salesData.totalRevenue).toLocaleString('en-IN')}</p>
+              <p className="text-lg sm:text-2xl font-bold text-gray-900 break-words">₹{Math.round(salesData.totalRevenue).toLocaleString('en-IN')}</p>
             </div>
-            <div className="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
-              <Package className="w-10 h-10 text-green-600 mx-auto mb-3" />
+            <div className="text-center p-4 sm:p-6 min-w-0 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
+              <Package className="w-8 h-8 sm:w-10 sm:h-10 text-green-600 mx-auto mb-3" />
               <p className="text-sm text-gray-600 mb-1">Orders</p>
-              <p className="text-2xl font-bold text-gray-900">{salesData.totalOrders}</p>
+              <p className="text-lg sm:text-2xl font-bold text-gray-900 break-words">{salesData.totalOrders}</p>
             </div>
-            <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
-              <Users className="w-10 h-10 text-purple-600 mx-auto mb-3" />
+            <div className="text-center p-4 sm:p-6 min-w-0 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
+              <Users className="w-8 h-8 sm:w-10 sm:h-10 text-purple-600 mx-auto mb-3" />
               <p className="text-sm text-gray-600 mb-1">Customers</p>
-              <p className="text-2xl font-bold text-gray-900">{salesData.totalCustomers}</p>
+              <p className="text-lg sm:text-2xl font-bold text-gray-900 break-words">{salesData.totalCustomers}</p>
             </div>
-            <div className="text-center p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg">
-              <TrendingUp className="w-10 h-10 text-orange-600 mx-auto mb-3" />
+            <div className="text-center p-4 sm:p-6 min-w-0 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg">
+              <TrendingUp className="w-8 h-8 sm:w-10 sm:h-10 text-orange-600 mx-auto mb-3" />
               <p className="text-sm text-gray-600 mb-1">Avg Order</p>
-              <p className="text-2xl font-bold text-gray-900">₹{Math.round(salesData.averageOrderValue).toLocaleString('en-IN')}</p>
+              <p className="text-lg sm:text-2xl font-bold text-gray-900 break-words">₹{Math.round(salesData.averageOrderValue).toLocaleString('en-IN')}</p>
             </div>
           </div>
         </div>

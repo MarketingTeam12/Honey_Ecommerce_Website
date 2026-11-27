@@ -644,10 +644,10 @@ export function SalesPage() {
 
   return (
     <AdminLayout>
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Sales & Order Management</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Sales & Order Management</h1>
           <p className="text-gray-600 mt-1">Complete order details and sales analytics</p>
         </div>
 
@@ -677,9 +677,9 @@ export function SalesPage() {
         )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
               <div className="p-3 bg-blue-100 rounded-lg">
                 <ShoppingCart className="w-6 h-6 text-blue-600" />
               </div>
@@ -940,7 +940,7 @@ export function SalesPage() {
                 {/* Customer Information */}
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-3">Customer Information</h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-gray-600 mb-1">Name</p>
                       <p className="font-semibold text-gray-900">{selectedOrder.customer_name || 'N/A'}</p>
@@ -955,7 +955,7 @@ export function SalesPage() {
                 {/* Order Information */}
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-3">Order Information</h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-gray-600 mb-1">Order Date</p>
                       <p className="font-semibold text-gray-900">{new Date(selectedOrder.created_at).toLocaleDateString('en-IN')}</p>

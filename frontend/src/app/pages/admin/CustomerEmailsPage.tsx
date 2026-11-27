@@ -215,11 +215,11 @@ export function CustomerEmailsPage() {
 
   return (
     <AdminLayout>
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Customer Emails</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Customer Emails</h1>
             <p className="text-gray-600 mt-1">
               Manage newsletter subscriber emails ({emails.length} total)
             </p>
