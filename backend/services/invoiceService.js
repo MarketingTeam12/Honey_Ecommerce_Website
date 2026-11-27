@@ -148,5 +148,6 @@ const generateInvoice = async (invoiceData) => {
 };
 
 module.exports = {
-  generateInvoice
+  generateInvoice,
+  getBrowser,
 };

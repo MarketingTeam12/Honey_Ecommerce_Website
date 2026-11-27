@@ -814,7 +814,7 @@ async function updateOrderEmailStatus(id, { status, error } = {}) {
 }
 
 async function updateOrderPaymentStatus(id, paymentStatus) {
-  const allowed = ["paid", "unpaid", "pending", "failed", "refunded"];
+  const allowed = ["paid", "unpaid", "pending", "failed", "refunded", "partially_refunded"];
   const normalized = String(paymentStatus || "").toLowerCase();
   if (!allowed.includes(normalized)) {
     const error = new Error(`Invalid payment_status. Allowed: ${allowed.join(", ")}`);

@@ -41,8 +41,31 @@ async function requireAdmin(req, res, next) {
   }
 }
 
+/** Admins, plus any role whose name contains "manager" (e.g. sales_manager). */
+async function isOrderManager(user) {
+  if (!user) return false;
+  if (await userService.isAdmin(user)) return true;
+  return /manager/i.test(String(user.role || ""));
+}
+
+async function requireOrderManager(req, res, next) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: "Unauthorized" });
+    }
+    if (!(await isOrderManager(req.user))) {
+      return res.status(403).json({ success: false, error: "Forbidden - admin or manager access required" });
+    }
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   requireAuth,
   optionalAuth,
   requireAdmin,
+  requireOrderManager,
+  isOrderManager,
 };

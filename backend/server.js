@@ -46,6 +46,10 @@ const testResendRoute = require("./routes/testResend");
 const authRoutes = require("./routes/authRoutes");
 const siteReviewRoutes = require("./routes/siteReviewRoutes");
 const appDataRoutes = require("./routes/appDataRoutes");
+const { createCancellationRouter } = require("./routes/cancellationRoutes");
+const { cancellationService } = require("./services/cancellationModule");
+const { resolveCreditNotePath } = require("./services/creditNoteService");
+const { requireAuth, requireOrderManager, isOrderManager } = require("./middleware/auth");
 const razorpayService = require("./services/razorpayService");
 const s3Routes = require("./routes/s3Routes");
 
@@ -305,6 +309,14 @@ app.use(
 );
 
 app.use(["/make-server-a67f0635", "/api"], authRoutes, siteReviewRoutes, appDataRoutes);
+app.use(
+  ["/make-server-a67f0635", "/api"],
+  createCancellationRouter({
+    service: cancellationService,
+    auth: { requireAuth, requireOrderManager, isOrderManager },
+    resolveCreditNotePath,
+  }),
+);
 app.use(["/make-server-a67f0635", "/api"], paymentRoutes);
 app.use(["/make-server-a67f0635", "/api"], documentRoute);
 

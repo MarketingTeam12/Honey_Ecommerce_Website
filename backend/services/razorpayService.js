@@ -115,9 +115,30 @@ function verifyWebhookSignature(rawBody, signatureHeader) {
   return timingSafeHexCompare(expectedSignature, String(signatureHeader).trim());
 }
 
+/** Fetches a payment (amount / amount_refunded are in paise). */
+async function fetchPayment(paymentId) {
+  return getRazorpay().payments.fetch(paymentId);
+}
+
+/**
+ * POST /payments/{payment_id}/refund. `params.amount` is in paise; `receipt`
+ * carries our refund idempotency key so retries can find an earlier refund.
+ */
+async function createRefund(paymentId, params) {
+  return getRazorpay().payments.refund(paymentId, params);
+}
+
+/** Lists refunds already made against a payment. */
+async function listRefunds(paymentId) {
+  return getRazorpay().payments.fetchMultipleRefund(paymentId, { count: 100 });
+}
+
 module.exports = {
   createOrder,
   getPublicKeyId,
   verifyPaymentSignature,
   verifyWebhookSignature,
+  fetchPayment,
+  createRefund,
+  listRefunds,
 };

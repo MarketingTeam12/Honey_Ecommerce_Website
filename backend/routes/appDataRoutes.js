@@ -6,6 +6,7 @@ const userService = require("../services/userService");
 const razorpayService = require("../services/razorpayService");
 const whatsappService = require("../services/whatsappService");
 const siteData = require("../services/siteDataService");
+const { cancellationService } = require("../services/cancellationModule");
 const { sendQueryNotifications } = require("../services/Querynotificationservice");
 const { optionalAuth, requireAuth, requireAdmin } = require("../middleware/auth");
 const { getBucketName, isS3Configured } = require("../config/s3");
@@ -1725,6 +1726,17 @@ router.post("/payment/webhook", async (req, res, next) => {
 
     const eventPayload = parseMaybeJson(req.body) || {};
     const eventName = String(eventPayload.event || "");
+
+    // Refund lifecycle (cancellation workflow). Idempotent on the Razorpay event id
+    // and on the refund row status, so redelivered webhooks are harmless.
+    if (eventName === "refund.processed" || eventName === "refund.failed") {
+      const result = await cancellationService.handleRefundWebhook({
+        eventId: req.get("X-Razorpay-Event-Id") || null,
+        event: eventName,
+        refundEntity: eventPayload?.payload?.refund?.entity || null,
+      });
+      return res.json({ success: true, event: eventName, ...result });
+    }
     const paymentEntity = eventPayload?.payload?.payment?.entity || {};
     const internalOrderId = paymentEntity?.notes?.orderId || null;
 

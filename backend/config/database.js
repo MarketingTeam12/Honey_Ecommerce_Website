@@ -566,6 +566,124 @@ async function initializeDatabase() {
         ADD COLUMN terms_accepted_at DATETIME NULL AFTER last_login_at
     `);
   }
+
+  // Never let this block stop the server from starting: the rest of the site must
+  // keep working even if the cancellation tables could not be created.
+  try {
+    await migrateCancellationsAndRefunds();
+  } catch (error) {
+    console.error("Cancellation/refund migration failed — cancellation features will be unavailable:", error.message);
+  }
+}
+
+async function addColumnIfMissing(table, column, definition) {
+  const [cols] = await pool.query(
+    `SELECT COLUMN_NAME FROM information_schema.COLUMNS
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :table AND COLUMN_NAME = :column`,
+    { table, column },
+  );
+  if (cols.length === 0) {
+    await pool.query(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
+}
+
+// Order cancellation & refund workflow (additive; safe to run on every startup).
+async function migrateCancellationsAndRefunds() {
+  const cancellationColumns = `
+      id VARCHAR(64) PRIMARY KEY,
+      order_id VARCHAR(64) NOT NULL,
+      customer_id VARCHAR(64) NULL,
+      reason VARCHAR(50) NOT NULL,
+      comments TEXT NULL,
+      policy_accepted TINYINT(1) NOT NULL DEFAULT 0,
+      status VARCHAR(20) NOT NULL DEFAULT 'REQUESTED',
+      order_status_at_request VARCHAR(50) NULL,
+      suggested_refund_amount DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+      approved_refund_amount DECIMAL(12,2) NULL,
+      refund_type VARCHAR(10) NULL,
+      admin_id VARCHAR(64) NULL,
+      admin_decision_reason TEXT NULL,
+      decided_at DATETIME NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_cancellation_order_id (order_id),
+      INDEX idx_cancellation_status (status)
+  `;
+  try {
+    // active_order_id is only populated while REQUESTED, so the UNIQUE key allows
+    // exactly one active request per order (backs up the row lock in the service).
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS cancellation_requests (
+        ${cancellationColumns},
+        active_order_id VARCHAR(64) GENERATED ALWAYS AS (IF(status = 'REQUESTED', order_id, NULL)) STORED,
+        UNIQUE KEY uniq_cancellation_active_order (active_order_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+  } catch (error) {
+    // Some MySQL/MariaDB versions reject generated columns; the service still
+    // serialises requests per order with SELECT ... FOR UPDATE on the order row.
+    console.warn("cancellation_requests: generated unique key unsupported, creating without it:", error.message);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS cancellation_requests (
+        ${cancellationColumns}
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+  }
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS refunds (
+      id VARCHAR(64) PRIMARY KEY,
+      order_id VARCHAR(64) NOT NULL,
+      cancellation_request_id VARCHAR(64) NULL,
+      razorpay_payment_id VARCHAR(255) NULL,
+      amount DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+      refund_type VARCHAR(10) NOT NULL DEFAULT 'FULL',
+      status VARCHAR(20) NOT NULL DEFAULT 'INITIATED',
+      razorpay_refund_id VARCHAR(255) NULL,
+      idempotency_key VARCHAR(100) NOT NULL,
+      attempts INT NOT NULL DEFAULT 0,
+      refunded_at DATETIME NULL,
+      failure_reason TEXT NULL,
+      manual_refund_note TEXT NULL,
+      credit_note_number VARCHAR(100) NULL,
+      credit_note_path TEXT NULL,
+      created_by VARCHAR(64) NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      UNIQUE KEY uniq_refunds_razorpay_refund_id (razorpay_refund_id),
+      UNIQUE KEY uniq_refunds_idempotency_key (idempotency_key),
+      INDEX idx_refunds_order_id (order_id),
+      INDEX idx_refunds_status (status)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS order_events (
+      id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+      order_id VARCHAR(64) NOT NULL,
+      actor_type VARCHAR(20) NOT NULL,
+      actor_id VARCHAR(255) NULL,
+      action VARCHAR(100) NOT NULL,
+      details JSON NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_order_events_order_id (order_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS webhook_events (
+      event_id VARCHAR(255) PRIMARY KEY,
+      event_name VARCHAR(100) NULL,
+      processed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+
+  // Denormalised onto orders so the admin list can show/filter without joins.
+  // Kept separate from orders.status on purpose.
+  await addColumnIfMissing("orders", "cancellation_status", "VARCHAR(20) NULL AFTER payment_status");
+  await addColumnIfMissing("orders", "refund_status", "VARCHAR(20) NOT NULL DEFAULT 'NONE' AFTER cancellation_status");
+  await addColumnIfMissing("orders", "refund_amount", "DECIMAL(12,2) NOT NULL DEFAULT 0.00 AFTER refund_status");
+  await addColumnIfMissing("orders", "refunded_at", "DATETIME NULL AFTER refund_amount");
 }
 
 module.exports = {
