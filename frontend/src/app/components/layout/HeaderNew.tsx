@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { LogOut, User, Key, Shield, ChevronDown, Menu, X, ShoppingCart, Heart, Package, MapPin, MessageSquare } from 'lucide-react';
 import { useCurrency } from '@/app/context/CurrencyContext';
@@ -42,6 +42,32 @@ export function HeaderNew() {
   const [attestationOpen, setAttestationOpen] = useState(false);
   const [startupOpen, setStartupOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+
+  // Hover dropdowns: the menu content renders in a portal outside the tab wrapper, so
+  // leaving the tab towards the menu would close it instantly (flicker). Delay the close
+  // briefly and cancel it when the pointer reaches the menu; opening one closes the rest.
+  const hoverCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cancelHoverClose = () => {
+    if (hoverCloseTimerRef.current) {
+      clearTimeout(hoverCloseTimerRef.current);
+      hoverCloseTimerRef.current = null;
+    }
+  };
+  useEffect(() => cancelHoverClose, []);
+  const hoverMenuHandlers = (setOpen: (open: boolean) => void) => ({
+    onMouseEnter: () => {
+      cancelHoverClose();
+      setTranslationOpen(false);
+      setAttestationOpen(false);
+      setStartupOpen(false);
+      setMoreOpen(false);
+      setOpen(true);
+    },
+    onMouseLeave: () => {
+      cancelHoverClose();
+      hoverCloseTimerRef.current = setTimeout(() => setOpen(false), 150);
+    },
+  });
   const { currency, currencies, setCurrency } = useCurrency();
   const { getCartCount } = useCart();
   const { getWishlistCount } = useWishlist();
@@ -149,7 +175,7 @@ export function HeaderNew() {
                 <CustomerNotificationBell />
                 
                 {/* User Dropdown */}
-                <DropdownMenu>
+                <DropdownMenu modal={false}>
                   <DropdownMenuTrigger className="flex items-center gap-2 hover:bg-white/10 px-3 py-1.5 rounded-full transition-colors">
                     <span className="text-white text-[15px]">Hi, {user.name?.split(' ')[0] || 'User'}</span>
                     <ChevronDown className="w-4 h-4 text-white" />
@@ -244,10 +270,9 @@ export function HeaderNew() {
               {/* Translation Services Dropdown */}
               <div
                 className="relative"
-                onMouseEnter={() => setTranslationOpen(true)}
-                onMouseLeave={() => setTranslationOpen(false)}
+                {...hoverMenuHandlers(setTranslationOpen)}
               >
-                <DropdownMenu open={translationOpen} onOpenChange={setTranslationOpen}>
+                <DropdownMenu modal={false} open={translationOpen} onOpenChange={setTranslationOpen}>
                   <DropdownMenuTrigger
                     onClick={() => {
                       setTranslationOpen(false);
@@ -261,7 +286,7 @@ export function HeaderNew() {
                   >
                     Translation Services <ChevronDown className={`w-3.5 h-3.5 xl:w-4 xl:h-4 transition-transform duration-200 ${translationOpen ? 'rotate-180' : ''}`} />
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-64" align="start">
+                  <DropdownMenuContent className="w-64" align="start" {...hoverMenuHandlers(setTranslationOpen)}>
                     <DropdownMenuItem asChild>
                       <Link to="/all-translation-products" className="font-semibold text-blue-600">
                         View All Translation Services
@@ -301,10 +326,9 @@ export function HeaderNew() {
               {/* Attestation Services Dropdown */}
               <div
                 className="relative"
-                onMouseEnter={() => setAttestationOpen(true)}
-                onMouseLeave={() => setAttestationOpen(false)}
+                {...hoverMenuHandlers(setAttestationOpen)}
               >
-                <DropdownMenu open={attestationOpen} onOpenChange={setAttestationOpen}>
+                <DropdownMenu modal={false} open={attestationOpen} onOpenChange={setAttestationOpen}>
                   <DropdownMenuTrigger
                     onClick={() => {
                       setAttestationOpen(false);
@@ -318,7 +342,7 @@ export function HeaderNew() {
                   >
                     Attestation Services <ChevronDown className={`w-3.5 h-3.5 xl:w-4 xl:h-4 transition-transform duration-200 ${attestationOpen ? 'rotate-180' : ''}`} />
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
+                  <DropdownMenuContent align="start" {...hoverMenuHandlers(setAttestationOpen)}>
                     <DropdownMenuItem asChild>
                       <Link to="/all-attestation-products" className="font-semibold text-blue-600">
                         View All Attestation Services
@@ -347,10 +371,9 @@ export function HeaderNew() {
               {/* Startup Packages Dropdown */}
               <div
                 className="relative"
-                onMouseEnter={() => setStartupOpen(true)}
-                onMouseLeave={() => setStartupOpen(false)}
+                {...hoverMenuHandlers(setStartupOpen)}
               >
-                <DropdownMenu open={startupOpen} onOpenChange={setStartupOpen}>
+                <DropdownMenu modal={false} open={startupOpen} onOpenChange={setStartupOpen}>
                   <DropdownMenuTrigger
                     onClick={() => {
                       setStartupOpen(false);
@@ -364,7 +387,7 @@ export function HeaderNew() {
                   >
                     Startup Packages <ChevronDown className={`w-3.5 h-3.5 xl:w-4 xl:h-4 transition-transform duration-200 ${startupOpen ? 'rotate-180' : ''}`} />
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
+                  <DropdownMenuContent align="start" {...hoverMenuHandlers(setStartupOpen)}>
                     <DropdownMenuItem asChild>
                       <Link to="/all-startup-products" className="font-semibold text-blue-600">
                         View All Startup Packages
@@ -385,10 +408,9 @@ export function HeaderNew() {
               {/* More Dropdown */}
               <div
                 className="relative"
-                onMouseEnter={() => setMoreOpen(true)}
-                onMouseLeave={() => setMoreOpen(false)}
+                {...hoverMenuHandlers(setMoreOpen)}
               >
-                <DropdownMenu open={moreOpen} onOpenChange={setMoreOpen}>
+                <DropdownMenu modal={false} open={moreOpen} onOpenChange={setMoreOpen}>
                   <DropdownMenuTrigger
                     className={`flex items-center gap-1 transition-all font-bold text-xs xl:text-sm 2xl:text-base whitespace-nowrap outline-none ${
                       isMore
@@ -398,7 +420,7 @@ export function HeaderNew() {
                   >
                     More <ChevronDown className={`w-3.5 h-3.5 xl:w-4 xl:h-4 transition-transform duration-200 ${moreOpen ? 'rotate-180' : ''}`} />
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
+                  <DropdownMenuContent align="start" {...hoverMenuHandlers(setMoreOpen)}>
                     <DropdownMenuItem asChild>
                       <Link to="/about">About Us</Link>
                     </DropdownMenuItem>
@@ -469,7 +491,7 @@ export function HeaderNew() {
               </Link>
 
               {/* Currency Selector Dropdown */}
-              <DropdownMenu>
+              <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <button
                     className="flex items-center justify-center gap-1.5 min-h-[40px] p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
