@@ -7,7 +7,6 @@ const { pool } = require("../config/database");
 const resend = require("../utils/resend");
 const razorpayService = require("./razorpayService");
 const siteData = require("./siteDataService");
-const { getBrowser } = require("./invoiceService");
 const { createMysqlStore } = require("./cancellationRepository");
 const { createCancellationService } = require("./cancellationService");
 const { createCancellationEmails } = require("./cancellationEmails");
@@ -28,7 +27,7 @@ const cancellationService = createCancellationService({
     notifyAdmin: ({ title, message, metadata }) =>
       siteData.saveNotification({ title, message, type: metadata?.type, metadata }),
   },
-  creditNotes: createCreditNoteService({ store, getBrowser }),
+  creditNotes: createCreditNoteService({ store }),
 });
 
 module.exports = { cancellationService };

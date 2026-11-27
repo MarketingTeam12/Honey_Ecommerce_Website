@@ -156,3 +156,22 @@ test("unpaid orders are not marked PAID", () => {
 test("formatInvoiceDate is DD/MM/YYYY", () => {
   assert.equal(formatInvoiceDate("2026-03-05T06:00:00Z"), "05/03/2026");
 });
+
+test("invoice and credit note render as PDFs without a browser", async () => {
+  const { generateInvoice } = require("../services/invoiceService");
+  const { renderCreditNotePdf } = require("../services/pdfDocuments");
+  const invoice = await generateInvoice(
+    buildInvoiceDataFromOrder({
+      order_number: "HT100",
+      created_at: "2026-11-20T10:00:00Z",
+      payment_status: "paid",
+      subtotal: 400,
+      tax: 72,
+      total_amount: 472,
+      items: JSON.stringify([{ name: "Translation", totalPrice: 400 }]),
+    }),
+  );
+  assert.equal(invoice.subarray(0, 5).toString(), "%PDF-");
+  const note = await renderCreditNotePdf({ credit_note_number: "CN-HT100-1", taxable_amount: 400, gst_amount: 72, total_amount: 472 });
+  assert.equal(note.subarray(0, 5).toString(), "%PDF-");
+});
