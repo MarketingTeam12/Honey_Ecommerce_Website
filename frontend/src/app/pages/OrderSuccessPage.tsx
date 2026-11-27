@@ -7,6 +7,7 @@ import { buildHeaders } from '@/app/utils/buildHeaders';
 import { toast } from 'sonner';
 import { generateInvoicePDF } from '@/app/utils/generateInvoicePDF';
 import { trackPurchase } from '@/app/utils/analytics';
+import { downloadOrderInvoice } from '@/app/services/invoiceApi';
 
 // Was reading VITE_BACKEND_URL (never set) with a localhost:3000 fallback —
 // broke invoice generation on any deployment other than local dev.
@@ -121,57 +122,6 @@ export function OrderSuccessPage() {
     }
   };
 
-  const normalizeInvoiceUrl = (rawPath: string) => {
-    if (/^https?:\/\//i.test(rawPath)) {
-      return rawPath;
-    }
-    const trimmed = rawPath.startsWith('/') ? rawPath : `/${rawPath}`;
-    return `${API_URL}${trimmed}`;
-  };
-
-  const downloadFromUrl = async (rawPath: string) => {
-    const response = await fetch(normalizeInvoiceUrl(rawPath));
-    if (!response.ok) {
-      throw new Error('Invoice file download failed');
-    }
-    const blob = await response.blob();
-    const blobUrl = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = blobUrl;
-    link.download = `invoice-${order?.order_number || 'receipt'}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(blobUrl);
-  };
-
-  const generateTemplateInvoice = async () => {
-    if (!order) return null;
-
-    const response = await fetch(`${LOCAL_BACKEND_BASE}/api/generate-invoice`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ order }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Template invoice generation failed');
-    }
-
-    const data = await response.json();
-    if (!data?.invoicePath) {
-      throw new Error('Template invoice path not returned');
-    }
-
-    if (orderId) {
-      localStorage.setItem(`invoicePath_${orderId}`, data.invoicePath);
-    }
-    setInvoicePath(data.invoicePath);
-    return data.invoicePath as string;
-  };
-
   const handleDownloadInvoice = async () => {
     setDownloadingInvoice(true);
 
@@ -179,13 +129,11 @@ export function OrderSuccessPage() {
       if (!order) {
         throw new Error('Invoice not available');
       }
-      // Prefer backend HTML template for exact matching output.
+      // The official invoice comes from the server (built from the stored order).
       try {
-        const activeInvoicePath = await generateTemplateInvoice();
-        if (!activeInvoicePath) throw new Error('Invoice path not available');
-        await downloadFromUrl(activeInvoicePath);
-      } catch (templateError) {
-        console.warn('Template invoice generation failed, falling back to client PDF:', templateError);
+        await downloadOrderInvoice(order.id || orderId || '', order.order_number);
+      } catch (serverError) {
+        console.warn('Server invoice failed, falling back to client PDF:', serverError);
         await generateInvoicePDF({
           ...order,
           user_id: order.user_id || 'guest',

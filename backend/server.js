@@ -47,6 +47,9 @@ const authRoutes = require("./routes/authRoutes");
 const siteReviewRoutes = require("./routes/siteReviewRoutes");
 const appDataRoutes = require("./routes/appDataRoutes");
 const { createCancellationRouter } = require("./routes/cancellationRoutes");
+const { createInvoiceRouter } = require("./routes/invoiceRoutes");
+const orderInvoiceService = require("./services/orderInvoiceService");
+const { isOrderOwner } = require("./services/cancellationService");
 const { cancellationService } = require("./services/cancellationModule");
 const { resolveCreditNotePath } = require("./services/creditNoteService");
 const { requireAuth, requireOrderManager, isOrderManager } = require("./middleware/auth");
@@ -315,6 +318,14 @@ app.use(
     service: cancellationService,
     auth: { requireAuth, requireOrderManager, isOrderManager },
     resolveCreditNotePath,
+  }),
+);
+app.use(
+  ["/make-server-a67f0635", "/api"],
+  createInvoiceRouter({
+    ...orderInvoiceService,
+    auth: { requireAuth, isOrderManager },
+    isOrderOwner,
   }),
 );
 app.use(["/make-server-a67f0635", "/api"], paymentRoutes);

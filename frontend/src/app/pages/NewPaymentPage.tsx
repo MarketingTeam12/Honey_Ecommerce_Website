@@ -301,27 +301,6 @@ export function NewPaymentPage() {
     void loadRazorpayCheckout().catch(() => {});
   }, []);
 
-  const generateTemplateInvoice = async (orderPayload: Record<string, any>) => {
-    const response = await fetch(toApiUrl('/generate-invoice'), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ order: orderPayload }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Template invoice generation failed');
-    }
-
-    const data = await response.json();
-    if (!data?.invoicePath) {
-      throw new Error('Template invoice path not returned');
-    }
-
-    return data.invoicePath as string;
-  };
-
   const validateRazorpayOrder = (order: RazorpayOrderResponse | null | undefined) => {
     if (!order?.id || !order?.amount) {
       throw new Error('Payment order was not created correctly. Please try again.');
@@ -762,19 +741,9 @@ export function NewPaymentPage() {
               throw new Error(verifyData?.message || 'Payment signature verification failed on server.');
             }
 
-            let resolvedInvoicePath: string | null = verifyData.invoicePath || null;
-
-            try {
-              const templateInvoicePath = await generateTemplateInvoice({
-                ...order,
-                payment_status: 'paid',
-                status: 'confirmed',
-                transaction_id: razorpayResponse.razorpay_payment_id || '',
-              });
-              resolvedInvoicePath = templateInvoicePath;
-            } catch (templateError) {
-              console.warn('Template invoice generation failed on payment page:', templateError);
-            }
+            // The invoice is downloaded on demand from the stored order
+            // (GET /orders/:id/invoice); nothing to generate here.
+            const resolvedInvoicePath: string | null = verifyData.invoicePath || null;
 
             if (resolvedInvoicePath) {
               setInvoicePath(resolvedInvoicePath);

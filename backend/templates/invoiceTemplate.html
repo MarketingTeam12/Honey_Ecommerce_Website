@@ -301,6 +301,7 @@
         Email: salesteam@honeytranslations.com |
         Phone: +91 72990 05577
       </p>
+      {{company_gstin_line}}
 
       <div class="divider"></div>
 
@@ -320,9 +321,9 @@
 
         <p>{{customer_email}}</p>
 
-        <p>{{customer_city}}</p>
+        {{customer_address_lines}}
 
-        <p>{{customer_country}}</p>
+        {{customer_gstin_line}}
 
       </div>
 
@@ -344,21 +345,16 @@
 
         <p>
           <strong>Payment Method:</strong>
-          Razorpay
+          {{payment_method}}
         </p>
 
         <p>
           <strong>Payment Status:</strong>
-          PAID
+          {{payment_status}}
         </p>
 
         <p>
-          <strong>Order Status:</strong>
-          COMPLETED
-        </p>
-
-        <p>
-          <strong>Tracking #:</strong>
+          <strong>Payment ID:</strong>
           {{payment_id}}
         </p>
 
@@ -405,20 +401,7 @@
     <span>₹{{tax}}</span>
   </div>
 
-  <div class="totals-row discount">
-    <span>Discount</span>
-    <span>- ₹{{discount}}</span>
-  </div>
-
-  <div class="totals-row coupon">
-    <span>Coupon Applied ({{coupon_code}})</span>
-    <span>- ₹{{coupon_discount}}</span>
-  </div>
-
-  <div class="totals-row">
-    <span>Processing Fee</span>
-    <span>₹{{processing_fee}}</span>
-  </div>
+  {{adjustment_rows}}
 
   <div class="totals-row grand-total">
     <span>GRAND TOTAL</span>

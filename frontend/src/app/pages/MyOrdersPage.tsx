@@ -24,6 +24,7 @@ import { authClient } from '@/app/utils/authClient';
 import { buildHeaders } from '@/app/utils/buildHeaders';
 import { getCurrencySymbolForCountry } from '@/app/utils/currency';
 import { generateInvoicePDF } from '@/app/utils/generateInvoicePDF';
+import { downloadOrderInvoice } from '@/app/services/invoiceApi';
 
 interface OrderItem {
   id: string;
@@ -395,6 +396,12 @@ export function MyOrdersPage() {
 
   const handleDownloadInvoice = async (order: Order) => {
     try {
+      try {
+        await downloadOrderInvoice(order.id, order.order_number);
+        return;
+      } catch (serverError) {
+        console.warn('Server invoice failed, falling back to client PDF:', serverError);
+      }
       await generateInvoicePDF(order as any);
     } catch (error) {
       console.error('Error generating invoice:', error);

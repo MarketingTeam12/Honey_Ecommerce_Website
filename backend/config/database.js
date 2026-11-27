@@ -684,6 +684,9 @@ async function migrateCancellationsAndRefunds() {
   await addColumnIfMissing("orders", "refund_status", "VARCHAR(20) NOT NULL DEFAULT 'NONE' AFTER cancellation_status");
   await addColumnIfMissing("orders", "refund_amount", "DECIMAL(12,2) NOT NULL DEFAULT 0.00 AFTER refund_status");
   await addColumnIfMissing("orders", "refunded_at", "DATETIME NULL AFTER refund_amount");
+  // Fixed once the first invoice is issued so credit notes can cite it.
+  await addColumnIfMissing("orders", "invoice_number", "VARCHAR(32) NULL");
+  await addColumnIfMissing("orders", "invoice_date", "DATETIME NULL");
 }
 
 module.exports = {

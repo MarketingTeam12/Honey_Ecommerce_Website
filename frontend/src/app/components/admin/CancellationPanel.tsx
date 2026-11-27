@@ -9,6 +9,7 @@ import {
   type RefundRecord,
   approveCancellation,
   declineCancellation,
+  downloadCreditNote,
   formatDate,
   formatInr,
   getAdminOrderCancellation,
@@ -270,7 +271,23 @@ export function CancellationPanel({ orderId, onChanged }: { orderId: string; onC
                 <div className="mt-1 space-y-0.5 text-gray-600">
                   {refund.razorpayRefundId && <p>Razorpay refund ID: <span className="font-mono">{refund.razorpayRefundId}</span></p>}
                   {refund.refundedAt && <p>Refunded on {formatDate(refund.refundedAt)}</p>}
-                  {refund.creditNoteNumber && <p>Credit note: {refund.creditNoteNumber}</p>}
+                  {refund.creditNoteNumber && (
+                    <p>
+                      Credit note:{' '}
+                      <button
+                        type="button"
+                        className="font-mono text-blue-700 underline hover:text-blue-900"
+                        onClick={() =>
+                          downloadCreditNote(orderId, `${refund.creditNoteNumber}.pdf`).catch((error) =>
+                            toast.error(error instanceof Error ? error.message : 'Credit note is not available yet'),
+                          )
+                        }
+                      >
+                        {refund.creditNoteNumber}
+                      </button>{' '}
+                      <span className="text-gray-500">(adjusts the original invoice)</span>
+                    </p>
+                  )}
                   {refund.manualRefundNote && <p>Manual note: {refund.manualRefundNote}</p>}
                   {refund.status === 'FAILED' && refund.failureReason && (
                     <p className="flex items-start gap-1 text-red-700">

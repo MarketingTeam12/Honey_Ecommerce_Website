@@ -36,6 +36,7 @@ function renderCreditNoteHtml({ order, refund, number }) {
   const values = {
     credit_note_number: escapeHtml(number),
     credit_note_date: escapeHtml(formatDate(refund.refundedAt)),
+    invoice_number: escapeHtml(order.invoice_number || order.order_number || order.id),
     order_number: escapeHtml(order.order_number || order.id),
     order_date: escapeHtml(formatDate(order.created_at)),
     customer_name: escapeHtml(order.customer_name || "Customer"),

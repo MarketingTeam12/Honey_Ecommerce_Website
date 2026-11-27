@@ -89,21 +89,49 @@ const generateInvoice = async (invoiceData) => {
       "utf8"
     );
 
-    html = html.replace(/{{customer_name}}/g, invoiceData.customer_name);
-    html = html.replace(/{{customer_email}}/g, invoiceData.customer_email);
-    html = html.replace(/{{customer_city}}/g, invoiceData.customer_city);
-    html = html.replace(/{{customer_country}}/g, invoiceData.customer_country);
-    html = html.replace(/{{invoice_number}}/g, invoiceData.invoice_number);
-    html = html.replace(/{{invoice_date}}/g, invoiceData.invoice_date);
-    html = html.replace(/{{payment_id}}/g, invoiceData.payment_id);
-    html = html.replace(/{{service_name}}/g, invoiceData.service_name);
-    html = html.replace(/{{amount}}/g, invoiceData.amount);
-    html = html.replace(/{{tax}}/g, invoiceData.tax);
-    html = html.replace(/{{total}}/g, invoiceData.total);
-    html = html.replace(/{{discount}}/g, invoiceData.discount);
-    html = html.replace(/{{coupon_code}}/g, invoiceData.coupon_code);
-    html = html.replace(/{{coupon_discount}}/g, invoiceData.coupon_discount);
-    html = html.replace(/{{processing_fee}}/g, invoiceData.processing_fee);
+    const money = (value) => Number(value || 0).toFixed(2);
+    const addressLines = (invoiceData.customer_address_lines || [
+      invoiceData.customer_city,
+      invoiceData.customer_country,
+    ])
+      .filter(Boolean)
+      .map((line) => `<p>${escapeHtml(line)}</p>`)
+      .join("\n");
+
+    // Discount / coupon / fee rows only appear when they actually apply.
+    const adjustmentRows = [];
+    if (Number(invoiceData.discount) > 0) {
+      adjustmentRows.push(`<div class="totals-row discount"><span>Discount</span><span>- ₹${money(invoiceData.discount)}</span></div>`);
+    }
+    if (Number(invoiceData.coupon_discount) > 0) {
+      const code = invoiceData.coupon_code ? ` (${escapeHtml(invoiceData.coupon_code)})` : "";
+      adjustmentRows.push(`<div class="totals-row coupon"><span>Coupon Applied${code}</span><span>- ₹${money(invoiceData.coupon_discount)}</span></div>`);
+    }
+    if (Number(invoiceData.processing_fee) > 0) {
+      adjustmentRows.push(`<div class="totals-row"><span>Processing Fee</span><span>₹${money(invoiceData.processing_fee)}</span></div>`);
+    }
+
+    const companyGstin = invoiceData.company_gstin ?? process.env.COMPANY_GSTIN ?? "";
+    const values = {
+      customer_name: escapeHtml(invoiceData.customer_name || "Customer"),
+      customer_email: escapeHtml(invoiceData.customer_email || ""),
+      customer_address_lines: addressLines,
+      customer_gstin_line: invoiceData.customer_gstin
+        ? `<p>GSTIN: ${escapeHtml(invoiceData.customer_gstin)}</p>`
+        : "",
+      company_gstin_line: companyGstin ? `<p>GSTIN: ${escapeHtml(companyGstin)}</p>` : "",
+      invoice_number: escapeHtml(invoiceData.invoice_number),
+      invoice_date: escapeHtml(invoiceData.invoice_date),
+      payment_id: escapeHtml(invoiceData.payment_id || "N/A"),
+      payment_method: escapeHtml(invoiceData.payment_method || "Razorpay"),
+      payment_status: escapeHtml(invoiceData.payment_status || "PAID"),
+      service_name: escapeHtml(invoiceData.service_name),
+      amount: money(invoiceData.amount),
+      tax: money(invoiceData.tax),
+      total: money(invoiceData.total),
+      adjustment_rows: adjustmentRows.join("\n"),
+    };
+    html = html.replace(/{{(\w+)}}/g, (match, key) => (key in values ? values[key] : match));
 
     const invoiceRows = buildInvoiceRows(
       Array.isArray(invoiceData.items)
@@ -147,7 +175,85 @@ const generateInvoice = async (invoiceData) => {
   }
 };
 
+/** DD/MM/YYYY in India time, whatever the server's locale/timezone is. */
+const formatInvoiceDate = (value) => {
+  const date = value ? new Date(value) : new Date();
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("en-GB", { timeZone: "Asia/Kolkata" });
+};
+
+const parseJsonValue = (value) => {
+  if (!value) return null;
+  if (typeof value === "object") return value;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+};
+
+const PAID_STATUSES = new Set(["paid", "completed", "success", "captured", "refunded", "partially_refunded"]);
+
+/**
+ * Builds invoice data from an order row as stored in the database (snake_case
+ * columns). Amounts always come from the database, never from the browser.
+ */
+const buildInvoiceDataFromOrder = (order) => {
+  const address = parseJsonValue(order.shipping_address) || {};
+  const metadata = parseJsonValue(order.metadata) || {};
+  const items = (parseJsonValue(order.items) || []).map((item) => ({
+    description: item.name || item.description || "Service",
+    quantity: item.quantity || item.uploadedFiles?.length || 1,
+    pages: item.pages ?? item.pageCount ?? "",
+    rate: item.rate ?? item.basePrice ?? item.totalPrice ?? 0,
+    amount: item.amount ?? item.totalPrice ?? item.basePrice ?? 0,
+    sourceLanguage: item.sourceLanguage,
+    targetLanguage: item.targetLanguage,
+    documentType: item.documentType,
+    certificateType: item.certificateType,
+    files: Array.isArray(item.uploadedFiles)
+      ? item.uploadedFiles.map((file) => file?.name).filter(Boolean)
+      : [],
+  }));
+
+  const cityLine = [address.city, address.state].filter(Boolean).join(", ");
+  const pinLine = [cityLine, address.pincode || address.postalCode || address.zipCode || address.zip]
+    .filter(Boolean)
+    .join(" - ");
+  const paymentStatus = String(order.payment_status || "").toLowerCase();
+
+  return {
+    customer_name: address.name || order.customer_name,
+    customer_email: order.customer_email,
+    customer_address_lines: [
+      address.addressLine1 || address.address || address.street || address.line1,
+      address.addressLine2 || address.line2,
+      pinLine,
+      address.country,
+    ].filter(Boolean),
+    customer_gstin: order.gst_number || metadata.gst_number || metadata.gstNumber || "",
+    invoice_number: order.invoice_number || order.order_number,
+    invoice_date: formatInvoiceDate(order.invoice_date || order.created_at),
+    payment_id: order.transaction_id || "N/A",
+    payment_method: order.payment_method === "razorpay" || !order.payment_method ? "Razorpay" : order.payment_method,
+    // The status at the time of sale – a later refund is shown on the credit
+    // note, not by changing the invoice.
+    payment_status: PAID_STATUSES.has(paymentStatus) ? "PAID" : "UNPAID",
+    service_name: items[0]?.description || "Translation Service",
+    amount: order.subtotal ?? order.total_amount,
+    tax: order.tax,
+    discount: order.discount,
+    coupon_code: order.coupon_code,
+    coupon_discount: order.coupon_discount,
+    processing_fee: order.processing_fee,
+    total: order.total_amount,
+    items,
+  };
+};
+
 module.exports = {
   generateInvoice,
+  buildInvoiceDataFromOrder,
+  formatInvoiceDate,
   getBrowser,
 };

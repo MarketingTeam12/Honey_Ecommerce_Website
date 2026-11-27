@@ -13,6 +13,7 @@ import { buildHeaders } from '@/app/utils/buildHeaders';
 import { OrderManagementVisual } from '@/app/components/admin/OrderManagementVisual';
 import { CancellationPanel } from '@/app/components/admin/CancellationPanel';
 import { generateInvoicePDF } from '@/app/utils/generateInvoicePDF';
+import { downloadOrderInvoice } from '@/app/services/invoiceApi';
 
 const ORDERS_STORAGE_KEY = 'honey_translation_orders';
 // Was reading VITE_BACKEND_URL (never set) with a localhost:3000 fallback —
@@ -433,8 +434,13 @@ export function OrderDetailPage() {
     try {
       console.log('ðŸ“„ [OrderDetailPage] Generating invoice PDF for order:', order.order_number);
       
-      // Generate and download invoice PDF
-      await generateInvoicePDF(order);
+      // Official invoice from the server; the in-browser PDF is only a fallback.
+      try {
+        await downloadOrderInvoice(order.id, order.order_number);
+      } catch (serverError) {
+        console.warn('Server invoice failed, falling back to client PDF:', serverError);
+        await generateInvoicePDF(order);
+      }
       
       toast.success('Invoice PDF downloaded successfully');
       console.log('âœ… [OrderDetailPage] Invoice PDF downloaded:', order.order_number);

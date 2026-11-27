@@ -133,6 +133,11 @@ export function OrderCancellationSection({ orderId, orderNumber, onChanged }: Pr
                     {latestRefund.razorpayRefundId ? ` · Reference: ${latestRefund.razorpayRefundId}` : ''}
                   </p>
                 )}
+                {latestRefund.creditNoteNumber && (
+                  <p>
+                    Credit note {latestRefund.creditNoteNumber} issued against invoice #{orderNumber}
+                  </p>
+                )}
                 {failed && <p>We hit a problem processing your refund. Our team is looking into it – no action is needed from you.</p>}
               </>
             )}
