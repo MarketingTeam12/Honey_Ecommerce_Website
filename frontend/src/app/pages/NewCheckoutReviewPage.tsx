@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Edit2, FileText, Tag, ChevronRight, X, Percent, DollarSign, Calendar, Users, Info, XCircle } from 'lucide-react';
 import { useCurrency } from '@/app/context/CurrencyContext';
@@ -983,9 +984,10 @@ export function NewCheckoutReviewPage() {
       )}
 
       {/* Payment failed / cancelled popup */}
-      {paymentFailure && (
+      {/* Portalled to <body> so it isn't trapped under the sticky header by <main>'s stacking context. */}
+      {paymentFailure && createPortal(
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4"
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4"
           role="alertdialog"
           aria-modal="true"
           aria-labelledby="payment-failure-title"
@@ -1022,7 +1024,8 @@ export function NewCheckoutReviewPage() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );

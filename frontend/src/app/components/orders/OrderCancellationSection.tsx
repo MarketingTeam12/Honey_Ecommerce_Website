@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AlertTriangle, CheckCircle2, Clock, Download, Loader2, RotateCcw, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/app/components/ui/button';
@@ -219,9 +220,11 @@ function CancellationRequestModal({
     }
   };
 
-  return (
+  // Portal to <body>: <main> is its own stacking context (relative z-10), which
+  // otherwise traps the modal underneath the sticky header (z-50).
+  return createPortal(
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="cancel-order-title"
@@ -306,7 +309,8 @@ function CancellationRequestModal({
           </Button>
         </div>
       </form>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

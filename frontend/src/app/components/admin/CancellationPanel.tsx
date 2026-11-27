@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AlertTriangle, CheckCircle2, Clock, Loader2, RefreshCw, RotateCcw, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -337,8 +338,8 @@ export function CancellationPanel({ orderId, onChanged }: { orderId: string; onC
         </div>
       )}
 
-      {pending && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4" role="alertdialog" aria-modal="true">
+      {pending && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4" role="alertdialog" aria-modal="true">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
             <h3 className="text-lg font-bold text-gray-900">Please confirm</h3>
             <p className="mt-2 text-sm text-gray-700">{confirmMessage(pending)}</p>
@@ -362,7 +363,8 @@ export function CancellationPanel({ orderId, onChanged }: { orderId: string; onC
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );
