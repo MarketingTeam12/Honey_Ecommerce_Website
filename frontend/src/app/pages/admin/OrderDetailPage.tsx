@@ -11,6 +11,7 @@ import { API_URL, API_BASE_URL } from '@/app/utils/api';
 import { useAuth } from '@/app/context/AuthContext';
 import { buildHeaders } from '@/app/utils/buildHeaders';
 import { OrderManagementVisual } from '@/app/components/admin/OrderManagementVisual';
+import { CancellationPanel } from '@/app/components/admin/CancellationPanel';
 import { generateInvoicePDF } from '@/app/utils/generateInvoicePDF';
 
 const ORDERS_STORAGE_KEY = 'honey_translation_orders';
@@ -979,6 +980,9 @@ export function OrderDetailPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
+              {/* Cancellation request / refund (only renders when there is one) */}
+              {orderId && <CancellationPanel orderId={orderId} onChanged={() => void fetchOrder()} />}
+
               {/* Order Timeline */}
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-6">Order Status</h2>

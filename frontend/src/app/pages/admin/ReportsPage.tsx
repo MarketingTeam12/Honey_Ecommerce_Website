@@ -6,6 +6,7 @@ import { API_URL } from '@/app/utils/api';
 import { useAuth } from '@/app/context/AuthContext';
 import { buildHeaders } from '@/app/utils/buildHeaders';
 import { isSalesManager } from '@/app/utils/roleAccess';
+import { CancellationReportCard } from '@/app/components/admin/CancellationReportCard';
 
 const ORDERS_STORAGE_KEY = 'honey_translation_orders';
 
@@ -556,6 +557,9 @@ export function ReportsPage() {
             <p className="text-sm text-gray-500 mt-1">Customer retention rate</p>
           </div>
         </div>
+
+        {/* Cancellations & refunds */}
+        <CancellationReportCard dateRange={dateRange} />
 
         {/* Top Buyers */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">

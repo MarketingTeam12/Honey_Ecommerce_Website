@@ -19,7 +19,7 @@ const ROLES_STORAGE_KEY = 'honey_roles';
 // Orders are only real, actionable sales once payment has actually gone
 // through. Carts abandoned before Razorpay confirms (payment_status stays
 // "pending") should never clutter the Sales Orders list.
-const PAID_PAYMENT_STATUSES = new Set(['paid', 'completed', 'success', 'successful']);
+const PAID_PAYMENT_STATUSES = new Set(['paid', 'completed', 'success', 'successful', 'refunded', 'partially_refunded']);
 const isOrderPaid = (order: { payment_status?: string }) =>
   PAID_PAYMENT_STATUSES.has(String(order.payment_status || '').trim().toLowerCase());
 // Tracks which localStorage-only orders we've already attempted to push to
@@ -98,6 +98,9 @@ interface Order {
   notes?: string;
   tip?: number;
   assigned_to?: string;
+  cancellation_status?: string | null;
+  refund_status?: string | null;
+  refund_amount?: string | number | null;
   created_at: string;
   updated_at: string;
 }
@@ -154,6 +157,8 @@ export function OrdersPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>('All');
   const [filterPaymentStatus, setFilterPaymentStatus] = useState<string>('All');
+  // 'Cancellation Requests' tab: only orders with a cancellation request under review.
+  const [showCancellationRequests, setShowCancellationRequests] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
@@ -593,20 +598,48 @@ export function OrdersPage() {
     );
   };
 
-  const getRefundDots = () => {
+  const getRefundCell = (order: Order) => {
+    const refundStatus = String(order.refund_status || 'NONE').toUpperCase();
+    if (refundStatus === 'NONE') {
+      if (String(order.cancellation_status || '').toUpperCase() === 'REQUESTED') {
+        return (
+          <span className="inline-block px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[11px] font-medium" title="Cancellation requested">
+            Requested
+          </span>
+        );
+      }
+      return (
+        <div className="flex gap-1">
+          <div className="w-2 h-2 rounded-full bg-gray-300"></div>
+        </div>
+      );
+    }
+    const styles: Record<string, string> = {
+      INITIATED: 'bg-blue-100 text-blue-800',
+      PROCESSED: 'bg-green-100 text-green-800',
+      FAILED: 'bg-red-100 text-red-800',
+    };
+    const labels: Record<string, string> = { INITIATED: 'Initiated', PROCESSED: 'Refunded', FAILED: 'Failed' };
     return (
-      <div className="flex gap-1">
-        <div className="w-2 h-2 rounded-full bg-gray-300"></div>
+      <div className="flex flex-col items-center gap-0.5">
+        <span className="text-xs font-medium text-gray-900">
+          ₹{Number(order.refund_amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+        </span>
+        <span className={`px-1.5 py-0.5 rounded text-[11px] font-medium ${styles[refundStatus] || 'bg-gray-100 text-gray-700'}`}>
+          {labels[refundStatus] || refundStatus}
+        </span>
       </div>
     );
   };
+
+  const pendingCancellationCount = orders.filter((order) => String(order.cancellation_status || '').toUpperCase() === 'REQUESTED').length;
 
   const statusFilteredOrders = (filterStatus === 'All'
     ? orders
     : orders.filter(order => order.status.toLowerCase() === filterStatus.toLowerCase())
   ).filter(order =>
     filterPaymentStatus === 'All' || order.payment_status?.toLowerCase() === filterPaymentStatus.toLowerCase()
-  );
+  ).filter(order => !showCancellationRequests || String(order.cancellation_status || '').toUpperCase() === 'REQUESTED');
 
   const isOrderWithinDateRange = (orderDateValue: string) => {
     if (!fromDate && !toDate) {
@@ -874,6 +907,27 @@ export function OrdersPage() {
               <button className="text-gray-500 hover:text-gray-700" aria-label="Breadcrumb chevron">
                 <ChevronRight className="w-5 h-5" />
               </button>
+              <button
+                type="button"
+                onClick={() => setShowCancellationRequests((value) => !value)}
+                aria-pressed={showCancellationRequests}
+                className={`ml-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                  showCancellationRequests
+                    ? 'bg-amber-500 border-amber-500 text-white'
+                    : 'bg-white border-amber-300 text-amber-800 hover:bg-amber-50'
+                }`}
+              >
+                Cancellation Requests
+                {pendingCancellationCount > 0 && (
+                  <span
+                    className={`min-w-5 h-5 px-1.5 rounded-full text-xs font-semibold flex items-center justify-center ${
+                      showCancellationRequests ? 'bg-white text-amber-700' : 'bg-amber-500 text-white'
+                    }`}
+                  >
+                    {pendingCancellationCount}
+                  </span>
+                )}
+              </button>
             </div>
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <div className="relative flex-1 sm:flex-initial">
@@ -953,6 +1007,7 @@ export function OrdersPage() {
                 <option value="pending">Pending</option>
                 <option value="failed">Failed</option>
                 <option value="refunded">Refunded</option>
+                <option value="partially_refunded">Partially refunded</option>
               </select>
               <button className="p-1.5 hover:bg-gray-100 rounded">
                 <span className="text-gray-600"></span>
@@ -1013,7 +1068,7 @@ export function OrdersPage() {
                 <th className="w-14 px-1 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
                   Shipped
                 </th>
-                <th className="w-14 px-1 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
+                <th className="w-24 px-1 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
                   Refund
                 </th>
                 <th className="px-2.5 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
@@ -1092,9 +1147,9 @@ export function OrdersPage() {
                       {getShippedDots(order.status)}
                     </div>
                   </td>
-                  <td className="w-14 px-1 py-3 text-center whitespace-nowrap">
+                  <td className="w-24 px-1 py-3 text-center whitespace-nowrap">
                     <div className="flex justify-center">
-                      {getRefundDots()}
+                      {getRefundCell(order)}
                     </div>
                   </td>
                   <td className="px-2.5 py-3 text-right whitespace-nowrap">
